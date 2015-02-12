@@ -1,0 +1,23 @@
+Django < 1.6
+django-grappelli < 2.5
+django-debug-toolbar
+django-taggit
+django-reversion < 1.8.0
+django-widget-tweaks
+psycopg2
+pygraphviz
+django_extensions
+GitPython
+south
+python-dateutil
+pytz
+lxml
+pexpect
+importlib
+feedparser
+docutils
+gitconfig
+croniter
+texttable
+BeautifulSoup4
+single_process
