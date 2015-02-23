@@ -1,0 +1,65 @@
+{% extends "basic.html" %}
+{% load gitweb %}
+
+{% block content %}
+
+<p>Last check: {{ progress.datestart }} - 
+{% if progress.dateend %} {{ progress.dateend}} {% else %} running {% endif %}
+</p>
+
+<p>Progress = {{ progress.actual }} checked / {{ progress.totalsum }} running</p>
+
+<div class="progress">
+  <div class="progress-bar" role="progressbar" aria-valuenow="{{progress.actual}}" aria-valuemin="0" aria-valuemax="{{ progress.totalsum }}" style="width: {{ progress.percent }}%;">
+    <span class="sr-only">{{ progress.percent }}% Complete</span>
+  </div>
+</div>
+
+<h1>Waiver</h1>
+
+<table class="table table-striped">
+    <tr>
+        <th>Username</th><th>UID</th><th>Comment</th><th>Date</th><th>Action</th>
+    </tr>
+{% for it in waiver.object_list %}
+    <tr>
+        <td>{{it.username}}</td>
+        <td>{{it.job|default:""}} {% if it.recipe %}<a a href="{% url 'jobs-list' %}?search={{it.recipe.job.template}}">R:{{it.recipe}}</a>{% endif %} {% if it.task %}<a a href="{% url 'tests-list' %}?search={{it.task.test}}">T:{{it.task}}</a>{% endif %}</td>
+        <td>{{it.content}}</td>
+        <td>{{it.created_date}}</td>
+        <td>{{it.get_action}}</td>
+    </tr>
+{% endfor %}
+</table>
+
+<ul class="pagination">
+  {% if waiver.has_previous %}<li><a href="?cpage={{ waiver.previous_page_number }}">&laquo;</a></li>{% else %}<li class="disabled" ><span>&laquo;</span></li>{%endif%}
+  {% for it in cpaginator.page_range %}
+  <li {% ifequal waiver.number  it %}class="active"{% endifequal %}><a href="?cpage={{it}}">{{it}} <span class="sr-only">(current)</span></a></li>
+  {% endfor %}
+  {% if waiver.has_next %}<li><a href="?cpage={{ waiver.next_page_number }}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>{%endif%}
+</ul>
+
+ <h1>History</h1>
+<table class="table table-striped">
+    <tr>
+        <th>Author</th><th>Test</th><th>Date</th><th>Commit</th>
+    </tr>
+{% for it in history.object_list %}
+    <tr>
+        <td>{{it.author.name}}</td>
+        <td><a target="_new" href="{{it.test.get_absolute_url}}">{{it.test}}</a></td>
+        <td>{{it.date}}</td>
+        <td><a target="_new" href="{{ it.get_absolute_url }}">{{it.commit}}</a></td>
+    </tr>
+{% endfor %}
+</table>
+
+<ul class="pagination">
+  {% if history.has_previous %}<li><a href="?hpage={{ history.previous_page_number }}">&laquo;</a></li>{% else %}<li class="disabled" ><span>&laquo;</span></li>{%endif%}
+  {% for it in hpaginator.page_range %}
+  <li {% ifequal history.number  it %}class="active"{% endifequal %}><a href="?hpage={{it}}">{{it}} <span class="sr-only">(current)</span></a></li>
+  {% endfor %}
+  {% if history.has_next %}<li><a href="?hpage={{ history.next_page_number }}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>{%endif%}
+</ul>
+{% endblock %}

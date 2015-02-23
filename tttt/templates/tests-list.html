@@ -1,0 +1,113 @@
+{% extends "basic.html" %}
+{% load core_extras %}
+{% load gitweb %}
+
+{% block header %}
+<script src="/media/js/core-tests.js"></script>
+{% endblock %}
+
+
+{% block title %}Test Trends{% endblock %}
+
+{% block content %}
+      <div class="legendTab">
+         <h3>Legend:</h3>
+         <ul>
+            <li><img src="/media/images/rtriangle.png" alt="Red Triangle">&nbsp;&nbsp;The change of the test package</li>
+            <li><img src="/media/images/ptriangle.png" alt="Violet Triangle">&nbsp;&nbsp;The change in dependent packages</li>
+         </ul>
+          <h3>Repos:</h3>
+         <ul>
+            {% for it in repos %}
+            <li><a href="?repo={{it.id}}" >{{ it.name }}</a></li>
+            {% endfor %}
+         </ul>
+      </div>
+    <a name="Test Trends"></a>
+<h1>Test Trends</h1>
+Last check: {{ progress.datestart }}
+
+<p>
+    <ul >
+        <li><a href="{% url 'tests-list' %}" >Test Trends</a>
+        <ul >
+        {%for key, it in owners.items %}
+            {%if it.dcount > 0 %}<li><a href="{% url 'tests-email' it.email  %}" >{{ it.name }} &lsaquo;{{ it.email }}&rsaquo; ({{ it.dcount }})</a></li>{% endif %}
+        {% endfor %}
+        </ul>
+        </li>
+    </ul>
+</p>
+<br>
+
+{% include 'search-box.html'  %}
+{% include 'detail-panel.html' %}
+
+{% for it in tests_bad %}
+<a href="{{ it.get_absolute_url }}">{{ it.name }}</a> ({{ it.count_fail }}),
+{% endfor %}
+
+{% for key, item in data.items %}
+<a name="{{ item.owner.email }}"></a>
+<h2>{{ item.owner.name }} &lsaquo;{{ item.owner.email }}&rsaquo;</h2>
+
+{% for key, test in item.tests.items %}
+{% with changes=history|keyvalue:test.id %}
+<table class="dashboard dashboard-tests">
+  <thead>
+	<tr >
+		<th colspan="12"><a name="{{test}}"></a><a href="#{{test}}" class="testLink" >{{ test.name }}</a>
+		{% if test.get_reposituory_url %}<a href="{{ test.get_reposituory_url }}" class="gitLink" >git</a>{% endif %} <a href="{{ test.get_detail_url }}" class="gitLink" >detail</a></th>
+	</tr>
+	<tr >
+	<th colspan="2">&nbsp;</th>
+	    {% for labelone in label %}
+	    {% with change=changes|keyvalue:labelone %}
+	    <th {% if change %} data-container="body" data-toggle="popover" data-params="{% for chit in change %}{{chit.id}}|{% endfor %}"{% endif %}
+	        class="{% if change %}{% if change.0.test.id == test.id %}rTriangle rBorder {% else %}pTriangle pBorder {% endif %}{% endif %}date">
+	        {{labelone|date:"Y-m-d"}}</th>
+	    {% endwith %}
+	    {% endfor %}
+	</tr>
+  </thead>
+  <tbody>
+	{% for key, days in test.labels.items %}
+	    <tr >
+	      <td>{% ifchanged key.0 %}{{key.0}}{% else %}&nbsp;{% endifchanged %}</td>
+	      <td>{{key.1}}</td>
+	      {% for day, it in days.items %}
+	      {% with change=changes|keyvalue:day %}
+		  <td {% if it.uid %}id="T:{{it.uid}}" class="field-value status-{{it.get_result}}{% if change %} {% if change.0.test.id == test.id %}r{% else %}p{% endif %}Border{% endif %}" {% endif %}>
+		    {% if it %}
+		      <div class="rWrapper">
+		        <div class="icons-tr"><span class="glyphicon glyphicon-eye-open" title="System is selected."></span></div>
+		        <div class="icons-mr">
+		          {% if atom.recipe.is_running %}<span class="glyphicon glyphicon-star" title="System is still runnig."></span>{% endif %}
+		          {% if it.reschedule > 1 %}<span class="glyphicon glyphicon-refresh" title="Rescheduled {{it.reschedule}} time(s)"></span>{% endif %}
+		        </div>
+			    <div class="icons-br">{% if it.recipe_uid %}<a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ it.recipe_uid|join:"" }}#task{{it.uid}}" class="glyphicon glyphicon-tripledot" title="Link to Beaker.">...</a>{% endif %}</div>
+			    <span class="perc">{{ it.resultrate|floatformat:"1" }}&nbsp;%</span>
+			  </div>
+			{% endif %}
+		  </td>
+	    {% endwith %}
+	    {% endfor %}
+	   </tr>
+	{% endfor %}
+  </tbody>
+</table>
+{% endwith %}
+<br>
+{% endfor %}
+<br>
+{% endfor %}
+
+<ul class="pagination">
+  {% if tests.has_previous %}<li><a href="?page={{ tests.previous_page_number }}&amp;{{ urlstring }}">&laquo;</a></li>{% else %}<li class="disabled" ><span>&laquo;</span></li>{%endif%}
+  {% for it in paginator.page_range %}
+  <li {% ifequal tests.number  it %}class="active"{% endifequal %}><a href="?page={{it}}&amp;{{ urlstring }}">{{it}} <span class="sr-only">(current)</span></a></li>
+  {% endfor %}
+  {% if tests.has_next %}<li><a href="?page={{ tests.next_page_number }}&amp;{{ urlstring }}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>{%endif%}
+</ul>
+{% include 'legends.html' %}
+{% endblock %}

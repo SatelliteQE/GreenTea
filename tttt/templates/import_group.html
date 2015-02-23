@@ -1,0 +1,32 @@
+{% extends "basic.html" %}
+
+{% block title %}Group Template{% endblock %}
+
+{% block content %}
+
+<ul class="nav nav-tabs">
+  <li role="presentation" ><a href="{% url 'import-xml' %}">Job Template</a></li>
+  <li role="presentation" class="active"><a href="{% url 'import-group' %}">Group Tempalte</a></li>
+</ul>
+
+<h1>Group Template</h1>
+
+{% if group %}
+<div class="alert alert-info">
+<p><b>Administration:</b><a href="{% url 'admin:core_grouptemplate_change' group.id %}" >{{ group }}</a></p>
+</div>
+{% endif %}
+
+<form action="" method="POST" class="tableform" id="job">{% csrf_token %}   
+{{ forms.group }}
+
+{{ forms.content }}
+
+</textarea>
+
+<div style="margin-top: 20px">
+<input type="submit" class="btn btn-primary" value="Queue">
+</div>
+
+</form>
+{% endblock %}

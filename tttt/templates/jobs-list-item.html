@@ -1,0 +1,19 @@
+{% for label, recipe in item.recipes.items %}
+<tr>
+    <td>{% ifchanged %}<a href="{{item.get_absolute_url}}" >{{ recipe.job }}</a>{% endifchanged %}</td>
+    <td>{{ recipe.label }}</td>
+    {% for date, atom in recipe.days.items %}
+    <td {% if atom.recipe.uid %}id="R:{{atom.recipe.uid}}"{% endif %} class="field-value {% if not atom.recipe.is_result_pass %} field-job{% endif %} status-{{atom.recipe.get_result}}">
+       <div class="rWrapper">
+        <div class="icons-tr"><span class="glyphicon glyphicon-eye-open" title="System is selected."></span></div>
+        <div class="icons-mr">
+	    {% if  atom.recipe and atom.recipe.is_running %}<span class="glyphicon glyphicon-star" title="System is still runnig."></span>{% endif %}
+	    {% if atom.schedule|length > 1 %}<span class="glyphicon glyphicon-refresh" title="Rescheduled {{atom.schedule|length}} time(s) - {{atom.schedule}}"></span>{% endif %}
+	    </div>
+	    <div class="icons-br">{% if atom.recipe %}<a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ atom.recipe.uid }}" class="glyphicon glyphicon-tripledot" title="Link to Beaker.">...</a>{% endif %}</div>
+	   {% if atom.recipe %}<span class="perc">{{ atom.recipe.resultrate|floatformat:"1" }}&nbsp;%</span>{% endif %}
+	   </div>
+    </td>
+    {% endfor %}
+</tr>
+{% endfor %}

@@ -1,0 +1,78 @@
+{% extends "basic.html" %}
+{% load core_extras %}
+
+{% block title %}Job Trends{% endblock %}
+
+{% block header %}
+<script src="/media/js/core-jobs.js"></script>
+{% endblock %}
+
+{% block content %}
+<a name="Job Trends"></a>
+<h1>Job Trends</h1>
+<p>Last check: {{ progress.datestart }}</p>
+
+{% include 'search-box.html' with onlysearch=1 %}
+{% include 'detail-panel.html' %}
+
+<h2>Statistic</h2>
+<table width="100%">
+  <tr>
+    <th></th>
+    {% for key, it in statistic.label.items %}
+    <th>{{ key.isoformat }}</th>
+    {% endfor %}
+  </tr>
+{% for key, it in statistic.data.items %}
+  {% if key != "sum"  %}
+  <tr>
+  <td><b>{{ key }}</b></td>
+    {% for k, val in it.items %}
+  <td align="center">{{ statistic.data|sum:k|percent:val|floatformat:"1"}}% ({{ val }})</td>
+    {% endfor %}
+  </tr>
+  {% endif %}
+{% endfor %}
+</table>
+
+<a name="Dashboard"></a>
+<h2>Dashboard</h2>
+
+<table class="dashboard dashboard-jobs">
+	<thead>
+	    <tr><th colspan="11"><h4>Daily</h4></th></tr>
+	    <tr>
+	        <th>Job</th>
+	        <th>Recipe</th>
+	        {% for it in label %}
+	        <th class="date"><a href="#" >{{it|date:"Y-m-d"}}</a></th>
+	        {% endfor %}
+	    </tr>
+    </thead>
+    <tbody>
+    {% for key, item in data.items %}
+        {% include "jobs-list-item.html" %}
+    {% endfor %}
+    </tbody>
+</table>
+<br>
+
+<table class="dashboard dashboard-jobs" >
+	<thead>
+	    <tr><th colspan="11"><h4>Weekly</h4></th></tr>
+	    <tr>
+	        <th>Job</th>
+	        <th>Recipe</th>
+	        {% for it in labelweek %}
+	        <th class="date"><a href="#" >{{it|date:"Y-m-d"}}</a></th>
+	        {% endfor %}
+	    </tr>
+    </thead>
+    <tbody>
+    {% for key, item in dataweek.items %}
+        {% include "jobs-list-item.html" %}
+    {% endfor %}
+    </tbody>
+</table>
+{% include 'legends.html' %}
+{% endblock %}

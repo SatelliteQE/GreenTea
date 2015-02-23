@@ -1,0 +1,117 @@
+{% load core_extras %}
+<job {% if not is_manual %}group="satellite"{%endif%} retention_tag="scratch">
+  <whiteboard>{{ job.whiteboard }}</whiteboard>
+  <recipeSet priority="Normal">
+  {% for r in job.cache_recipes %}
+    {% for arch in r.getArchsForToday %}
+    <recipe kernel_options="{{ r.kernel_options }}" kernel_options_post="{{ r.kernel_options_post }}" ks_meta="{{ r.ks_meta }}" role="{{ r.get_role|default:"STANDALONE" }}" whiteboard="{{ r.name }}">
+      {% comment %} ### Render xml for virtual guest ###  {% endcomment %}
+      {% for guest in r.cache_guests %}
+        <guestrecipe guestargs="--kvm --ram={{ guest.memory|default:'1024'}} --file-size={{ guest.disk|default:'8' }}" guestname="guest" kernel_options="{{ guest.kernel_options }}" kernel_options_post="{{ guest.kernel_options_post }}" ks_meta="{{ guest.ks_meta }}" role="{{ guest.get_role|default:"STANDALONE" }}" whiteboard="{{ guest.name }}">
+        <autopick random="false"/>
+        <watchdog panic="None"/>
+        <packages>
+          <package name="@Base"/>
+        </packages>
+        <ks_appends/>
+        <repos/>
+        <distroRequires>
+          <and>
+            {% if guest.distro.family %}<distro_family op="=" value="{{ guest.distro.family|default:"" }}"/>{% endif %}
+            {% if guest.distro.variant %}<distro_variant op="=" value="{{ guest.distro.variant }}"/>{% endif %}
+            <distro_name op="=" value="{{ guest.distro.distroname }}"/>
+            <distro_method op="=" value="nfs"/>
+            <distro_arch op="=" value="{{ arch.name }}"/>
+          </and>
+        </distroRequires>
+        <hostRequires>
+          <and>
+            <arch op="=" value="{{ arch.name }}"/>
+          </and>
+          <system_type value="Virtual"/>
+        </hostRequires>
+        <partitions/>
+        {% for task in guest.get_tasks %}
+        <task name="{{ task.test.name }}" role="{{ task.get_role|default:"STANDALONE" }}">
+        {% if task.get_params %}
+          <params>
+            {% for key, value in task.get_params.items %}<param name="{{ key }}" value="{{ value }}"/>{% endfor %}
+          </params>
+          {% else %}<params />{% endif %}
+        </task>
+        {% endfor %}
+      </guestrecipe>
+      {% endfor %}
+      {% comment %} ### Render xml for physical host ###  {% endcomment %}
+      <autopick random="false"/>
+      <watchdog panic="None"/>
+      <packages>
+        <package name="gcc"/>
+        <package name="make"/>
+        <package name="nfs-utils"/>
+        <package name="redhat-lsb"/>
+        <package name="wget"/>
+        <package name="libxml2-python"/>
+        {% if r.virtualguests.all %}
+        <package name="@x11"/>
+        <package name="@fonts"/>
+        <package name="@kvm"/>
+        {% endif %}
+      </packages>
+      <ks_appends/>
+      <repos/>
+      <distroRequires>
+        <and>
+          {% if r.distro.family %}<distro_family op="=" value="{{ r.distro.family|default:"" }}"/>{% endif %}
+          {% if r.distro.variant %}<distro_variant op="=" value="{{ r.distro.variant }}"/>{% endif %}
+          <distro_name op="=" value="{{ r.distro.distroname }}"/>
+          <distro_method op="=" value="nfs"/>
+          <distro_arch op="=" value="{{ arch.name }}"/>
+        </and>
+        {% if r.hvm %} <distro_virt op="=" value=""/>{% endif %}
+      </distroRequires>
+      <hostRequires>
+        <and>
+{% if r.hvm %}<cpu>
+	<or>
+		<flag op="=" value="vmx"/>
+		<flag op="=" value="svm"/>
+	</or>
+</cpu>{% endif %}
+          <system>
+		    <and>
+              <arch op="=" value="{{ arch.name }}"/>
+              {% if r.memory %}<memory op="{{r.memory.split.0|htmlentities}}" value="{{ r.memory.split.1 }}"/>{% endif %}
+              {% if r.hvm %}<hypervisor op="=" value=""/>{% endif %}
+			</and>
+		  </system>
+          <or>
+            {% if r.disk %}<disk><size op="{{r.disk.split.0|htmlentities}}" value="{{ r.disk.split.1 }}" units="GB" /></disk>{% endif %}
+            {% comment %} https://bugzilla.redhat.com/show_bug.cgi?id=1187402 s390x is aborted with new xml construction{% endcomment %}
+            {% if r.disk %}<key_value key="DISKSPACE" op="{{r.disk.split.0|htmlentities}}" value="{{ r.disk.split.1 }}000"/>{% endif %}
+          </or>
+        </and>
+        <system_type value="{% if r.is_virtualguest %}Virtual{% else %}Machine{% endif %}"/>
+      </hostRequires>
+      <partitions/>
+      {% if not r.tasks %}
+      <task name="/distribution/install" role="STANDALONE">
+        <params />
+      </task>
+      {% endif %}
+      {% for t in r.cache_tasks %}
+      <task name="{{ t.name }}" role="{% if t.role %}{{ t.get_role }}{% else %}STANDALONE{% endif %}">
+        {% if t.params %}
+        <params>
+          {% for n, v in t.params.items %}
+          <param name="{{ n }}" value="{{ v }}"/>
+          {% endfor %}
+        </params>
+        {% else %}<params />{% endif %}
+      </task>
+      {% endfor %}
+      {% if r.cache_reserve %}<reservesys duration="286400"/>{% endif %}
+    </recipe>
+    {% endfor %}{% endfor %}
+  </recipeSet>
+</job>

@@ -1,0 +1,47 @@
+{% extends "basic.html" %}
+
+{% block content %}
+<h1>Job detail</h1>
+
+<h2>{{ jobtemplate }}  <a href="{% url 'admin:core_jobtemplate_change' jobtemplate.id %}" >Link to administration</a> </h2>
+
+
+<h3>Jobs</h3>
+
+<table class="dashboard-jobs">
+	<tr bgcolor="#ffff99">
+        <th>Date</th>
+        <th>UID</th>
+        <th>Description</th>
+        <th>System</th>
+        <th>Status</th>
+        <th>Result</th>
+    </tr>
+{% for job in jobs.object_list %}
+{% for recipe in job.recipes.all %}
+<tr>
+	<td>{% ifchanged job.date %}{{ job.date|date }}{% endifchanged %}</td>
+	<td><a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ recipe.uid }}" >R:{{ recipe }}</a> | <a href="https://{{ conf.BEAKER_SERVER }}/jobs/{{ job.get_uid }}"> {{ job.uid}} </a>
+	<td>{{recipe.whiteboard}} {{ recipe.arch }} {{ recipe.distro}}</td>
+	<td> {{ recipe.system }}</td>
+	<td>{{ recipe.get_status }}</td>
+	<td class="{% if not recipe.is_result_pass %} field-job{% endif %} status-{{recipe.get_result}}" >
+		{{ recipe.resultrate|floatformat:"1" }}
+		{% if recipe.is_running %}
+		<img src="/media/images/done.png" alt="R" titles="Machine still running" />
+		{% endif %}
+	</td>
+</tr>
+{% endfor %}
+{% endfor %}
+</table>
+
+<ul class="pagination">
+  {% if jobs.has_previous %}<li><a href="?page={{ jobs.previous_page_number }}">&laquo;</a></li>{% else %}<li class="disabled" ><span>&laquo;</span></li>{%endif%}
+  {% for it in paginator.page_range %}
+  <li {% ifequal jobs.number  it %}class="active"{% endifequal %}><a href="?page={{it}}">{{it}} <span class="sr-only">(current)</span></a></li>
+  {% endfor %}
+  {% if jobs.has_next %}<li><a href="?page={{ jobs.next_page_number }}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>{%endif%}
+</ul>
+
+{% endblock %}

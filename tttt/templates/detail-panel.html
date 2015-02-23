@@ -1,0 +1,74 @@
+{% load widget_tweaks %}
+<div class="panel-detail {% if detailPanelHidden == "1" %}small{% endif %}" {% if detailPanelHeight >= 100 %}style="height: {{detailPanelHeight}}px"{% endif %}>
+	<div class="header">
+	  <ul class="nav nav-tabs">
+		  <li class="active"><a href="#stab-detail" data-toggle="tab">Details</a></li>
+		  <li><a href="#stab-actions" data-toggle="tab">Actions</a></li>
+	  </ul>
+	  <span class="hTitle">Detail panel</span>
+	  <div class="glyphicon glyphicon-chevron-{% if detailPanelHidden == "1" %}up{% else %}down{% endif %} visibilitySwitcher"></div>
+	</div>
+	<div class="content row tab-content">
+		  <div class="tab-pane active" id="stab-detail">
+			<ul class="nav nav-tabs nav-stacked tab-detail-header col-xs-2 elastic scrolling">
+			  <li class="active"><a href="#tab-detail-last" data-toggle="tab">Manual</a></li>
+			</ul>
+			<div class="tab-content tab-detail-content col-xs-10">
+			  <div class="tab-pane active" id="tab-detail-last">
+			    <br>
+			    <p><strong>Fast preview:</strong> Move cursor on the job box and here, you can see informations about job.</p>
+			    <p><strong>Keep detail of job:</strong> If you want to preserve informations about job here, click on the job box.</p>
+			  </div>
+			</div>
+		  </div>
+		  <div class="tab-pane" id="stab-actions">
+			<div class="elastic col-xs-6 recipe-list">
+				<h4>Recipes:</h4>
+			</div>
+			<div class="col-xs-6 action-panel">
+				<h4>Actions</h4>
+				{% for error in waiveForm.errors.items %}
+				  <div  class="alert alert-danger">{{ error|striptags }}</div>
+				{% endfor %}
+				<form class="form-horizontal" role="form" method="POST">
+				  {% csrf_token %}
+				  <div class="form-group">
+				    <label for="inputName" class="col-sm-2 control-label">Name:</label>
+				    <div class="col-sm-10">{% render_field waiveForm.username class="form-control" placeholder="Name" required=None %}</div>
+				  </div>
+				  <div class="form-group">
+				    <label for="inputMessage" class="col-sm-2 control-label">Text:</label>
+					<div class="col-sm-10">{% render_field waiveForm.content class="form-control" rows="3" required=None %}</div>
+				  </div>
+				  <div class="form-group">
+				   <div class="col-sm-offset-2 col-sm-10">
+				     <button type="submit" class="btn btn-info" disabled="disabled" title="Add new comment" data-action-field="action" data-action-value="{{ waiveClass.ENUM_ACTION_NONE }}">Comment</button>
+				     {% if waiveClass.ENUM_ACTION_WAIVED in detailActions %}<button type="submit" class="btn btn-primary" disabled="disabled" title="Waive this jobs." data-action-field="action" data-action-value="{{ waiveClass.ENUM_ACTION_WAIVED }}" data-modalTitle="Warning" data-modalIcon="glyphicon-warning-sign" data-modalQuestion="Are you sure, that you want to waive this job(s)?">Waive</button>{% endif %}
+				     {% if waiveClass.ENUM_ACTION_RETURN in detailActions %}<button type="submit" class="btn btn-danger" disabled="disabled" title="Return the resources back to beaker." data-action-field="action" data-action-value="{{ waiveClass.ENUM_ACTION_RETURN }}" data-modalIcon="glyphicon-warning-sign" data-modalTitle="Warning" data-modalQuestion="Are you sure, that you want to return this job(s) to the beaker?">Beaker</button>{% endif %}
+				     {% if waiveClass.ENUM_ACTION_RESCHEDULE in detailActions %}<button type="submit" class="btn btn-success" disabled="disabled" title="Stop this job and reschedule it again." data-action-field="action" data-action-value="{{ waiveClass.ENUM_ACTION_RESCHEDULE }}" data-modalIcon="glyphicon-warning-sign" data-modalTitle="Warning" data-modalQuestion="Are you sure, that you want to reschedule this job(s) again?">Reschedule</button>{% endif %}
+				   </div>
+				 </div>
+				 {% render_field waiveForm.action type="hidden" value="" %}
+				 {% render_field waiveForm.uids type="hidden" %}
+				</form>
+			</div>
+		  </div>
+    </div>
+</div>
+<div class="modal fade" id="panel-detailModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        <h4 class="modal-title"></h4>
+      </div>
+      <div class="modal-body">
+        <p></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+        <button type="button" class="btn btn-primary" data-return="1">Yes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

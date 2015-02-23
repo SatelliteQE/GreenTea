@@ -1,0 +1,31 @@
+{% extends "basic.html" %}
+
+{% block title %}Job Template{% endblock %}
+
+{% block content %}
+
+<h1>Job Template</h1>
+
+<h2>{{ template.whiteboard }} <a href="{{ template.admin_url }}" >Link to administration</a></h2>
+
+
+{% if error %}
+<div class="alert alert-danger">{{ error }}</div>
+{% endif %}
+
+<br> 
+<form action="https://{{ beaker }}/jobs/clone" method="POST" class="tableform" id="tests">
+    {% csrf_token %}    
+    <div style="display:none">
+        <input id="job_confirmed" type="hidden" name="confirmed" value="false" class="hiddenfield">
+    </div>
+<textarea rows="30" cols="100"  name="textxml" id="job_textxml" class="form-control">
+{{ xml }}
+</textarea>
+
+<div style="margin-top: 20px">
+<input type="submit" class="btn btn-primary" value="Queue">
+</div>
+
+</form>
+{% endblock %}
