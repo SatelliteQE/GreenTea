@@ -1,0 +1,10 @@
+python-psycopg2
+python-pexpect
+gitweb-caching
+source-highlight
+highlight 
+libxslt-devel
+libxml12-devel
+graphviz-devel
+python-virtualenv
+gcc
