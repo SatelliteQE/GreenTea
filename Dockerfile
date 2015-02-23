@@ -16,11 +16,16 @@ RUN virtualenv GreenTea/env
 RUN . GreenTea/env/bin/activate && pip install -r GreenTea/requirement.txt
 
 # create default value for running service
-RUN python -c 'import random; print "import os\nfrom basic import *\nSECRET_KEY=\"" + "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]) + "\"" ' > GreenTea/tttt/settings/production.py 
+RUN python -c 'import random; print "import os\nfrom basic import *\nDEBUG=True\nSECRET_KEY=\"" + "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]) + "\"" ' > GreenTea/tttt/settings/production.py 
 
 RUN cd GreenTea && . env/bin/activate && python manage.py syncdb --all || true
 RUN cd GreenTea && . env/bin/activate && python manage.py migrate --fake
 
-EXPOSE 80
+RUN mkdir -p GreenTea/tttt/static
+RUN cd GreenTea && . env/bin/activate && python manage.py collectstatic -c --noinput
 
-CMD cd GreenTea && . env/bin/activate && python manage.py runserver 0.0.0.0:80
+RUN chmod 755 GreenTea/tttt/ -R
+
+EXPOSE 8000
+
+CMD cd GreenTea && . env/bin/activate && python manage.py runserver 0.0.0.0:8000
