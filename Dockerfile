@@ -21,6 +21,6 @@ RUN python -c 'import random; print "import os\nfrom basic import *\nSECRET_KEY=
 RUN cd GreenTea && . env/bin/activate && python manage.py syncdb --all || true
 RUN cd GreenTea && . env/bin/activate && python manage.py migrate --fake
 
-EXPOSE 8080
+EXPOSE 80
 
-CMD cd GreenTea && . env/bin/activate && python manage.py runserver
+CMD cd GreenTea && . env/bin/activate && python manage.py runserver 0.0.0.0:80
