@@ -5,7 +5,7 @@ WORKDIR /data/
 # install packages
 RUN yum install git -y
 RUN git clone https://github.com/SatelliteQE/GreenTea.git
-RUN cat GreenTea/rpms-*.txt | xargs yum install -y
+RUN cat GreenTea/requirement/rpms-*.txt | xargs yum install -y
 RUN chmod 755 /data/ -R
 
 # create enviroment
