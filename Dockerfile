@@ -28,5 +28,10 @@ RUN . $HOME/env/bin/activate && \
     python $HOME/manage.py migrate --fake
     python $HOME/manage.py collectstatic -c --noinput
 
+# create first user
+RUN . $HOME/env/bin/activate && \
+    echo 'from django.contrib.sites.models import Site; site = Site.objects.create(domain="localhost", name="localhost"); site.save()' | python $HOME/manage.py shell && \
+    echo 'from django.contrib.auth.models import User; User.objects.create_superuser("admin", "admin@example.com", "pass")' | python $HOME/manage.py shell
+
 EXPOSE 8000
 CMD . $HOME/env/bin/activate && python $HOME/manage.py runserver 0.0.0.0:8000
