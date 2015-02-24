@@ -4,7 +4,6 @@ django-debug-toolbar
 django-taggit
 django-reversion < 1.8.0
 django-widget-tweaks
-psycopg2
 pygraphviz
 django_extensions
 GitPython

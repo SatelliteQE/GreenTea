@@ -3,9 +3,9 @@ FROM fedora:latest
 WORKDIR /data/
 
 # install packages
-RUN yum install git python-virtualenv -y
+RUN yum install git -y
 RUN git clone https://github.com/SatelliteQE/GreenTea.git
-RUN cat GreenTea/requirement-rpms.txt | xargs yum install git python-virtualenv -y python-devel postgresql-devel
+RUN cat GreenTea/rpms-*.txt | xargs yum install -y
 RUN chmod 755 /data/ -R
 
 # create enviroment
@@ -14,10 +14,9 @@ RUN chown greentea:greentea -R GreenTea
 
 USER greentea
 ENV HOME /data/GreenTea
-RUN env
 
 RUN virtualenv $HOME/env
-RUN . $HOME/env/bin/activate && pip install -r $HOME/requirement.txt
+RUN . $HOME/env/bin/activate && pip install -r $HOME/requirement/requirement.txt
 
 # create default value for running service
 RUN python -c 'import random; print "import os\nfrom basic import *\nDEBUG=True\nSECRET_KEY=\"" + "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]) + "\"" ' > GreenTea/tttt/settings/production.py 
@@ -29,8 +28,5 @@ RUN . $HOME/env/bin/activate && \
     python $HOME/manage.py migrate --fake
     python $HOME/manage.py collectstatic -c --noinput
 
-RUN chmod 755 $HOME/tttt/ -R
-
 EXPOSE 8000
-
 CMD . $HOME/env/bin/activate && python $HOME/manage.py runserver 0.0.0.0:8000

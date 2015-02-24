@@ -1,0 +1,2 @@
+-r requirement.txt
+psycopg2
