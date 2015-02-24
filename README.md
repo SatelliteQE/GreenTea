@@ -10,6 +10,7 @@ docker pull pajinek/greentea
 docker run -i -t -p 80:8000 pajinek/greentea 
 ```
 or
+
 ```
 git clone https://github.com/SatelliteQE/GreenTea.git
 cd GreenTea
