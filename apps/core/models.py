@@ -107,6 +107,7 @@ class Git(models.Model):
     path_absolute = None
     cmd = None
     log = None
+    groups = None
 
     def __unicode__(self):
         return self.name
@@ -205,6 +206,8 @@ class Git(models.Model):
                 test.time = info.get('TestTime')
             if 'Type' in info and test.type != info.get('Type'):
                 test.type = info.get('Type')
+            if 'RunFor' in info:
+                self.__updateGroups(test, info.get('RunFor'))
             self.__updateDependences(test, info.get('RhtsRequires'))
             test.save()
 
@@ -282,6 +285,29 @@ class Git(models.Model):
         with open(mkfile) as fd:
             rows = fd.readlines()
         return self.__getMakefileInfo(rows, self.__getVariables(rows))
+
+    def __updateGroups(self, test, row):
+        if not self.groups:
+            self.groups = list()
+            for it in GroupOwner.objects.all():
+                self.groups.append(it)
+        res = list()
+        if isinstance(row, list):
+            row = " ".join(row)
+        for it in self.groups:
+            if row.find(it.name) >= 0:
+                res.append(it)
+        if len(res) > 0:
+            # Remove unsupported groups
+            for group in test.groups.all():
+                if group not in res:
+                    test.groups.remove(group)
+                else:
+                    res.remove(group)
+            # Add new groups
+            for group in res:
+                test.groups.add(group)
+
 
     def __updateDependences(self, test, rows):
         if not rows:
