@@ -1,7 +1,7 @@
 # GreenTea
 
 
-## How to install
+## Quick start guide
 
 Easy way to run Green Tea is using docker https://registry.hub.docker.com/u/pajinek/greentea/
 
@@ -18,3 +18,7 @@ sudo docker build  -t --nocache greentea .
 sudo docker run -i -t -p 80:8000 greentea 
 ``` 
 Service runs on port 80, you can go to link http://localhost/ (login: admin, password: pass)
+
+## Setup
+
+Information about setting you find on wiki page https://github.com/SatelliteQE/GreenTea/wiki/Setup
