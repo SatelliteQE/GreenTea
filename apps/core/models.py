@@ -715,6 +715,9 @@ class GroupTaskTemplate(ObjParams, models.Model):
     def __unicode__(self):
         return self.group.name
 
+    class Meta:
+        ordering = ('priority',)
+
 
 class GroupTestTemplate(ObjParams, models.Model):
     test = models.ForeignKey(Test)
@@ -729,6 +732,9 @@ class GroupTestTemplate(ObjParams, models.Model):
     def get_role(self):
         if self.role:
             return self.role.name
+
+    class Meta:
+        ordering = ('priority',)
 
 
 class TaskTemplate(ObjParams, models.Model):

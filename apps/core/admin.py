@@ -136,6 +136,7 @@ class GroupTestInLine(admin.TabularInline):
     extra = 0
     raw_id_fields = ("test", )
     sortable_field_name = "priority"
+    ordering = ["priority"]
 
 
 class GroupTaskInLine(admin.TabularInline):
