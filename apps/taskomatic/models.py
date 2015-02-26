@@ -29,8 +29,19 @@ logger = logging.getLogger('commands')
 sys.stderr = StreamToLogger(logger, logging.WARN)  # Redirect stderr to logger
 
 
+class TaskPeriodSchedule(models.Model):
+    title = models.CharField(max_length=64)
+    period = models.ForeignKey("TaskPeriod", blank=True, null=True)
+    date_create = TZDateTimeField(_('Date of create'), default=datetime.now)
+    counter = models.BigIntegerField(default=0)
+
+    def __unicode__(self):
+        return self.title
+
+
 class TaskPeriod(models.Model):
     title = models.CharField(max_length=64)
+    label = models.CharField(max_length=64, null=True, blank=True)
     common = models.CharField(max_length=128)
     date_last = TZDateTimeField(_('Date of last run'), null=True, blank=True)
     is_enable = models.BooleanField(default=False)
@@ -49,6 +60,11 @@ class TaskPeriod(models.Model):
         res = self.common.split(' ', 1)
         command = res.pop(0)
         params = "" if len(res) == 0 else res.pop()
+        label = TaskPeriodSchedule.objects.create(
+                title=self.title,
+                period=self,
+                counter=len(TaskPeriodSchedule.objects.filter(period=self))
+                )
         task = Task.objects.create(title=self.title,
                                    common=command,
                                    common_params=params,

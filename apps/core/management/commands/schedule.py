@@ -15,6 +15,7 @@ from optparse import make_option
 from django.core.management.base import BaseCommand
 from apps.core.models import JobTemplate
 from apps.core.utils.beaker import Beaker
+from apps.taskomatic.models import TaskPeriodSchedule
 
 logger = logging.getLogger('commands')
 
@@ -50,6 +51,10 @@ class Command(BaseCommand):
             dest='tags',
             default=False,
             help='Filter schedule job by template tags'),
+        make_option('--schedule_id',
+            dest='schedule_id',
+            default=False,
+            help='Set period schedule run'),
         )
 
     def handle(self, *args, **kwargs):
@@ -83,6 +88,17 @@ class Command(BaseCommand):
         if "all" in  kwargs or len(filter) > 0:
             filter["is_enable"] = True
             jobTs = JobTemplate.objects.filter(**filter).distinct()
+            # set schedule period run
+            period = None
+            if "schedule_id" in kwargs and kwargs["schedule_id"]:
+                schedule_id = int(kwargs["schedule_id"])
+                try:
+                    schedule = TaskPeriodSchedule.objects.get(id=schedule_id)
+                except TaskPeriodSchedule.DoesNotExist:
+                    schedule = TaskPeriodSchedule.objects.create(
+                            title="default",
+                        )
+
             logger.info("%s JobTemplates are prepared." % len(jobTs))
             for jobT in jobTs:
                 bk.jobSchedule(jobT)

@@ -11,4 +11,5 @@ class TaskPeriodAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Task, TaskAdmin)
+admin.site.register(TaskPeriodSchedule)
 admin.site.register(TaskPeriod, TaskPeriodAdmin)

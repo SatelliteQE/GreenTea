@@ -228,8 +228,8 @@ KRB5_SERVICE = 'krbtgt@AS.EXAMPLE.COM'
 LOGIN_REDIRECT_URL = '/'
 
 if int(os.environ.get("DDD", 0)) > 0:
-    LOGGING['loggers']['commands']['handlers'] = ['console', ]
-    LOGGING['loggers']['commands']['propagate'] = False
+    #LOGGING['loggers']['commands']['handlers'] = ['console', ]
+    #LOGGING['loggers']['commands']['propagate'] = False
     LOGGING['root']['handlers'].append('console')
 
     # Enabling django-debug-toolbar..."

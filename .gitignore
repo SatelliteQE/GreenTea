@@ -47,6 +47,7 @@ coverage.xml
 *.log
 tttt/settings/production.py
 tttt/settings/local.py
+data.db
 
 # Sphinx documentation
 docs/_build/

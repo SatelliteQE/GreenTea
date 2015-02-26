@@ -79,7 +79,7 @@ class Beaker:
                      (job.uid, "\n".join(result)))
             return False
 
-    def jobSchedule(self, jobT, reserve=False):
+    def jobSchedule(self, jobT, reserve=False, schedule=None):
         if not isinstance(jobT, JobTemplate) or not jobT:
             raise Exception("Parameter 'jobT' is not instance of class "
                             "JobTemplate")

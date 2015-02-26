@@ -12,6 +12,8 @@ from optparse import make_option
 from apps.core.models import JobTemplate, Job, Recipe
 from apps.core.utils.beaker import Beaker
 from apps.core.utils.advance_command import AdvancedCommand, make_option_group
+from apps.taskomatic.models import TaskPeriodSchedule
+from  datetime import datetime
 
 logger = logging.getLogger('commands')
 
@@ -19,6 +21,7 @@ logger = logging.getLogger('commands')
 class Command(AdvancedCommand):
     requires_model_validation = True
     can_import_settings = True
+    schedule = None
 
     option_list = AdvancedCommand.option_list + (
                 make_option('--info',
@@ -66,7 +69,11 @@ class Command(AdvancedCommand):
                     action='store_true',
                     dest='reservsys',
                     default=False,
-                    help='Adding forcibly of the reservsys task into new job.')
+                    help='Adding forcibly of the reservsys task into new job.'),
+                make_option('--schedule_id',
+                    dest='schedule_id',
+                    default=False,
+                    help='Set period schedule run'),
             ),
         ),
         # RESCHEDULE
@@ -245,6 +252,14 @@ class Command(AdvancedCommand):
             if len(filter['id__in']) == 0:
                 logger.error("Minimal one job template is required.")
                 return False
+        if kwargs.get("schedule_id"):
+            schedule_id = int(kwargs["schedule_id"])
+            try:
+                self.schedule = TaskPeriodSchedule.objects.get(id=schedule_id)
+            except TaskPeriodSchedule.DoesNotExist:
+                coutner = len(TaskPeriodSchedule.objects.filter(period=None))
+                self.schedule = TaskPeriodSchedule.objects.create(
+                        title="%s" % datetime.now(), counter=coutner)
         if len(filter) > 0:
             self.__scheduleTemplates(filter,
                                      kwargs.get("info"),
@@ -277,6 +292,8 @@ class Command(AdvancedCommand):
             if not simulate:
                 job = self.beaker.jobSchedule(jobT, reserve)
                 if job:
+                    job.schedule = self.schedule
+                    job.save()
                     logger.info("%s job was successful scheduled."
                                 % job.uid)
                 else:

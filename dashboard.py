@@ -50,6 +50,7 @@ class CustomIndexDashboard(Dashboard):
                         'apps.core.models.TestHistory',
                         'apps.core.models.CheckProgress',
                         'apps.taskomatic.models.Task',
+                        'apps.taskomatic.models.TaskPeriodSchedule',
                     ),
                 ),
                 modules.AppList(

@@ -21,6 +21,7 @@ from apps.core.utils.date_helpers import toUTC, currentDate, TZDateTimeField
 from taggit.managers import TaggableManager
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from apps.taskomatic.models import TaskPeriodSchedule
 
 logger = logging.getLogger(__name__)
 
@@ -800,6 +801,7 @@ class Job(models.Model):
     date = TZDateTimeField(default=datetime.now)
     is_running = models.BooleanField(default=False)
     is_finished = models.BooleanField(default=False)  # this is for checking (no used for data from beaker)
+    schedule = models.ForeignKey(TaskPeriodSchedule, null=True, blank=True)
 
     def __unicode__(self):
         return self.uid
