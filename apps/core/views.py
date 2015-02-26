@@ -538,7 +538,15 @@ class TestsListView(TemplateView):
         # History
         history = dict()
         minDate = currentDate() - timedelta(days=settings.PREVIOUS_DAYS + 7)
-        for change in TestHistory.objects.filter(date__gt=minDate).select_related('test').annotate(dcount=Count('test')):
+        changes = TestHistory.objects.filter(date__gt=minDate).select_related('test').annotate(dcount=Count('test'))
+#TODO: Fix this feaure, the dependence packages
+#        deptTests = dict()
+#        for test in Test.objects.filter(dependencies__in = [it.test for it in changes]):
+#            for depIt in test.dependencies.all():
+#                if depIt.id not in deptTests:
+#                    deptTests[depIt.id] = list()
+#                deptTests[depIt.id].append(depIt)
+        for change in changes:
             day = change.date.date()
             if change.date.hour > 20:
                 day = day + timedelta(days=1)
@@ -551,13 +559,13 @@ class TestsListView(TemplateView):
             if not history[change.test.id].has_key(day):
                 history[change.test.id][day] = list()
             history[change.test.id][day].insert(0, change)
-            depList = Test.objects.filter(dependencies=change.test).values("id")
-            for depchange in depList:
-                if not history.has_key(depchange['id']):
-                    history[depchange['id']] = {}
-                if not history[depchange['id']].has_key(day):
-                    history[depchange['id']][day] = []
-                history[depchange['id']][day].append(change)
+#            depList = list() # Test.objects.filter(dependencies=change.test).values("id")
+#            for depchange in depList:
+#                if not history.has_key(depchange['id']):
+#                    history[depchange['id']] = {}
+#                if not history[depchange['id']].has_key(day):
+#                    history[depchange['id']][day] = []
+#                history[depchange['id']][day].append(change)
         # apply filter
         search = self.filters.get('search', False)
         if search and len(search) > 0:
