@@ -16,12 +16,24 @@
             <li><img src="/media/images/rtriangle.png" alt="Red Triangle">&nbsp;&nbsp;The change of the test package</li>
             <li><img src="/media/images/ptriangle.png" alt="Violet Triangle">&nbsp;&nbsp;The change in dependent packages</li>
          </ul>
-          <h3>Repos:</h3>
-         <ul>
-            {% for it in repos %}
-            <li><a href="?repo={{it.id}}" >{{ it.name }}</a></li>
-            {% endfor %}
-         </ul>
+         <div>
+           <div class="float-right">
+             <h3>Repos:</h3>
+             <ul>
+                {% for it in repos %}
+                <li><a href="?repo={{it.id}}" >{{ it.name }}</a></li>
+                {% endfor %}
+             </ul>
+           </div>
+           <div style="border: 1px white solid">
+             <h3>Groups:</h3>
+             <ul>
+                {% for it in groups %}
+                <li><a href="?group={{it.id}}" >{{ it.name }}</a></li>
+                {% endfor %}
+             </ul>
+           </div>
+         </div>
       </div>
     <a name="Test Trends"></a>
 <h1>Test Trends</h1>
@@ -57,7 +69,9 @@ Last check: {{ progress.datestart }}
   <thead>
 	<tr >
 		<th colspan="12"><a name="{{test}}"></a><a href="#{{test}}" class="testLink" >{{ test.name }}</a>
-		{% if test.get_reposituory_url %}<a href="{{ test.get_reposituory_url }}" class="gitLink" >git</a>{% endif %} <a href="{{ test.get_detail_url }}" class="gitLink" >detail</a></th>
+		{% if test.get_reposituory_url %}<a href="{{ test.get_reposituory_url }}" class="gitLink" >git</a>{% endif %} <a href="{{ test.get_detail_url }}" class="gitLink" >detail</a>
+        <span class="float-right" title="Groups">{% for group in test.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        </th>
 	</tr>
 	<tr >
 	<th colspan="2">&nbsp;</th>

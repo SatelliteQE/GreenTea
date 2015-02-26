@@ -475,6 +475,8 @@ class TestsListView(TemplateView):
         self.forms['search'] = FilterForm(parameters)
         if parameters.has_key('repo'):
             self.filters['repo_id'] = parameters.get('repo')
+        if parameters.has_key('group'):
+            self.filters['group_id'] = parameters.get('group')
         if kwargs.has_key('email'):
             self.filters['email'] = kwargs.get('email')
         if parameters.has_key("search"):
@@ -534,9 +536,9 @@ class TestsListView(TemplateView):
         # date Labels
         dates_label = create_matrix(settings.PREVIOUS_DAYS + 1)
         # History
-        history = {}
+        history = dict()
         minDate = currentDate() - timedelta(days=settings.PREVIOUS_DAYS + 7)
-        for change in TestHistory.objects.filter(date__gt=minDate, version__isnull=False).select_related('test').annotate(dcount=Count('test')):
+        for change in TestHistory.objects.filter(date__gt=minDate).select_related('test').annotate(dcount=Count('test')):
             day = change.date.date()
             if change.date.hour > 20:
                 day = day + timedelta(days=1)
@@ -545,9 +547,9 @@ class TestsListView(TemplateView):
                     day = lday
                     break;
             if not history.has_key(change.test.id):
-                history[change.test.id] = {}
+                history[change.test.id] = dict()
             if not history[change.test.id].has_key(day):
-                history[change.test.id][day] = []
+                history[change.test.id][day] = list()
             history[change.test.id][day].insert(0, change)
             depList = Test.objects.filter(dependencies=change.test).values("id")
             for depchange in depList:
@@ -573,6 +575,9 @@ class TestsListView(TemplateView):
         if self.filters.has_key('repo_id'):
             taskFilter['test__git__id'] = self.filters.get('repo_id')
             testFilter["git__id"] = self.filters.get('repo_id')
+        if self.filters.has_key('group_id'):
+            taskFilter['test__groups__id'] = self.filters.get('group_id')
+            testFilter["groups__id"] = self.filters.get('group_id')
 
         date_range = (TZDatetime(*dates_label[0].timetuple()[:6]),
                       TZDatetime(*dates_label[-1].timetuple()[:3], hour=23, minute=55))
@@ -669,7 +674,8 @@ class TestsListView(TemplateView):
         context["stat"] = stat
         context["history"] = history
         context["urlstring"] = urllib.urlencode(dict(urllist))
-        context['repos'] = Git.objects.all()
+        context['repos'] = Git.objects.all().order_by('name')
+        context['groups'] = GroupOwner.objects.all().order_by('name')
         return context
 
 
