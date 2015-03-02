@@ -965,7 +965,7 @@ class Recipe(models.Model):
     def is_running(self):
         # this makes about 1000 requests into DB, I think it is not necessary here.
         # self.recount_result()
-        return self.status == self.RUNNING
+        return self.status == self.RUNNING or self.status == self.RESERVED
 
     def get_info(self):
         # TODO: ???? Toto je asi blbost ????
