@@ -1,0 +1,8 @@
+# Green Tea
+# https://github.com/SatelliteQE/GreenTea/wiki/Setup
+
+# For asynchronous operation Green Tea needs to run cron
+*/1 * * * * 	greentea 	python /data/Greantea/manage.py pickup --traceback
+
+# Following command check status of beaker jobs (automation tests)
+*/20 * * * * 	greentea 	python /data/Greantea/manage.py check --quiet --traceback
