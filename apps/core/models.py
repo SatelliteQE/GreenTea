@@ -573,7 +573,6 @@ class JobTemplate(models.Model):
         content_type = ContentType.objects.get_for_model(self.__class__)
         return reverse("admin:%s_%s_change" % (content_type.app_label, content_type.model), args=(self.id,))
 
-
     def is_return(self):
         return ( self.event_finish == RETURN )
 
@@ -706,13 +705,14 @@ class RecipeTemplate(models.Model, ObjParams):
         ordering = ('name',)
 
     def is_return(self):
-        return ( self.jobtemplate.event_finish == RETURN )
+        return self.jobtemplate.is_return()
 
     def is_reserve(self):
         return not self.is_return()
 
     def is_enabled(self):
         return self.jobtemplate.is_enable
+
 
 class TaskRoleEnum(models.Model):
     name = models.CharField(max_length=255, blank=True)

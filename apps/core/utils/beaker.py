@@ -93,7 +93,7 @@ class Beaker:
         except:
             # FIXME
             # TypeError: argument 1 must be string or read-only character buffer, not None
-            print xmlfile, job, jobT
+            logging.error("schedule file %s: %s %s" % ( xmlfile, job, jobT))
         if job:
             os.rename(xmlfile, xmlfile.replace(tmp, slugify(job.uid)))
         return job
