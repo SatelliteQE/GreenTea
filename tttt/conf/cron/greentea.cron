@@ -1,5 +1,6 @@
 # Green Tea
 # https://github.com/SatelliteQE/GreenTea/wiki/Setup
+# Copy file to directory /etc/cron.d/ and restart service cron
 
 # For asynchronous operation Green Tea needs to run cron
 */1 * * * * 	greentea 	python /data/Greantea/manage.py pickup --traceback
