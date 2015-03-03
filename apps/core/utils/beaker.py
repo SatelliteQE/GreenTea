@@ -45,7 +45,7 @@ def strToSec(string):
         delta = timedelta(days=days, hours=t.hour, minutes=t.minute,
                           seconds=t.second)
     except ValueError:
-        print "Error: %s" % data
+        logger.error("ValueError %s" % data)
         return 0
     if sys.version_info < (2, 7):
         return total_sec(delta)
@@ -212,6 +212,7 @@ class JobGen:
 
         jobT.cache_recipes = recipesS
         kwargs['job'] = jobT
+        kwargs['default_packages'] = settings.BEAKER_DEFAULT_PACKAGES
         return self.__renderXML(kwargs)
 
     def __renderXML(self, kwargs):

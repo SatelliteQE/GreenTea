@@ -46,12 +46,9 @@
       <autopick random="false"/>
       <watchdog panic="None"/>
       <packages>
-        <package name="gcc"/>
-        <package name="make"/>
-        <package name="nfs-utils"/>
-        <package name="redhat-lsb"/>
-        <package name="wget"/>
-        <package name="libxml2-python"/>
+        {% for package in default_packages %}
+        <package name="{{ package }}"/>
+        {% endfor %}
         {% if r.virtualguests.all %}
         <package name="@x11"/>
         <package name="@fonts"/>

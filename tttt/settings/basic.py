@@ -248,6 +248,11 @@ BEAKER_SERVER = "https://beaker.example.com"
 BEAKER_OWNER = None
 BEAKER_PASS = None
 
+BEAKER_DEFAULT_PACKAGES = (
+    "vim", "gcc", "make", "nfs-utils", "wget", "libxml2-python",
+)
+
+
 BKR_SYSTEM_PASS = None
 BKR_SYSTEM_USER = None
 
