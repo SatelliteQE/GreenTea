@@ -139,7 +139,7 @@ class Beaker:
         auth = (settings.BEAKER_OWNER, settings.BEAKER_PASS)
         s = requests.Session()
         url = "https://%s/recipes/really_return_reservation?id=%d" \
-                % ( settings.BEAKER_SERVER, recipe.uid)
+                % ( settings.BEAKER_SERVER, int(recipe.uid))
 
         r = s.get(url, auth=auth, verify=False)
         return (r.status_code == 200)
