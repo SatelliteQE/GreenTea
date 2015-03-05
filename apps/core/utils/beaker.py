@@ -19,6 +19,7 @@ import time
 import logging
 import pxssh
 import subprocess
+import requests
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.template.defaultfilters import slugify
@@ -133,6 +134,18 @@ class Beaker:
         if not recipe.is_running():
             logger.info("The recipe (%s) is not already running" % recipe.uid)
             return True
+
+        # if system status is reserved
+        auth = (settings.BEAKER_OWNER, settings.BEAKER_PASS)
+        s = requests.Session()
+        url = "https://%s/recipes/really_return_reservation?id=%d" \
+                % ( settings.BEAKER_SERVER, recipe.uid)
+
+        r = s.get(url, auth=auth, verify=False)
+        return (r.status_code == 200)
+
+    def return2beaker_old(self, recipe):
+        # better way: use fabric
         ssh = pxssh.pxssh()
         ssh.force_password = True
         result = False
