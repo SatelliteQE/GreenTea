@@ -582,7 +582,8 @@ class DistroTemplate(models.Model):
     name = models.CharField(max_length=255, blank=True, help_text="Only alias")
     family = models.CharField(max_length=255, blank=True, null=True)
     variant = models.CharField(max_length=255, blank=True, null=True)
-    distroname = models.CharField(max_length=255, blank=True, null=True)
+    distroname = models.CharField(max_length=255, blank=True, null=True, \
+        help_text="If field is empty, then it will use latest compose.")
 
     def __unicode__(self):
         return self.name

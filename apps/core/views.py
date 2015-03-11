@@ -107,6 +107,12 @@ def create_matrix(days):
     return list(reversed(datearray))
 
 
+def statistic(request):
+    content = "TODO"
+    # we need create statistic page
+    return HttpResponse(content, content_type='text/plain')
+
+
 class ApiView(View):
     content_type = 'application/json'
 
@@ -269,6 +275,7 @@ class JobsListView(TemplateView):
     def dispatch(self, request, *args, **kwargs):
         self.filters = {}
         self.forms = {}
+        self.format = None
         return super(JobsListView, self).dispatch(request, *args, **kwargs)
 
     def filterEvent(self, parameters):
@@ -280,6 +287,7 @@ class JobsListView(TemplateView):
             else:
                 self.filters['search'] = None
                 self.forms['search'] = None
+        self.format = parameters.get("format_output")
 
     def formEvent(self, parametrs):
         if "uids" in parametrs:
@@ -299,6 +307,31 @@ class JobsListView(TemplateView):
         self.get(request, *args, **kwargs)
         context = self.get_context_data(**kwargs)
         return super(self.__class__, self).render_to_response(context, **kwargs)
+
+    def get_statistic(self, statistic):
+            data = statistic["data"]
+            head = [ it for it in data.keys() if it != "sum"]
+            content = "date\t%s" % "\t".join(head)
+            render = OrderedDict()
+            for key, items in data.items():
+                if key == "sum": continue
+                for it in items:
+                    count = data["sum"][it]
+                    if not render.has_key(it):
+                        render[it] = [100*items[it]/float(count),]
+                    else:
+                        render[it].append(100*items[it]/float(count))
+            for key, value in render.items():
+                row = "\t".join([str("%.2f" % it) for it in value])
+                content += "\n%s\t%s" % (key , row)
+            return content
+
+    def render_to_response(self, context, **response_kwargs):
+        # temporary return data for statis
+        if self.format == "txt":
+            content = self.get_statistic(context['statistic'])
+            return HttpResponse(content, content_type='text/plain')
+        return super(self.__class__, self).render_to_response(context, **response_kwargs)
 
     def prepare_matrix(self, jobs, recipes, label=None):
         data, reschedule = OrderedDict(), 0
@@ -445,6 +478,7 @@ class JobsListView(TemplateView):
                 pass
             context['statistic']['data'][T(it[1])][it[0]] = it[2]
             context['statistic']['data']["sum"][it[0]] += it[2]
+
         try:
             context['progress'] = CheckProgress.objects.order_by("-datestart")[0]
         except IndexError:

@@ -222,3 +222,17 @@ table.dashboard .rTriangle > div, .pTriangle > div { position:relative; }
 .panel-detail .recipe-list .glyphicon-remove { display: none; }
 
 .panel-detail .tasks-info th { vertical-align: top; }
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.browser text {
+  text-anchor: end;
+}
+
+.statistic {
+}

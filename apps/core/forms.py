@@ -12,6 +12,9 @@ class FilterForm(forms.Form):
     search = forms.CharField(
                    required = False
                 )
+    format_output = forms.CharField(
+                   required = False
+                )
     def __init__(self, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
         self.fields['search'].widget.attrs['class'] = 'form-control'
