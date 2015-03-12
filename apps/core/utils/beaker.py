@@ -19,7 +19,7 @@ import time
 import logging
 import pxssh
 import subprocess
-import requests
+from returns import return_reservation
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.template.defaultfilters import slugify
@@ -136,13 +136,8 @@ class Beaker:
             return True
 
         # if system status is reserved
-        auth = (settings.BEAKER_OWNER, settings.BEAKER_PASS)
-        s = requests.Session()
-        url = "https://%s/recipes/really_return_reservation?id=%d" \
-                % ( settings.BEAKER_SERVER, int(recipe.uid))
-
-        r = s.get(url, auth=auth, verify=False)
-        return (r.status_code == 200)
+        status = return_reservation(int(recipe.uid))
+        return (status == -1)
 
     def return2beaker_old(self, recipe):
         # better way: use fabric
