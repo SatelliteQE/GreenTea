@@ -136,8 +136,12 @@ class Beaker:
             return True
 
         # if system status is reserved
-        status = return_reservation(int(recipe.uid))
-        return (status == -1)
+        try:
+            status = return_reservation(int(recipe.uid))
+            import sdsdssdsd
+            return (status == -1)
+        except ImportError:
+            logger.error("No module named bkr.client")
 
     def return2beaker_old(self, recipe):
         # better way: use fabric
