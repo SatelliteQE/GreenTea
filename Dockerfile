@@ -3,7 +3,7 @@ FROM fedora:latest
 WORKDIR /data/
 
 # install packages
-RUN yum install git -y \
+RUN yum install git wget -y \
     && wget https://beaker-project.org/yum/beaker-client-Fedora.repo -O /etc/yum.repos.d/beaker-client-Fedora.repo \
     && git clone https://github.com/SatelliteQE/GreenTea.git \
     && cat GreenTea/requirement/rpms-*.txt | xargs yum install -y \
