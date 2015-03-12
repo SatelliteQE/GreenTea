@@ -3,14 +3,15 @@ from django.conf import settings
 from django.contrib import admin
 from apps.core.views import *
 from apps.kerberos.views import *
+import apps.api.urls
 admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^xml/(?P<id>[0-9]+)$', 'apps.core.views.to_xml', name='beaker-xml'),
     url(r'^import/$', 'apps.core.views.import_xml', name='import-xml'),
     url(r'^import/group$', 'apps.core.views.import_group', name='import-group'),
-    url(r'^api$', 'apps.api.views.performance', name='performance'),
-    url(r'^api/(?P<action>[^/]+)$', ApiView.as_view(), name='api'),
+    url(r'^api/', include(apps.api.urls)),
+#   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^tests/(?P<email>.+)$', TestsListView.as_view(), name='tests-email'),
     url(r'^accounts/login', LoginView.as_view(), name="login"),
     url(r'^job/(?P<id>[0-9]+)$', JobDetailView.as_view(), name='job-detail'),

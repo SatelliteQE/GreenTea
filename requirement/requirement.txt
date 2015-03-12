@@ -4,6 +4,7 @@ django-debug-toolbar
 django-taggit
 django-reversion < 1.8.0
 django-widget-tweaks
+django-filter
 pygraphviz
 django_extensions
 GitPython
@@ -20,3 +21,5 @@ croniter
 texttable
 BeautifulSoup4
 single_process
+markdown
+djangorestframework

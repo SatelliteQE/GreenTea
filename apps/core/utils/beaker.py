@@ -19,7 +19,6 @@ import time
 import logging
 import pxssh
 import subprocess
-from returns import return_reservation
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.template.defaultfilters import slugify
@@ -137,11 +136,12 @@ class Beaker:
 
         # if system status is reserved
         try:
+            from returns import return_reservation
             status = return_reservation(int(recipe.uid))
             import sdsdssdsd
             return (status == -1)
         except ImportError:
-            logger.error("No module named bkr.client")
+            logger.info("No module named bkr.client")
 
     def return2beaker_old(self, recipe):
         # better way: use fabric

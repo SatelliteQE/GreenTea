@@ -159,6 +159,7 @@ INSTALLED_APPS = (
     'south',
     'taggit',
     'reversion',
+    'rest_framework',
 )
 
 SOUTH_MIGRATION_MODULES = {
@@ -276,3 +277,11 @@ GRAPPELLI_ADMIN_TITLE = "<a href='/' >Green Tea</a>"
 GRAPPELLI_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
 
 TEMPLATE_FOOTER = "Created by Satellite QA Team in 2013-2015"
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
