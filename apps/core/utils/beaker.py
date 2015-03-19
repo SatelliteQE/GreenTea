@@ -25,10 +25,10 @@ from django.template.defaultfilters import slugify
 from django.template import Context, Template
 from apps.core.models import JobTemplate, RecipeTemplate, TaskTemplate
 from apps.core.models import Job, Recipe, Test, Task
-from apps.core.models import System, Arch, Distro, Author, PASS
+from apps.core.models import System, Arch, Distro, Author, PASS, RETURNWHENGREEN
+from returns import return_reservation
 
 logger = logging.getLogger('commands')
-
 
 def total_sec(td):
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) \
@@ -129,11 +129,9 @@ class Beaker:
         if not isinstance(recipe, Recipe):
             msg = "This type is not supported: %s %s" % (recipe, type(recipe))
             raise TypeError(msg)
-        hostname = recipe.system.hostname
         if not recipe.is_running():
             logger.info("The recipe (%s) is not already running" % recipe.uid)
             return True
-
         # if system status is reserved
         try:
             from returns import return_reservation
@@ -376,7 +374,8 @@ def parse_recipe(recipexml, job, guestrecipe=None):
 
     reserve = Task.objects.filter(test__name=settings.RESERVE_TEST, recipe=recipe)
 
-    if reserve or (recipe.status == Recipe.RESERVED and job.template.is_return()):
-            if recipe.result == PASS:
+    logger.debug("%s status:  %s result %s" % (recipe.uid, recipe.status, recipe.result))
+    if reserve or recipe.status == Recipe.RESERVED:
+            if recipe.result == PASS  and job.template.event_finish == RETURNWHENGREEN:
                 bk = Beaker()
                 bk.return2beaker(recipe)
