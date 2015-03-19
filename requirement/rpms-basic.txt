@@ -7,5 +7,5 @@ libxslt-devel
 libxml12-devel
 graphviz-devel
 python-virtualenv
-beaker-client
+beaker-common
 gcc
