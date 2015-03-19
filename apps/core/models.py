@@ -591,6 +591,9 @@ class DistroTemplate(models.Model):
     def tpljobs_counter(self):
         return RecipeTemplate.objects.filter(distro=self).count()
 
+    def __unicode__(self):
+        return self.name
+
     class Meta:
         ordering = ('name', 'distroname',)
 
