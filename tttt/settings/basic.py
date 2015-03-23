@@ -200,7 +200,7 @@ LOGGING = {
             'include_html': True,
         },
         'console': {
-            'level': 'INFO',  # 'DEBUG',
+            'level': 'DEBUG',  # 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'simple'
         },

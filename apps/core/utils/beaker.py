@@ -26,7 +26,6 @@ from django.template import Context, Template
 from apps.core.models import JobTemplate, RecipeTemplate, TaskTemplate
 from apps.core.models import Job, Recipe, Test, Task
 from apps.core.models import System, Arch, Distro, Author, PASS, RETURNWHENGREEN
-from returns import return_reservation
 
 logger = logging.getLogger('commands')
 
