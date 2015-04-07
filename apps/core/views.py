@@ -17,7 +17,9 @@ from django.db import connection
 from datetime import date, timedelta
 from forms import FilterForm
 # from json import JSONEncoder
-import re, os, time
+import re
+import os
+import time
 from copy import copy
 import urllib
 import json
@@ -40,6 +42,7 @@ else:
 
 
 logger = logging.getLogger(__name__)
+
 
 def render_lable(data, rule):
     rule = "{%% load core_extras %%}%s" % rule
@@ -65,9 +68,10 @@ def import_xml(request):
 
     return render(request, 'import_xml.html', data)
 
+
 def import_group(request):
     # TODO: rewrite to standard View Class
-    data = { "forms": GroupsForm() }
+    data = {"forms": GroupsForm()}
     if request.POST and "group" in request.POST:
         forms = GroupsForm(request.POST)
         if forms.is_valid():
@@ -90,7 +94,7 @@ def to_xml(request, id):
         raise Exception("Bad xml format or something is bad")
     xml = soup.prettify()
     return render(request, 'job_xml.html',
-           {'template': jobT, "xml": xml, "beaker": settings.BEAKER_SERVER})
+                  {'template': jobT, "xml": xml, "beaker": settings.BEAKER_SERVER})
 
 
 def create_matrix(days):
@@ -122,8 +126,8 @@ class ApiView(View):
         # TODO: predelat
         j_date = recipe.job.date
         date_range = (TZDatetime(*j_date.timetuple()[:3], hour=19, minute=0),
-                      TZDatetime(*(j_date + timedelta(days=1))\
-                                    .timetuple()[:3], hour=18, minute=55))
+                      TZDatetime(*(j_date + timedelta(days=1))
+                                 .timetuple()[:3], hour=18, minute=55))
         rescheduled = Job.objects.filter(template=recipe.job.template,
                                          date__range=date_range)\
                                  .exclude(id=recipe.job.id)
@@ -131,7 +135,7 @@ class ApiView(View):
 
     def getRecipeComments(self, recipe):
         rComments = Comment.objects.filter(recipe=recipe, task__isnull=True)\
-                .order_by('-created_date')
+            .order_by('-created_date')
         return [comm.to_json() for comm in rComments]
 
     def getRecipeInfo(self, params, content):
@@ -247,7 +251,7 @@ class ApiView(View):
         ids = params.get("ids", "").rstrip('|').split('|')
         test_history = TestHistory.objects.filter(id__in=ids).order_by('-date')
         content['changes'] = [change.to_json() for change in test_history]\
-                                 if test_history else []
+            if test_history else []
 
     def apiEvent(self, action, params):
         content = dict()
@@ -315,20 +319,21 @@ class JobsListView(TemplateView):
 
     def get_statistic(self, statistic):
             data = statistic["data"]
-            head = [ it for it in data.keys() if it != "sum"]
+            head = [it for it in data.keys() if it != "sum"]
             content = "date\t%s" % "\t".join(head)
             render = OrderedDict()
             for key, items in data.items():
-                if key == "sum": continue
+                if key == "sum":
+                    continue
                 for it in items:
                     count = data["sum"][it]
                     if not render.has_key(it):
-                        render[it] = [100*items[it]/float(count),]
+                        render[it] = [100 * items[it] / float(count), ]
                     else:
-                        render[it].append(100*items[it]/float(count))
+                        render[it].append(100 * items[it] / float(count))
             for key, value in render.items():
                 row = "\t".join([str("%.2f" % it) for it in value])
-                content += "\n%s\t%s" % (key , row)
+                content += "\n%s\t%s" % (key, row)
             return content
 
     def render_to_response(self, context, **response_kwargs):
@@ -356,10 +361,12 @@ class JobsListView(TemplateView):
                 tmp_recipe[lb]["days"] = OrderedDict()
                 tmp_recipe[lb]["label"] = lb
                 for d in label:
-                    tmp_recipe[lb]["days"][d] = {"recipe": None, "schedule": []}
+                    tmp_recipe[lb]["days"][d] = {
+                        "recipe": None, "schedule": []}
             labeldate = recipe.get_date().date()
             # recipe isn't in range of date # FIXME
-            if not tmp_recipe[lb]["days"].has_key(labeldate): continue
+            if not tmp_recipe[lb]["days"].has_key(labeldate):
+                continue
 
             tmp_recipe[lb]["days"][labeldate]["recipe"] = recipe
             tmp_recipe[lb]["days"][labeldate]["schedule"].append(recipe.uid)
@@ -368,37 +375,40 @@ class JobsListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
         context['detailPanelHidden'] = self.request.COOKIES.get('detailHidden')
-        context['detailPanelHeight'] = int(self.request.COOKIES.get('detailHeight', 0))
+        context['detailPanelHeight'] = int(
+            self.request.COOKIES.get('detailHeight', 0))
         context['detailActions'] = [Comment.ENUM_ACTION_WAIVED,
                                     Comment.ENUM_ACTION_RETURN,
                                     Comment.ENUM_ACTION_RESCHEDULE]
         context['waiveClass'] = Comment
         context['GITWEB_URL'] = settings.GITWEB_URL
 
-        ### Forms ###
+        # Forms ###
 
-
-        ### daily ###
+        # daily ###
         context['label'] = create_matrix(settings.PREVIOUS_DAYS)
 
-        jfilters = { "is_enable": True, "period": JobTemplate.DAILY}
+        jfilters = {"is_enable": True, "period": JobTemplate.DAILY}
         date_range = (TZDatetime(*context['label'][0].timetuple()[:6]),
-                      TZDatetime(*context['label'][-1].timetuple()[:3], hour=23, minute=55)
-                     )
-        rfilters = { "job__template__is_enable": True,
-                     "job__date__range": date_range,
-                     "job__template__period": JobTemplate.DAILY}
+                      TZDatetime(
+                          *context['label'][-1].timetuple()[:3], hour=23, minute=55)
+                      )
+        rfilters = {"job__template__is_enable": True,
+                    "job__date__range": date_range,
+                    "job__template__period": JobTemplate.DAILY}
 
         jobstag = None
         if self.filters.get("tag"):
-                jobstag = JobTemplate.objects.filter(tags__slug = self.filters.get("tag")).values("id")
+                jobstag = JobTemplate.objects.filter(
+                    tags__slug=self.filters.get("tag")).values("id")
                 context["actualtag"] = self.filters.get("tag")
                 jfilters["id__in"] = jobstag
                 rfilters["job__template_id__in"] = jobstag
 
         if self.filters.get('search'):
             jfilters["whiteboard__icontains"] = self.filters.get('search')
-            rfilters["job__template__whiteboard__icontains"] = self.filters.get('search')
+            rfilters["job__template__whiteboard__icontains"] = self.filters.get(
+                'search')
 
         jobs = JobTemplate.objects.filter(**jfilters).order_by("position")
         recipes = Recipe.objects.filter(**rfilters)\
@@ -407,7 +417,7 @@ class JobsListView(TemplateView):
                         .annotate(Count('id'))
         context['data'] = self.prepare_matrix(jobs, recipes)
 
-        ### weekly ###
+        # weekly ###
 
         # create label
         cursor = connection.cursor()
@@ -418,29 +428,30 @@ class JobsListView(TemplateView):
         # sqllite return unicode
         # postgresql return datetime
         udate = lambda a: a.date() if type(a) in (datetime,) else a
-        context['labelweek'] = [udate(it[0]) for it in cursor.fetchall()];
+        context['labelweek'] = [udate(it[0]) for it in cursor.fetchall()]
 
-        #FIXME
+        # FIXME
         try:
             date_range = (context['labelweek'][-1], datetime.now())
         except IndexError:
             date_range = (datetime.now(), datetime.now())
 
-        jfilters = { "is_enable": True, "period": JobTemplate.WEEKLY}
-        rfilters = { "job__template__is_enable": True,
-                     "job__date__range": date_range,
-                     "job__template__period": JobTemplate.WEEKLY}
+        jfilters = {"is_enable": True, "period": JobTemplate.WEEKLY}
+        rfilters = {"job__template__is_enable": True,
+                    "job__date__range": date_range,
+                    "job__template__period": JobTemplate.WEEKLY}
 
         if self.filters.get('search'):
             jfilters["whiteboard__icontains"] = self.filters.get('search')
-            rfilters["job__template__whiteboard__icontains"] = self.filters.get('search')
+            rfilters["job__template__whiteboard__icontains"] = self.filters.get(
+                'search')
 
         jobs = JobTemplate.objects.filter(**jfilters)
         recipes = Recipe.objects.filter(**rfilters)\
                         .select_related("job", "job__template", "arch", "distro")\
                         .annotate(Count('id'))
 
-        ### ORM doen't work correct ###
+        # ORM doen't work correct ###
 
         # labelweek = [it.strftime("%Y-%m-%d") for it in Job.objects.values("date")\
         #        .filter(
@@ -451,15 +462,17 @@ class JobsListView(TemplateView):
         #        .extra({'date_day': "date(date)"})\
         #        .values("date_day").order_by("date")\
         #        .annotate(Count('id'))\
-        #        .dates("date", "day").order_by("-date")[:settings.PREVIOUS_DAYS]] # skip today - only previous day
+        # .dates("date", "day").order_by("-date")[:settings.PREVIOUS_DAYS]] # skip today - only previous day
         context['labelweek'].reverse()
 
-        context['dataweek'] = self.prepare_matrix(jobs, recipes, context['labelweek'])
+        context['dataweek'] = self.prepare_matrix(
+            jobs, recipes, context['labelweek'])
 
         tag_query = ""
-        if jobstag != None: 
+        if jobstag != None:
             tag_query = map(lambda x: "%d" % int(x["id"]), jobstag)
-            tag_query = """ AND "core_job"."template_id" IN ( %s ) """ % ", ".join(tag_query)
+            tag_query = """ AND "core_job"."template_id" IN ( %s ) """ % ", ".join(
+                tag_query)
         if self.filters.get('search'):
             # statistic information
             query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
@@ -469,25 +482,26 @@ class JobsListView(TemplateView):
                WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s
                AND lower("core_jobtemplate"."whiteboard") LIKE lower(%s)
                GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
-            cursor.execute( query, 
-               [(datetime.now().date() - timedelta(days=14)).isoformat(), True, JobTemplate.DAILY, "%%%s%%" % self.filters.get('search')])
+            cursor.execute(query,
+                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True, JobTemplate.DAILY, "%%%s%%" % self.filters.get('search')])
         else:
             query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
                LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
                LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
                LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
                WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s """ + tag_query + """
-               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """ 
+               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
             cursor.execute(query,
-               [(datetime.now().date() - timedelta(days=14)).isoformat(), True, JobTemplate.DAILY])
+                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True, JobTemplate.DAILY])
 
         data = cursor.fetchall()
         label = OrderedDict()
-        T = lambda x : dict(RESULT_CHOICES)[x]
+        T = lambda x: dict(RESULT_CHOICES)[x]
         for it in data:
             if not it[0] in label.keys():
                 label.update({it[0]: 0})
-        context['statistic'] = {"data": {"sum": copy(label)}, "label": copy(label)}
+        context['statistic'] = {
+            "data": {"sum": copy(label)}, "label": copy(label)}
         for it in data:
             if not T(it[1]) in context['statistic']['data'].keys():
                 context['statistic']['data'][T(it[1])] = copy(label)
@@ -498,7 +512,8 @@ class JobsListView(TemplateView):
             context['statistic']['data']["sum"][it[0]] += it[2]
 
         try:
-            context['progress'] = CheckProgress.objects.order_by("-datestart")[0]
+            context['progress'] = CheckProgress.objects.order_by(
+                "-datestart")[0]
         except IndexError:
             context['progress'] = None
         # Search box
@@ -537,8 +552,10 @@ class TestsListView(TemplateView):
         if parameters.has_key("search"):
             self.filters['email'] = None
             if self.forms['search'].is_valid():
-                self.filters['onlyfail'] = self.forms['search'].cleaned_data["onlyfail"]
-                self.filters['search'] = self.forms['search'].cleaned_data["search"]
+                self.filters['onlyfail'] = self.forms[
+                    'search'].cleaned_data["onlyfail"]
+                self.filters['search'] = self.forms[
+                    'search'].cleaned_data["search"]
             else:
                 self.forms['search'] = None
 
@@ -576,7 +593,8 @@ class TestsListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
         context['detailPanelHidden'] = self.request.COOKIES.get('detailHidden')
-        context['detailPanelHeight'] = int(self.request.COOKIES.get('detailHeight', 0))
+        context['detailPanelHeight'] = int(
+            self.request.COOKIES.get('detailHeight', 0))
         context['detailActions'] = [Comment.ENUM_ACTION_WAIVED, ]
         context['waiveClass'] = Comment
         context['GITWEB_URL'] = settings.GITWEB_URL
@@ -587,14 +605,16 @@ class TestsListView(TemplateView):
         taskFilter = dict()
         # taskFilter['recipe__job__template__is_enable'] = True
         # Owners
-        owners = dict([(it.id, it) for it in Author.objects.filter(is_enabled=True).annotate(dcount=Count('test'))])
+        owners = dict([(it.id, it)
+                      for it in Author.objects.filter(is_enabled=True).annotate(dcount=Count('test'))])
         # date Labels
         dates_label = create_matrix(settings.PREVIOUS_DAYS + 1)
         # History
         history = dict()
         minDate = currentDate() - timedelta(days=settings.PREVIOUS_DAYS + 7)
-        changes = TestHistory.objects.filter(date__gt=minDate).select_related('test').annotate(dcount=Count('test'))
-#TODO: Fix this feaure, the dependence packages
+        changes = TestHistory.objects.filter(date__gt=minDate).select_related(
+            'test').annotate(dcount=Count('test'))
+# TODO: Fix this feaure, the dependence packages
 #        deptTests = dict()
 #        for test in Test.objects.filter(dependencies__in = [it.test for it in changes]):
 #            for depIt in test.dependencies.all():
@@ -608,13 +628,13 @@ class TestsListView(TemplateView):
             for lday in dates_label:
                 if lday >= day:
                     day = lday
-                    break;
+                    break
             if not history.has_key(change.test.id):
                 history[change.test.id] = dict()
             if not history[change.test.id].has_key(day):
                 history[change.test.id][day] = list()
             history[change.test.id][day].insert(0, change)
-#            depList = list() # Test.objects.filter(dependencies=change.test).values("id")
+# depList = list() # Test.objects.filter(dependencies=change.test).values("id")
 #            for depchange in depList:
 #                if not history.has_key(depchange['id']):
 #                    history[depchange['id']] = {}
@@ -652,23 +672,25 @@ class TestsListView(TemplateView):
             "test__owner__email", "recipe__uid", "recipe__job__date", "result", "id", "uid", "recipe",
             "statusbyuser", "recipe__job__template__grouprecipes", "recipe__arch__name",
             "recipe__whiteboard", "recipe__distro__name", "alias")\
-        .order_by("test__owner__name", "recipe__job__template__whiteboard") \
-        .annotate(Count('id'))
+            .order_by("test__owner__name", "recipe__job__template__whiteboard") \
+            .annotate(Count('id'))
 
         # tests = Test.objects.filter(**testFilter).annotate(count = Count('id')).order_by("count", "name")
         testFilter['owner__is_enabled'] = True
         tests = Test.objects.filter(**testFilter) \
-                .annotate(count_fail=Count('task__result'))\
-                .annotate(Count('id')).order_by("-count_fail")
+            .annotate(count_fail=Count('task__result'))\
+            .annotate(Count('id')).order_by("-count_fail")
 
         paginator = Paginator(tests, settings.PAGINATOR_OBJECTS_ONPAGE)
         testlist = paginator.page(int(self.request.GET.get('page', 1)))
         ids = []
         data = dict()
         for it in testlist.object_list:
-            email = owners[it.owner_id].email if it.owner_id else "unknow@redhat.com"
+            email = owners[
+                it.owner_id].email if it.owner_id else "unknow@redhat.com"
             if not data.has_key(email):
-                data[email] = dict({"tests": OrderedDict(), 'owner': owners[it.owner_id]})
+                data[email] = dict(
+                    {"tests": OrderedDict(), 'owner': owners[it.owner_id]})
             ids.append(it.id)
             it.labels = OrderedDict()
             data[email]["tests"][it.name] = it
@@ -681,8 +703,8 @@ class TestsListView(TemplateView):
                 continue
             id_email = it["test__owner__email"]
             # use for filters
-            if not (data.has_key(id_email) and\
-                data[id_email]["tests"].has_key(it["test__name"])):
+            if not (data.has_key(id_email) and
+                    data[id_email]["tests"].has_key(it["test__name"])):
                 continue
 
             test = data[id_email]["tests"][it["test__name"]]
@@ -694,7 +716,7 @@ class TestsListView(TemplateView):
                 "distro_label": it["recipe__distro__name"],
                 "whiteboard": it["recipe__whiteboard"],
                 "alias": it["alias"],
-                }, it["recipe__job__template__grouprecipes"])
+            }, it["recipe__job__template__grouprecipes"])
             test_label = (it["recipe__job__template__whiteboard"], lb)
             if not test.labels.has_key(test_label):
                 test.labels[test_label] = OrderedDict()
@@ -704,17 +726,18 @@ class TestsListView(TemplateView):
             label = test.labels[test_label]
 
             labeldate = it["recipe__job__date"].date()
-            if not label.has_key(labeldate): continue
+            if not label.has_key(labeldate):
+                continue
 
             reschedule = 0
             if label[labeldate]:
                 reschedule = label[labeldate].reschedule + 1
             label[labeldate] = Task(
-                    id=it["id"],
+                id=it["id"],
                     uid=it["uid"],
                     result=it["result"],
                     statusbyuser=it["statusbyuser"],
-                )
+            )
             label[labeldate].resultrate = it["recipe__resultrate"]
             label[labeldate].recipe_uid = "%s" % it["recipe__uid"]
             label[labeldate].reschedule = reschedule
@@ -724,7 +747,8 @@ class TestsListView(TemplateView):
         except IndexError:
             progress = None
 
-        urllist = filter(lambda (x, y): x != "page", self.request.GET.copy().items())
+        urllist = filter(
+            lambda (x, y): x != "page", self.request.GET.copy().items())
 
         if self.filters.get('onlyfail', False):
             context["tests_bad"] = tests[:10]
@@ -750,19 +774,23 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
         try:
-            context['progress'] = CheckProgress.objects.order_by("-datestart")[0]
+            context['progress'] = CheckProgress.objects.order_by(
+                "-datestart")[0]
         except IndexError:
             context['progress'] = None
         # Waiver
         comments = Comment.objects\
-                            .filter(created_date__gt=datetime.today().date())\
-                            .order_by("-created_date", "task", "recipe", "job")
+            .filter(created_date__gt=datetime.today().date())\
+            .order_by("-created_date", "task", "recipe", "job")
         paginator = Paginator(comments, settings.PAGINATOR_OBJECTS_ONHOMEPAGE)
-        context['waiver'] = paginator.page(int(self.request.GET.get('cpage', 1)))
+        context['waiver'] = paginator.page(
+            int(self.request.GET.get('cpage', 1)))
         context['cpaginator'] = paginator
-        history = TestHistory.objects.filter().order_by("-date")[:settings.PAGINATOR_OBJECTS_ONHOMEPAGE * 10]
+        history = TestHistory.objects.filter().order_by(
+            "-date")[:settings.PAGINATOR_OBJECTS_ONHOMEPAGE * 10]
         paginator = Paginator(history, settings.PAGINATOR_OBJECTS_ONHOMEPAGE)
-        context['history'] = paginator.page(int(self.request.GET.get('hpage', 1)))
+        context['history'] = paginator.page(
+            int(self.request.GET.get('hpage', 1)))
         context['hpaginator'] = paginator
         return context
 
@@ -794,7 +822,8 @@ class TestDetailView(TemplateView):
 
         test_id = kwargs["id"]
         oTest = Test.objects.get(id=test_id)
-        task_list = Task.objects.filter(test=oTest).order_by("-recipe__job__date")
+        task_list = Task.objects.filter(
+            test=oTest).order_by("-recipe__job__date")
 
         paginator = Paginator(task_list, settings.PAGINATOR_OBJECTS_ONPAGE)
         tasks = paginator.page(int(self.request.GET.get('page', 1)))

@@ -13,7 +13,7 @@ from apps.core.models import JobTemplate, Job, Recipe
 from apps.core.utils.beaker import Beaker
 from apps.core.utils.advance_command import AdvancedCommand, make_option_group
 from apps.taskomatic.models import TaskPeriodSchedule
-from  datetime import datetime
+from datetime import datetime
 
 logger = logging.getLogger('commands')
 
@@ -24,178 +24,178 @@ class Command(AdvancedCommand):
     schedule = None
 
     option_list = AdvancedCommand.option_list + (
-                make_option('--info',
+        make_option('--info',
                     action='store_true',
                     dest='info',
                     default=False,
                     help='Show more informations.'),
                 make_option('--simulate',
-                    action='store_true',
-                    dest='simulate',
-                    default=False,
-                    help='Simulate action, use it with --fullinfo.'),
+                            action='store_true',
+                            dest='simulate',
+                            default=False,
+                            help='Simulate action, use it with --fullinfo.'),
     )
     option_groups = (
-         # SCHEDULE
+        # SCHEDULE
          make_option_group(
-            'Options for schedule',
+             'Options for schedule',
             description='Options for scheduling of jobs in beaker',
             option_list=(
                 make_option('--schedule-all',
-                    action='store_true',
-                    dest='all',
-                    default=False,
-                    help='Schedule all active job templates'),
+                            action='store_true',
+                            dest='all',
+                            default=False,
+                            help='Schedule all active job templates'),
                 make_option('--schedule-daily',
-                    action='store_true',
-                    dest='daily',
-                    default=False,
-                    help='Schedule daily job templates'),
+                            action='store_true',
+                            dest='daily',
+                            default=False,
+                            help='Schedule daily job templates'),
                 make_option('--schedule-weekly',
-                    action='store_true',
-                    dest='weekly',
-                    default=False,
-                    help='Schedule weekly job templates'),
+                            action='store_true',
+                            dest='weekly',
+                            default=False,
+                            help='Schedule weekly job templates'),
                 make_option('--schedule-template',
-                    dest='template',
-                    help='Schedule only job templates, which are required. We '
-                         'can use more values, which are separated by comma.'),
+                            dest='template',
+                            help='Schedule only job templates, which are required. We '
+                            'can use more values, which are separated by comma.'),
                 make_option('--schedule-tags',
-                    dest='tags',
-                    default=False,
-                    help='Schedule job templates, which have required tags.'
-                         'We can use more values, separated by comma'),
+                            dest='tags',
+                            default=False,
+                            help='Schedule job templates, which have required tags.'
+                            'We can use more values, separated by comma'),
                 make_option('--schedule-reservsys',
-                    action='store_true',
-                    dest='reservsys',
-                    default=False,
-                    help='Adding forcibly of the reservsys task into new job.'),
+                            action='store_true',
+                            dest='reservsys',
+                            default=False,
+                            help='Adding forcibly of the reservsys task into new job.'),
                 make_option('--schedule_id',
-                    dest='schedule_id',
-                    default=False,
-                    help='Set period schedule run'),
+                            dest='schedule_id',
+                            default=False,
+                            help='Set period schedule run'),
             ),
-        ),
+         ),
         # RESCHEDULE
          make_option_group(
-            'Options for reschedule',
+             'Options for reschedule',
             description='Options for rescheduling of jobs',
             option_list=(
                 make_option('--reschedule-all',
-                    action='store_true',
-                    dest='all',
-                    default=False,
-                    help='Reschedule all active jobs'),
+                            action='store_true',
+                            dest='all',
+                            default=False,
+                            help='Reschedule all active jobs'),
                 make_option('--reschedule-daily',
-                    action='store_true',
-                    dest='daily',
-                    default=False,
-                    help='Reschedule daily job'),
+                            action='store_true',
+                            dest='daily',
+                            default=False,
+                            help='Reschedule daily job'),
                 make_option('--reschedule-weekly',
-                    action='store_true',
-                    dest='weekly',
-                    default=False,
-                    help='Reschedule weekly jobs'),
+                            action='store_true',
+                            dest='weekly',
+                            default=False,
+                            help='Reschedule weekly jobs'),
                 make_option('--reschedule-job',
-                    dest='job',
-                    help='Reschedule only jobs, which are required. Use UID '
-                         '(J:12345) for identify of job. We can use more '
-                         'values, which are separated by comma.'),
+                            dest='job',
+                            help='Reschedule only jobs, which are required. Use UID '
+                            '(J:12345) for identify of job. We can use more '
+                            'values, which are separated by comma.'),
                 make_option('--reschedule-template',
-                    dest='template',
-                    help='Reschedule only jobs, which are required. We '
-                         'can use more values, which are separated by comma.'),
+                            dest='template',
+                            help='Reschedule only jobs, which are required. We '
+                            'can use more values, which are separated by comma.'),
                 make_option('--reschedule-tags',
-                    dest='tags',
-                    default=False,
-                    help='Reschedule jobs, which have required tags.'
-                         'We can use more values, separated by comma'),
+                            dest='tags',
+                            default=False,
+                            help='Reschedule jobs, which have required tags.'
+                            'We can use more values, separated by comma'),
                 make_option('--reschedule-message',
-                    dest='message',
-                    default="",
-                    help='The comment for rescheduling of jobs.'),
+                            dest='message',
+                            default="",
+                            help='The comment for rescheduling of jobs.'),
             ),
-        ),
+         ),
         # RETURN2BEAKER
          make_option_group(
-            'Options for return2beaker',
+             'Options for return2beaker',
             description='Options for return2beaker of jobs',
             option_list=(
                 make_option('--return2beaker-all',
-                    action='store_true',
-                    dest='all',
-                    default=False,
-                    help='Return2beaker all active jobs'),
+                            action='store_true',
+                            dest='all',
+                            default=False,
+                            help='Return2beaker all active jobs'),
                 make_option('--return2beaker-daily',
-                    action='store_true',
-                    dest='daily',
-                    default=False,
-                    help='Return2beaker daily jobs'),
+                            action='store_true',
+                            dest='daily',
+                            default=False,
+                            help='Return2beaker daily jobs'),
                 make_option('--return2beaker-weekly',
-                    action='store_true',
-                    dest='weekly',
-                    default=False,
-                    help='Return2beaker weekly jobs'),
+                            action='store_true',
+                            dest='weekly',
+                            default=False,
+                            help='Return2beaker weekly jobs'),
                 make_option('--return2beaker-recipe',
-                    dest='recipe',
-                    help='Return2beaker only recipes, which are required. Use '
-                         'UID (R:12345) for identify of recipe. We can use '
-                         'more values, which are separated by comma.'),
+                            dest='recipe',
+                            help='Return2beaker only recipes, which are required. Use '
+                            'UID (R:12345) for identify of recipe. We can use '
+                            'more values, which are separated by comma.'),
                 make_option('--return2beaker-job',
-                    dest='job',
-                    help='Return2beaker only jobs, which are required. Use UID'
-                         ' (J:12345) for identify of job. We can use more '
-                         'values, which are separated by comma.'),
+                            dest='job',
+                            help='Return2beaker only jobs, which are required. Use UID'
+                            ' (J:12345) for identify of job. We can use more '
+                            'values, which are separated by comma.'),
                 make_option('--return2beaker-template',
-                    dest='template',
-                    help='Return2beaker only jobs, which are required. We '
-                         'can use more values, which are separated by comma.'),
+                            dest='template',
+                            help='Return2beaker only jobs, which are required. We '
+                            'can use more values, which are separated by comma.'),
                 make_option('--return2beaker-tags',
-                    dest='tags',
-                    default=False,
-                    help='Return2beaker jobs, which have required tags.'
-                         'We can use more values, separated by comma'),
+                            dest='tags',
+                            default=False,
+                            help='Return2beaker jobs, which have required tags.'
+                            'We can use more values, separated by comma'),
             ),
-        ),
+         ),
         # CANCEL
         make_option_group(
             'Options for cancel',
             description='Options for canceling of jobs',
             option_list=(
                 make_option('--cancel-all',
-                    action='store_true',
-                    dest='all',
-                    default=False,
-                    help='Cancel all active jobs'),
+                            action='store_true',
+                            dest='all',
+                            default=False,
+                            help='Cancel all active jobs'),
                 make_option('--cancel-daily',
-                    action='store_true',
-                    dest='daily',
-                    default=False,
-                    help='Cancel today daily jobs'),
+                            action='store_true',
+                            dest='daily',
+                            default=False,
+                            help='Cancel today daily jobs'),
                 make_option('--cancel-weekly',
-                    action='store_true',
-                    dest='weekly',
-                    default=False,
-                    help='Cancel weekly jobs'),
+                            action='store_true',
+                            dest='weekly',
+                            default=False,
+                            help='Cancel weekly jobs'),
                 make_option('--cancel-job',
-                    dest='job',
-                    help='Cancel only jobs, which are required. Use UID '
-                         '(J:12345) for identify of job. We can use more '
-                         'values, which are separated by comma.'),
+                            dest='job',
+                            help='Cancel only jobs, which are required. Use UID '
+                            '(J:12345) for identify of job. We can use more '
+                            'values, which are separated by comma.'),
                 make_option('--cancel-template',
-                    dest='template',
-                    help='Cancel only jobs, which are scheduled from required '
-                         'job templates. We can use more values, which are '
-                         'separated by comma.'),
+                            dest='template',
+                            help='Cancel only jobs, which are scheduled from required '
+                            'job templates. We can use more values, which are '
+                            'separated by comma.'),
                 make_option('--cancel-tags',
-                    dest='tags',
-                    default=False,
-                    help='Cancel jobs, which have required tags.'
-                         'We can use more values, separated by comma'),
+                            dest='tags',
+                            default=False,
+                            help='Cancel jobs, which have required tags.'
+                            'We can use more values, separated by comma'),
                 make_option('--cancel-message',
-                    dest='message',
-                    default="",
-                    help='The comment for canceling of jobs.'),
+                            dest='message',
+                            default="",
+                            help='The comment for canceling of jobs.'),
             ),
         ),
     )
@@ -334,7 +334,8 @@ class Command(AdvancedCommand):
                 return False
         if kwargs.get("job"):
             # need escaping quotes in string !!
-            filter['uid__in'] = kwargs.get("job", "").replace('\'','').split(',')
+            filter['uid__in'] = kwargs.get(
+                "job", "").replace('\'', '').split(',')
             if len(filter['uid__in']) == 0:
                 logger.error("Minimal one job is required.")
                 return False
@@ -408,7 +409,7 @@ class Command(AdvancedCommand):
                 return False
         if kwargs.get("recipe"):
             filter['uid__in'] = kwargs.get("recipe", "").replace('R:', '')\
-                                        .replace("'","").split(',')
+                                        .replace("'", "").split(',')
             if len(filter['uid__in']) == 0:
                 logger.error("Minimal one recipe is required.")
                 return False
@@ -439,7 +440,7 @@ class Command(AdvancedCommand):
                     logger.info("Problem with returning to beaker (R:%s)."
                                 % recipe.uid)
             if fullInfo:
-                tags = ",".join([tag.name for tag in recipe.job.template\
+                tags = ",".join([tag.name for tag in recipe.job.template
                                                                .tags.all()])
                 table.add_row([res, "R:%s" % str(recipe), str(recipe.job),
                                "%s - %s" % (recipe.job.template.whiteboard,

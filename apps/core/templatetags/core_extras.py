@@ -1,10 +1,12 @@
 from django import template
 from django.template.defaultfilters import stringfilter
-import re, datetime
+import re
+import datetime
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
 register = template.Library()
+
 
 @register.filter
 @stringfilter
@@ -14,11 +16,13 @@ def nostartsdate(value):
         return value[11:]
     return value
 
+
 @register.filter
 def keyvalue(dict, key):
     if not dict:
         return None
     return dict.get(key)
+
 
 @register.filter
 def itemvalue(list, ix):
@@ -29,11 +33,13 @@ def itemvalue(list, ix):
 
 @register.filter
 def percent(data, val):
-    return val*100./data
+    return val * 100. / data
+
 
 @register.filter
 def sum(data, key):
     return data["sum"][key]
+
 
 @register.filter
 def diffsec(date1, date2):
@@ -43,6 +49,7 @@ def diffsec(date1, date2):
             return datetime.datetime(dd.year, dd.month, dd.day)
         return dd
     return (convert(date1) - convert(date2)).total_seconds()
+
 
 @register.filter()
 def htmlentities(s):

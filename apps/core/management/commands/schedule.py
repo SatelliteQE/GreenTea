@@ -27,35 +27,35 @@ class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
         make_option('--files',
-            dest='files',
-            help='Schedule jobs from xml files'),
+                    dest='files',
+                    help='Schedule jobs from xml files'),
         make_option('--all',
-            action='store_true',
-            dest='all',
-            default=False,
-            help='Schedule all jobs'),
+                    action='store_true',
+                    dest='all',
+                    default=False,
+                    help='Schedule all jobs'),
         make_option('--ids',
-            dest='ids',
-            help='Schedule only this JobTemplates.'),
+                    dest='ids',
+                    help='Schedule only this JobTemplates.'),
         make_option('--daily',
-            action='store_true',
-            dest='daily',
-            default=False,
-            help='Schedule daily jobs'),
+                    action='store_true',
+                    dest='daily',
+                    default=False,
+                    help='Schedule daily jobs'),
         make_option('--weekly',
-            action='store_true',
-            dest='weekly',
-            default=False,
-            help='Schedule weekly jobs'),
+                    action='store_true',
+                    dest='weekly',
+                    default=False,
+                    help='Schedule weekly jobs'),
         make_option('--tags',
-            dest='tags',
-            default=False,
-            help='Filter schedule job by template tags'),
+                    dest='tags',
+                    default=False,
+                    help='Filter schedule job by template tags'),
         make_option('--schedule_id',
-            dest='schedule_id',
-            default=False,
-            help='Set period schedule run'),
-        )
+                    dest='schedule_id',
+                    default=False,
+                    help='Set period schedule run'),
+    )
 
     def handle(self, *args, **kwargs):
         bk = Beaker()
@@ -85,7 +85,7 @@ class Command(BaseCommand):
             filter["period"] = JobTemplate.WEEKLY
         if "tags" in kwargs and kwargs["tags"]:
             filter["tags__name__in"] = kwargs["tags"].split()
-        if "all" in  kwargs or len(filter) > 0:
+        if "all" in kwargs or len(filter) > 0:
             filter["is_enable"] = True
             jobTs = JobTemplate.objects.filter(**filter).distinct()
             # set schedule period run
@@ -96,8 +96,8 @@ class Command(BaseCommand):
                     schedule = TaskPeriodSchedule.objects.get(id=schedule_id)
                 except TaskPeriodSchedule.DoesNotExist:
                     schedule = TaskPeriodSchedule.objects.create(
-                            title="default",
-                        )
+                        title="default",
+                    )
 
             logger.info("%s JobTemplates are prepared." % len(jobTs))
             for jobT in jobTs:
@@ -112,10 +112,3 @@ class Command(BaseCommand):
 #            for it in cfg_tpl:
 #                jb = JobTemplate.objects.get(id=int(it))
 #                print jb, tmp_path
-
-
-
-
-
-
-

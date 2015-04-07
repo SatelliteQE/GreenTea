@@ -26,6 +26,7 @@ def make_option_group(title, description=None, option_list=None):
 
 
 class AdvancedCommand(BaseCommand):
+
     """
         Class: AdvancedCommand
         Extended Django's BaseCommand with option groups

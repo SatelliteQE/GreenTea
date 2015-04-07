@@ -10,14 +10,14 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'Job.schedule'
         db.add_column(u'core_job', 'schedule',
-                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['taskomatic.TaskPeriodSchedule'], null=True, blank=True),
+                      self.gf('django.db.models.fields.related.ForeignKey')(
+                          to=orm[
+                              'taskomatic.TaskPeriodSchedule'], null=True, blank=True),
                       keep_default=False)
-
 
     def backwards(self, orm):
         # Deleting field 'Job.schedule'
         db.delete_column(u'core_job', 'schedule_id')
-
 
     models = {
         u'contenttypes.contenttype': {

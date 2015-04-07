@@ -14,8 +14,11 @@ class TemplateTaskInLine(admin.TabularInline):
 class RecipeInLine(admin.TabularInline):
     model = Recipe
     extra = 0
-    fields = ["get_recipe_link", "whiteboard", "status", "system", "arch", "distro", "result", "resultrate"]
-    readonly_fields = ["get_recipe_link", "status", "system", "arch", "distro", "result", "resultrate"]
+    fields = ["get_recipe_link", "whiteboard", "status",
+              "system", "arch", "distro", "result", "resultrate"]
+    readonly_fields = ["get_recipe_link", "status",
+                       "system", "arch", "distro", "result", "resultrate"]
+
     def get_recipe_link(self, obj):
         url = reverse('admin:core_recipe_change', args=(obj.pk,))
         return '<a href="%s">%s</a>' % (url, obj.uid)
@@ -25,12 +28,14 @@ class RecipeInLine(admin.TabularInline):
 class RecipeTemplateInLineSmall(admin.TabularInline):
     model = RecipeTemplate
     extra = 0
-    fields = ( "get_recipe_link", "is_enabled", "name", "is_virtualguest", "role", "arch", "distro",)
-    readonly_fields = ( "get_recipe_link", "is_enabled", "arch" )
+    fields = ("get_recipe_link", "is_enabled", "name",
+              "is_virtualguest", "role", "arch", "distro",)
+    readonly_fields = ("get_recipe_link", "is_enabled", "arch")
 
     def is_enabled(self, obj):
         return obj.is_enabled()
     is_enabled.boolean = True
+
     def get_recipe_link(self, obj):
         url = reverse('admin:core_recipetemplate_change', args=(obj.pk,))
         return '<a href="%s">%s</a>' % (url, obj.id)
@@ -38,19 +43,22 @@ class RecipeTemplateInLineSmall(admin.TabularInline):
 
 
 class RecipeTemplateInLine(RecipeTemplateInLineSmall):
-    fields = ( "get_recipe_link", "name", "is_virtualguest", "role", "arch", "distro", "schedule")
-    readonly_fields = ( "get_recipe_link", )
+    fields = ("get_recipe_link", "name", "is_virtualguest",
+              "role", "arch", "distro", "schedule")
+    readonly_fields = ("get_recipe_link", )
 
 
 class TaskInLine(admin.TabularInline):
     model = Task
     extra = 0
-    fields = ("uid", "test", "status", "result", "duration", "datestart", "alias" )
+    fields = ("uid", "test", "status",
+              "result", "duration", "datestart", "alias")
     readonly_fields = fields
 
 
 class DistroTemplateAdmin(reversion.VersionAdmin):
-    list_display = ("name", "distroname", "variant", "family", "tpljobs_counter" )
+    list_display = ("name", "distroname",
+                    "variant", "family", "tpljobs_counter")
     ordering = ("name",)
     inlines = [RecipeTemplateInLineSmall]
 
@@ -63,7 +71,8 @@ class JobAdmin(admin.ModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ("uid", "get_job_link", "whiteboard", "get_template", "get_system_link", "result", "status", "resultrate" )
+    list_display = ("uid", "get_job_link", "whiteboard", "get_template",
+                    "get_system_link", "result", "status", "resultrate")
     search_fields = ["uid", "whiteboard"]
     inlines = [TaskInLine]
 
@@ -79,7 +88,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("uid", "recipe", "test", "status", "duration", "result" )
+    list_display = ("uid", "recipe", "test", "status", "duration", "result")
     search_fields = ["uid"]
 
 
@@ -89,10 +98,10 @@ class TestAdmin(admin.ModelAdmin):
     filter_horizontal = ["dependencies", "groups"]
 
     def ownerName(self, obj):
-      return obj.owner.name
+        return obj.owner.name
 
     def ownerEmail(self, obj):
-      return obj.owner.email
+        return obj.owner.email
 
 
 class TestHistoryAdmin(admin.ModelAdmin):
@@ -104,7 +113,8 @@ class AuthorAdmin(admin.ModelAdmin):
 
 
 class CheckProgressAdmin(admin.ModelAdmin):
-    list_display = ("datestart", "dateend", "percent", "totalsum", "get_duration" )
+    list_display = ("datestart", "dateend",
+                    "percent", "totalsum", "get_duration")
 
 
 class GitAdmin(admin.ModelAdmin):
@@ -112,21 +122,26 @@ class GitAdmin(admin.ModelAdmin):
 
 
 class JobTemplateAdmin(admin.ModelAdmin):
-    list_display = ("whiteboard", "is_enable", "period", "get_tags", "position" )
+    list_display = (
+        "whiteboard", "is_enable", "period", "get_tags", "position")
+
     def make_enable(modeladmin, request, queryset):
         queryset.update(is_enable=True)
     make_enable.short_description = "Set selected templates to enabled"
+
     def make_disable(modeladmin, request, queryset):
         queryset.update(is_enable=False)
     make_disable.short_description = "Set selected templates to disabled"
-    actions= [make_enable, make_disable]
+    actions = [make_enable, make_disable]
+
     class Media:
         js = (
             #'/media/js/admin_list_reorder.js',
         )
-    list_editable = ('position',)  # 'position' is the name of the model field which holds the position of an element
+    # 'position' is the name of the model field which holds the position of an element
+    list_editable = ('position',)
     list_filter = ["period", "is_enable"]
-    search_fields = ["whiteboard",]
+    search_fields = ["whiteboard", ]
     ordering = ["-is_enable", "period", "position"]
     inlines = [RecipeTemplateInLine]
 
@@ -144,7 +159,8 @@ class GroupTaskInLine(admin.TabularInline):
     extra = 0
     sortable_field_name = "priority"
     fields = ("get_group_link", "group", "params", "role", "priority")
-    readonly_fields = ( "get_group_link", )
+    readonly_fields = ("get_group_link", )
+
     def get_group_link(self, obj):
         url = reverse('admin:core_grouptemplate_change', args=(obj.group.pk,))
         return '<a href="%s">%s</a>' % (url, obj.group.id)
@@ -152,8 +168,8 @@ class GroupTaskInLine(admin.TabularInline):
 
 
 class GroupTemplateAdmin(admin.ModelAdmin):
-    search_fields = ["name",]
-    inlines = [GroupTestInLine,]
+    search_fields = ["name", ]
+    inlines = [GroupTestInLine, ]
 
 
 class GroupOwnerAdmin(admin.ModelAdmin):
@@ -161,11 +177,11 @@ class GroupOwnerAdmin(admin.ModelAdmin):
 
 
 class TaskTemplateAdmin(admin.ModelAdmin):
-    list_display = ("id", "test", "recipe" )
+    list_display = ("id", "test", "recipe")
 
 
 class RecipeTemplateAdmin(admin.ModelAdmin):
-    list_display = ("__unicode__", "jobtemplate", "distro", "archs", "hvm" )
+    list_display = ("__unicode__", "jobtemplate", "distro", "archs", "hvm")
     inlines = [GroupTaskInLine, TemplateTaskInLine]
     search_fields = ["name", "jobtemplate__whiteboard"]
 

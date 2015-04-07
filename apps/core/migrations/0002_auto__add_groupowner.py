@@ -11,8 +11,10 @@ class Migration(SchemaMigration):
         # Adding model 'GroupOwner'
         db.create_table(u'core_groupowner', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
-            ('email_notification', self.gf('django.db.models.fields.BooleanField')(default=True)),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=255)),
+            ('email_notification', self.gf(
+                'django.db.models.fields.BooleanField')(default=True)),
         ))
         db.send_create_signal(u'core', ['GroupOwner'])
 
@@ -20,7 +22,8 @@ class Migration(SchemaMigration):
         m2m_table_name = db.shorten_name(u'core_groupowner_owners')
         db.create_table(m2m_table_name, (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('groupowner', models.ForeignKey(orm[u'core.groupowner'], null=False)),
+            ('groupowner', models.ForeignKey(
+                orm[u'core.groupowner'], null=False)),
             ('author', models.ForeignKey(orm[u'core.author'], null=False))
         ))
         db.create_unique(m2m_table_name, ['groupowner_id', 'author_id'])
@@ -30,10 +33,10 @@ class Migration(SchemaMigration):
         db.create_table(m2m_table_name, (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('test', models.ForeignKey(orm[u'core.test'], null=False)),
-            ('groupowner', models.ForeignKey(orm[u'core.groupowner'], null=False))
+            ('groupowner', models.ForeignKey(
+                orm[u'core.groupowner'], null=False))
         ))
         db.create_unique(m2m_table_name, ['test_id', 'groupowner_id'])
-
 
     def backwards(self, orm):
         # Deleting model 'GroupOwner'
@@ -44,7 +47,6 @@ class Migration(SchemaMigration):
 
         # Removing M2M table for field groups on 'Test'
         db.delete_table(db.shorten_name(u'core_test_groups'))
-
 
     models = {
         u'contenttypes.contenttype': {

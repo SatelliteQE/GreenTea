@@ -5,6 +5,7 @@ from apps.core.models import Test, TestHistory
 
 register = template.Library()
 
+
 @register.filter
 def getUrlToGit(test):
     if isinstance(test, Test) and test.git and test.git.name:
@@ -13,8 +14,9 @@ def getUrlToGit(test):
             gName = res.group(1)
             tName = re.sub(r'.*%s' % gName, '', test.name)
             return "%s%s/.git/tree/HEAD:%s" % (settings.GITWEB_URL, gName,
-                                                tName)
+                                               tName)
     return settings.GITWEB_URL
+
 
 @register.filter
 def getUrlToCommit(testHistory):
@@ -28,4 +30,3 @@ def getUrlToCommit(testHistory):
             return "%s%s/.git/commit/%s" % (settings.GITWEB_URL, gName,
                                             testHistory.commit)
     return settings.GITWEB_URL
-

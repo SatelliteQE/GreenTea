@@ -7,6 +7,7 @@ import xml.dom.minidom
 from bkr.common.hub import HubProxy
 from django.conf import settings
 
+
 def return_reservation(rid):
     conf['AUTH_METHOD'] = "password"
     conf['HUB_URL'] = 'https://%s' % settings.BEAKER_SERVER
@@ -15,5 +16,5 @@ def return_reservation(rid):
     hub = HubProxy(conf=conf)
     return hub.recipes.extend(rid, 0)
 
-if __name__=="__main__":
+if __name__ == "__main__":
     return_reservation(sys.argv[1])

@@ -11,23 +11,27 @@ class Migration(SchemaMigration):
         # Adding model 'Arch'
         db.create_table(u'core_arch', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=32)),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=32)),
         ))
         db.send_create_signal(u'core', ['Arch'])
 
         # Adding model 'Distro'
         db.create_table(u'core_distro', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=255)),
         ))
         db.send_create_signal(u'core', ['Distro'])
 
         # Adding model 'Git'
         db.create_table(u'core_git', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=64, null=True, blank=True)),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (max_length=64, null=True, blank=True)),
             ('localurl', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('url', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
+            ('url', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=255)),
         ))
         db.send_create_signal(u'core', ['Git'])
 
@@ -35,7 +39,8 @@ class Migration(SchemaMigration):
         db.create_table(u'core_author', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('email', self.gf('django.db.models.fields.EmailField')(default='unknow@redhat.com', max_length=75)),
+            ('email', self.gf('django.db.models.fields.EmailField')
+             (default='unknow@redhat.com', max_length=75)),
             ('is_enabled', self.gf('django.db.models.fields.BooleanField')(default=True)),
         ))
         db.send_create_signal(u'core', ['Author'])
@@ -43,13 +48,20 @@ class Migration(SchemaMigration):
         # Adding model 'Test'
         db.create_table(u'core_test', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
-            ('git', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Git'], null=True, blank=True)),
-            ('owner', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Author'], null=True)),
-            ('description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('time', self.gf('django.db.models.fields.CharField')(max_length=6, null=True, blank=True)),
-            ('type', self.gf('django.db.models.fields.CharField')(max_length=32, null=True, blank=True)),
-            ('folder', self.gf('django.db.models.fields.CharField')(max_length=256, null=True, blank=True)),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=255)),
+            ('git', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Git'], null=True, blank=True)),
+            ('owner', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Author'], null=True)),
+            ('description', self.gf('django.db.models.fields.TextField')
+             (null=True, blank=True)),
+            ('time', self.gf('django.db.models.fields.CharField')
+             (max_length=6, null=True, blank=True)),
+            ('type', self.gf('django.db.models.fields.CharField')
+             (max_length=32, null=True, blank=True)),
+            ('folder', self.gf('django.db.models.fields.CharField')
+             (max_length=256, null=True, blank=True)),
             ('is_enable', self.gf('django.db.models.fields.BooleanField')(default=True)),
         ))
         db.send_create_signal(u'core', ['Test'])
@@ -66,65 +78,91 @@ class Migration(SchemaMigration):
         # Adding model 'TestHistory'
         db.create_table(u'core_testhistory', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('test', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Test'])),
-            ('version', self.gf('django.db.models.fields.CharField')(max_length=24, null=True)),
+            ('test', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Test'])),
+            ('version', self.gf('django.db.models.fields.CharField')
+             (max_length=24, null=True)),
             ('date', self.gf('apps.core.utils.date_helpers.TZDateTimeField')()),
-            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Author'], null=True)),
-            ('commit', self.gf('django.db.models.fields.CharField')(max_length=64, null=True)),
+            ('author', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Author'], null=True)),
+            ('commit', self.gf('django.db.models.fields.CharField')
+             (max_length=64, null=True)),
         ))
         db.send_create_signal(u'core', ['TestHistory'])
 
         # Adding model 'System'
         db.create_table(u'core_system', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('hostname', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('ram', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-            ('cpu', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('hdd', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('parent', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.System'], null=True, blank=True)),
-            ('group', self.gf('django.db.models.fields.SmallIntegerField')(null=True, blank=True)),
+            ('hostname', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
+            ('ram', self.gf('django.db.models.fields.IntegerField')
+             (null=True, blank=True)),
+            ('cpu', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
+            ('hdd', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
+            ('parent', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.System'], null=True, blank=True)),
+            ('group', self.gf('django.db.models.fields.SmallIntegerField')
+             (null=True, blank=True)),
         ))
         db.send_create_signal(u'core', ['System'])
 
         # Adding model 'JobTemplate'
         db.create_table(u'core_jobtemplate', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('whiteboard', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
+            ('whiteboard', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=255)),
             ('is_enable', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('event_finish', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
             ('period', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
             ('position', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
-            ('grouprecipes', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('grouprecipes', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
         ))
         db.send_create_signal(u'core', ['JobTemplate'])
 
         # Adding model 'DistroTemplate'
         db.create_table(u'core_distrotemplate', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('family', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('variant', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('distroname', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
+            ('family', self.gf('django.db.models.fields.CharField')
+             (max_length=255, null=True, blank=True)),
+            ('variant', self.gf('django.db.models.fields.CharField')
+             (max_length=255, null=True, blank=True)),
+            ('distroname', self.gf('django.db.models.fields.CharField')
+             (max_length=255, null=True, blank=True)),
         ))
         db.send_create_signal(u'core', ['DistroTemplate'])
 
         # Adding model 'RecipeTemplate'
         db.create_table(u'core_recipetemplate', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('jobtemplate', self.gf('django.db.models.fields.related.ForeignKey')(related_name='trecipes', to=orm['core.JobTemplate'])),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('kernel_options', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('kernel_options_post', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('ks_meta', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('jobtemplate', self.gf('django.db.models.fields.related.ForeignKey')
+             (related_name='trecipes', to=orm['core.JobTemplate'])),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
+            ('kernel_options', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
+            ('kernel_options_post', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
+            ('ks_meta', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
             ('role', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
-            ('memory', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
-            ('disk', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('memory', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
+            ('disk', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
             ('hvm', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('params', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('distro', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.DistroTemplate'])),
+            ('distro', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.DistroTemplate'])),
             ('is_virtualguest', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('virtualhost', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='virtualguests', null=True, to=orm['core.RecipeTemplate'])),
-            ('schedule', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('virtualhost', self.gf('django.db.models.fields.related.ForeignKey')
+             (blank=True, related_name='virtualguests', null=True, to=orm['core.RecipeTemplate'])),
+            ('schedule', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
         ))
         db.send_create_signal(u'core', ['RecipeTemplate'])
 
@@ -132,7 +170,8 @@ class Migration(SchemaMigration):
         m2m_table_name = db.shorten_name(u'core_recipetemplate_arch')
         db.create_table(m2m_table_name, (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('recipetemplate', models.ForeignKey(orm[u'core.recipetemplate'], null=False)),
+            ('recipetemplate', models.ForeignKey(
+                orm[u'core.recipetemplate'], null=False)),
             ('arch', models.ForeignKey(orm[u'core.arch'], null=False))
         ))
         db.create_unique(m2m_table_name, ['recipetemplate_id', 'arch_id'])
@@ -140,7 +179,8 @@ class Migration(SchemaMigration):
         # Adding model 'TaskRoleEnum'
         db.create_table(u'core_taskroleenum', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=255, blank=True)),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (max_length=255, blank=True)),
         ))
         db.send_create_signal(u'core', ['TaskRoleEnum'])
 
@@ -148,49 +188,62 @@ class Migration(SchemaMigration):
         db.create_table(u'core_grouptemplate', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('description', self.gf('django.db.models.fields.TextField')
+             (null=True, blank=True)),
         ))
         db.send_create_signal(u'core', ['GroupTemplate'])
 
         # Adding model 'GroupTaskTemplate'
         db.create_table(u'core_grouptasktemplate', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('group', self.gf('django.db.models.fields.related.ForeignKey')(related_name='grouptasks', to=orm['core.GroupTemplate'])),
-            ('recipe', self.gf('django.db.models.fields.related.ForeignKey')(related_name='grouptemplates', to=orm['core.RecipeTemplate'])),
+            ('group', self.gf('django.db.models.fields.related.ForeignKey')
+             (related_name='grouptasks', to=orm['core.GroupTemplate'])),
+            ('recipe', self.gf('django.db.models.fields.related.ForeignKey')
+             (related_name='grouptemplates', to=orm['core.RecipeTemplate'])),
             ('params', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('priority', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
-            ('role', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.TaskRoleEnum'], null=True, blank=True)),
+            ('role', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.TaskRoleEnum'], null=True, blank=True)),
         ))
         db.send_create_signal(u'core', ['GroupTaskTemplate'])
 
         # Adding model 'GroupTestTemplate'
         db.create_table(u'core_grouptesttemplate', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('test', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Test'])),
-            ('group', self.gf('django.db.models.fields.related.ForeignKey')(related_name='grouptests', to=orm['core.GroupTemplate'])),
+            ('test', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Test'])),
+            ('group', self.gf('django.db.models.fields.related.ForeignKey')
+             (related_name='grouptests', to=orm['core.GroupTemplate'])),
             ('params', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('priority', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
-            ('role', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.TaskRoleEnum'], null=True, blank=True)),
+            ('role', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.TaskRoleEnum'], null=True, blank=True)),
         ))
         db.send_create_signal(u'core', ['GroupTestTemplate'])
 
         # Adding model 'TaskTemplate'
         db.create_table(u'core_tasktemplate', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('test', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Test'])),
-            ('recipe', self.gf('django.db.models.fields.related.ForeignKey')(related_name='tasks', to=orm['core.RecipeTemplate'])),
+            ('test', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Test'])),
+            ('recipe', self.gf('django.db.models.fields.related.ForeignKey')
+             (related_name='tasks', to=orm['core.RecipeTemplate'])),
             ('params', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('priority', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
-            ('role', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.TaskRoleEnum'], null=True, blank=True)),
+            ('role', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.TaskRoleEnum'], null=True, blank=True)),
         ))
         db.send_create_signal(u'core', ['TaskTemplate'])
 
         # Adding model 'Job'
         db.create_table(u'core_job', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('template', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.JobTemplate'])),
-            ('uid', self.gf('django.db.models.fields.CharField')(unique=True, max_length=12)),
-            ('date', self.gf('apps.core.utils.date_helpers.TZDateTimeField')(default=datetime.datetime.now)),
+            ('template', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.JobTemplate'])),
+            ('uid', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=12)),
+            ('date', self.gf('apps.core.utils.date_helpers.TZDateTimeField')
+             (default=datetime.datetime.now)),
             ('is_running', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('is_finished', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
@@ -199,16 +252,22 @@ class Migration(SchemaMigration):
         # Adding model 'Recipe'
         db.create_table(u'core_recipe', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('job', self.gf('django.db.models.fields.related.ForeignKey')(related_name='recipes', to=orm['core.Job'])),
-            ('uid', self.gf('django.db.models.fields.CharField')(unique=True, max_length=12)),
+            ('job', self.gf('django.db.models.fields.related.ForeignKey')
+             (related_name='recipes', to=orm['core.Job'])),
+            ('uid', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=12)),
             ('whiteboard', self.gf('django.db.models.fields.CharField')(max_length=64)),
             ('status', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
             ('result', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
             ('resultrate', self.gf('django.db.models.fields.FloatField')(default=-1.0)),
-            ('system', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.System'])),
-            ('arch', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Arch'])),
-            ('distro', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Distro'])),
-            ('parentrecipe', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Recipe'], null=True, blank=True)),
+            ('system', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.System'])),
+            ('arch', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Arch'])),
+            ('distro', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Distro'])),
+            ('parentrecipe', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Recipe'], null=True, blank=True)),
             ('statusbyuser', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
         ))
         db.send_create_signal(u'core', ['Recipe'])
@@ -216,32 +275,41 @@ class Migration(SchemaMigration):
         # Adding model 'Task'
         db.create_table(u'core_task', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('uid', self.gf('django.db.models.fields.CharField')(unique=True, max_length=12)),
-            ('recipe', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Recipe'])),
-            ('test', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Test'])),
+            ('uid', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=12)),
+            ('recipe', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Recipe'])),
+            ('test', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Test'])),
             ('result', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
             ('status', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
             ('duration', self.gf('django.db.models.fields.FloatField')(default=-1.0)),
-            ('datestart', self.gf('apps.core.utils.date_helpers.TZDateTimeField')(null=True, blank=True)),
+            ('datestart', self.gf('apps.core.utils.date_helpers.TZDateTimeField')
+             (null=True, blank=True)),
             ('statusbyuser', self.gf('django.db.models.fields.SmallIntegerField')(default=0)),
-            ('alias', self.gf('django.db.models.fields.CharField')(max_length=32, null=True, blank=True)),
+            ('alias', self.gf('django.db.models.fields.CharField')
+             (max_length=32, null=True, blank=True)),
         ))
         db.send_create_signal(u'core', ['Task'])
 
         # Adding model 'PhaseLabel'
         db.create_table(u'core_phaselabel', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
+            ('name', self.gf('django.db.models.fields.CharField')
+             (unique=True, max_length=255)),
         ))
         db.send_create_signal(u'core', ['PhaseLabel'])
 
         # Adding model 'PhaseResult'
         db.create_table(u'core_phaseresult', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('task', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.Task'])),
-            ('phase', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['core.PhaseLabel'])),
+            ('task', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.Task'])),
+            ('phase', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['core.PhaseLabel'])),
             ('duration', self.gf('django.db.models.fields.FloatField')()),
-            ('date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('date', self.gf('django.db.models.fields.DateTimeField')
+             (null=True, blank=True)),
         ))
         db.send_create_signal(u'core', ['PhaseResult'])
 
@@ -256,13 +324,14 @@ class Migration(SchemaMigration):
         # Adding model 'CheckProgress'
         db.create_table(u'core_checkprogress', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('datestart', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2015, 2, 3, 0, 0))),
-            ('dateend', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('datestart', self.gf('django.db.models.fields.DateTimeField')
+             (default=datetime.datetime(2015, 2, 3, 0, 0))),
+            ('dateend', self.gf('django.db.models.fields.DateTimeField')
+             (null=True, blank=True)),
             ('totalsum', self.gf('django.db.models.fields.IntegerField')()),
             ('actual', self.gf('django.db.models.fields.IntegerField')(default=0)),
         ))
         db.send_create_signal(u'core', ['CheckProgress'])
-
 
     def backwards(self, orm):
         # Deleting model 'Arch'
@@ -336,7 +405,6 @@ class Migration(SchemaMigration):
 
         # Deleting model 'CheckProgress'
         db.delete_table(u'core_checkprogress')
-
 
     models = {
         u'contenttypes.contenttype': {

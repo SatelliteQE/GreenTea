@@ -12,17 +12,20 @@ from apps.core.models import RecipeTemplate
 from apps.core.utils.job_generator import JobGen, render_job
 import difflib
 
+
 class ImportTest(TestCase):
+
     def xmlimport(self, filename, num_recipes=1):
         """
         Tests importing beaker xml and crete templates
         """
-        s = Parser(file=filename) 
+        s = Parser(file=filename)
         s.run(position=100)
 
         recipes = RecipeTemplate.objects.filter(jobtemplate=s.job)
 
-        self.assertEqual(len(recipes), num_recipes, msg="Number recipes is bad")
+        self.assertEqual(
+            len(recipes), num_recipes, msg="Number recipes is bad")
         self.assertEqual(s.job.position, 100, msg="job position is same")
 
         job = JobGen(job=s.job, reserve=False)
@@ -30,8 +33,8 @@ class ImportTest(TestCase):
         f = open(filename)
         xml_old = f.read()
         f.close()
-        xml=xml.splitlines(True)
-        xml_old=xml_old.splitlines(True)
+        xml = xml.splitlines(True)
+        xml_old = xml_old.splitlines(True)
         d = difflib.unified_diff(xml, xml_old)
         diff = "".join(d)
 
@@ -39,7 +42,7 @@ class ImportTest(TestCase):
         print "'%s'" % diff
         print "-----------"
 
-        self.assertEqual(len(diff), 0, msg="XML '%s' is different" % filename )
+        self.assertEqual(len(diff), 0, msg="XML '%s' is different" % filename)
 
 #    def test_virtquest_import(self):
 #        self.xmlimport("test/example.2.xml", num_recipes=2)
@@ -49,6 +52,7 @@ class ImportTest(TestCase):
 
 
 class SimpleTest(TestCase):
+
     def test_running(self):
 
         c = Client()
@@ -60,4 +64,3 @@ class SimpleTest(TestCase):
 
         r = c.get("/tests.html")
         self.assertEqual(r.status_code, 200, msg="tests page is not running")
-

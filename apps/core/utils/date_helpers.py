@@ -11,7 +11,8 @@ import re
 from django.utils.timezone import utc
 
 from south.modelsinspector import add_introspection_rules
-add_introspection_rules([], ["^apps\.core\.utils\.date_helpers\.TZDateTimeField"])
+add_introspection_rules(
+    [], ["^apps\.core\.utils\.date_helpers\.TZDateTimeField"])
 
 TZ_OFFSET = re.compile(r'^(.*?)\s?([-\+])(\d\d):?(\d\d)$')
 
@@ -67,6 +68,7 @@ def date_parse(ds):
         return parser.parse(ds, tzinfos=tzd)
     return ds
 
+
 def toUTC(dt):
     ''' accept string or datetime and return datetime in UTC '''
     dt = date_parse(dt)
@@ -77,6 +79,7 @@ def toUTC(dt):
             return dt.replace(tzinfo=dateutil.tz.tzutc())
     return None
 
+
 def toLocalZone(dt):
     ''' accept string or datetime and return datetime in local zone '''
     dt = date_parse(dt)
@@ -85,18 +88,23 @@ def toLocalZone(dt):
     else:
         None
 
+
 def toSimpleDateTime(dt):
     dt = timezone.localtime(dt)
     return dt.replace(tzinfo=None)
 
+
 def currentDate():
-  dt = datetime.utcnow()
-  return dt.replace(tzinfo=dateutil.tz.tzutc())
+    dt = datetime.utcnow()
+    return dt.replace(tzinfo=dateutil.tz.tzutc())
+
 
 def currentDate2():
-  return datetime.utcnow().replace(tzinfo=utc)
+    return datetime.utcnow().replace(tzinfo=utc)
+
 
 class TZDatetime(datetime):
+
     def aslocaltimezone(self):
         """Returns the datetime in the local time zone."""
         tz = pytz.timezone(settings.TIME_ZONE)
@@ -104,6 +112,7 @@ class TZDatetime(datetime):
 
 
 class TZDateTimeField(models.DateTimeField):
+
     """A DateTimeField that treats naive datetimes as local time zone."""
     __metaclass__ = models.SubfieldBase
 
@@ -122,7 +131,8 @@ class TZDateTimeField(models.DateTimeField):
             if match:
                 value, op, hours, minutes = match.groups()
                 value = super(TZDateTimeField, self).to_python(value)
-                value = value - timedelta(hours=int(op + hours), minutes=int(op + minutes))
+                value = value - \
+                    timedelta(hours=int(op + hours), minutes=int(op + minutes))
                 value = value.replace(tzinfo=pytz.utc)
             else:
                 raise
@@ -134,7 +144,7 @@ class TZDateTimeField(models.DateTimeField):
         if (value.tzinfo is None) or (value.tzinfo.utcoffset(value) is None):
             value = force_tz(value, settings.TIME_ZONE)
         return TZDatetime(value.year, value.month, value.day, value.hour,
-            value.minute, value.second, value.microsecond, tzinfo=value.tzinfo)
+                          value.minute, value.second, value.microsecond, tzinfo=value.tzinfo)
 
 
 def force_tz(obj, tz):

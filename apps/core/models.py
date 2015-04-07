@@ -61,10 +61,11 @@ RETURN = 0
 RETURNWHENGREEN = 1
 RESERVED = 2
 EVENT_FINISH_ENUM = (
-    ( RETURN, "return" ),
-    ( RETURNWHENGREEN, "return when ok" ),
-    ( RESERVED, "sererved system" )
+    (RETURN, "return"),
+    (RETURNWHENGREEN, "return when ok"),
+    (RESERVED, "sererved system")
 )
+
 
 class Arch(models.Model):
     name = models.CharField(max_length=32, unique=True)
@@ -81,10 +82,12 @@ class Distro(models.Model):
 
 
 class ObjParams():
+
     def get_params(self):
         params = {}
         for it in self.params.split("\n"):
-            if not it: continue
+            if not it:
+                continue
             try:
                 n, v = it.strip().split("=")
                 params.update({n: v})
@@ -128,8 +131,8 @@ class Git(models.Model):
                 url = re.sub(r'.*(@|//)', '', it)
                 name = os.path.basename(folder)
                 oGit, new = Git.objects.get_or_create(url=url, defaults={
-                                                        "name": name
-                                                        })
+                    "name": name
+                })
                 oGit.path_absolute = folder
                 if not new and oGit.name != name:
                     oGit.name = name
@@ -200,7 +203,7 @@ class Git(models.Model):
             test.owner = owner
             test.folder = folder
             if 'Description' in info and \
-                test.description != info.get('Description'):
+                    test.description != info.get('Description'):
                 test.description = info.get('Description')
             if 'TestTime' in info and test.time != info.get('TestTime'):
                 test.time = info.get('TestTime')
@@ -308,7 +311,6 @@ class Git(models.Model):
             for group in res:
                 test.groups.add(group)
 
-
     def __updateDependences(self, test, rows):
         if not rows:
             rows = list()
@@ -352,11 +354,11 @@ class Git(models.Model):
                 if res:
                     data['version'] = res.group(1)
             author, status = Author.objects\
-                  .get_or_create(email=email, defaults={"name": name})
+                .get_or_create(email=email, defaults={"name": name})
             data['author'] = author
             data['date'] = toUTC(date)
             commit, status = TestHistory.objects\
-                  .get_or_create(commit=chash, test=test, defaults=data)
+                .get_or_create(commit=chash, test=test, defaults=data)
             return commit
 
     def get_count(self):
@@ -444,7 +446,7 @@ class Test(models.Model):
     time = models.CharField(max_length=6, blank=True, null=True)
     type = models.CharField(max_length=32, blank=True, null=True)
     folder = models.CharField(max_length=256, blank=True, null=True)
-    is_enable= models.BooleanField("enable", default=True)
+    is_enable = models.BooleanField("enable", default=True)
     groups = models.ManyToManyField(GroupOwner, blank=True)
 
     class Meta:
@@ -506,6 +508,7 @@ class TestHistory(models.Model):
         # for example: return self.test.git.url % self.commit
         return "%s/commitdiff/%s" % (self.test.git.localurl, self.commit)
 
+
 class System(models.Model):
     hostname = models.CharField(max_length=255, blank=True)
     ram = models.IntegerField(null=True, blank=True)
@@ -537,11 +540,12 @@ class JobTemplate(models.Model):
     )
     whiteboard = models.CharField(max_length=255, unique=True)
     is_enable = models.BooleanField(default=False)
-    event_finish = models.SmallIntegerField(choices=EVENT_FINISH_ENUM, default=RETURN)
+    event_finish = models.SmallIntegerField(
+        choices=EVENT_FINISH_ENUM, default=RETURN)
     period = models.SmallIntegerField(choices=PERIOD_ENUM, default=DAILY)
     position = models.SmallIntegerField(default=0)
     grouprecipes = models.CharField(max_length=255, null=False, blank=True,
-                    help_text="example: {{arch}} {{whiteboard|nostartsdate}}")
+                                    help_text="example: {{arch}} {{whiteboard|nostartsdate}}")
     tags = TaggableManager(blank=True)
 
     def __unicode__(self):
@@ -573,7 +577,7 @@ class JobTemplate(models.Model):
         return reverse("admin:%s_%s_change" % (content_type.app_label, content_type.model), args=(self.id,))
 
     def is_return(self):
-        return ( self.event_finish == RETURN )
+        return (self.event_finish == RETURN)
 
     def get_tags(self):
         return ", ".join([it.name for it in self.tags.all()])
@@ -583,8 +587,8 @@ class DistroTemplate(models.Model):
     name = models.CharField(max_length=255, blank=True, help_text="Only alias")
     family = models.CharField(max_length=255, blank=True, null=True)
     variant = models.CharField(max_length=255, blank=True, null=True)
-    distroname = models.CharField(max_length=255, blank=True, null=True, \
-        help_text="If field is empty, then it will use latest compose.")
+    distroname = models.CharField(max_length=255, blank=True, null=True,
+                                  help_text="If field is empty, then it will use latest compose.")
 
     def tpljobs_counter(self):
         return RecipeTemplate.objects.filter(distro=self).count()
@@ -612,7 +616,8 @@ class RecipeTemplate(models.Model, ObjParams):
     role = models.SmallIntegerField(choices=ROLE_ENUM, default=NONE)
     arch = models.ManyToManyField(Arch)
     memory = models.CharField(max_length=255, blank=True)
-    disk = models.CharField(max_length=255, blank=True, help_text="Value is in GB")
+    disk = models.CharField(
+        max_length=255, blank=True, help_text="Value is in GB")
     hvm = models.BooleanField(default=False)
     params = models.TextField(blank=True)
     distro = models.ForeignKey(DistroTemplate)
@@ -660,14 +665,14 @@ class RecipeTemplate(models.Model, ObjParams):
 
         res = list()
         for it in schedule:
-            if ((it[2] == weekday and it[1]) or \
-                (it[2] != weekday and not it[1])):
+            if ((it[2] == weekday and it[1]) or
+                    (it[2] != weekday and not it[1])):
                 res.append(Arch.objects.get(name=it[0]))
-        if res: return res
+        if res:
+            return res
 
         # if empty return all archs
         return self.get_arch()
-
 
     def parse(self, st):
         return self.__parse_schedule_period(st)
@@ -679,7 +684,8 @@ class RecipeTemplate(models.Model, ObjParams):
             return []
         data = []
         for it in string.split(";"):
-            if not it.strip(): continue
+            if not it.strip():
+                continue
             try:
                 key, val = it.split(":")
             except ValueError:
@@ -729,7 +735,7 @@ class TaskRoleEnum(models.Model):
 class GroupTemplate(models.Model):
     name = models.CharField(max_length=64)
     description = models.TextField(blank=True, null=True)
-    
+
     def __unicode__(self):
         return self.name
 
@@ -805,7 +811,8 @@ class Job(models.Model):
     uid = models.CharField("Job ID", max_length=12, unique=True)
     date = TZDateTimeField(default=datetime.now)
     is_running = models.BooleanField(default=False)
-    is_finished = models.BooleanField(default=False)  # this is for checking (no used for data from beaker)
+    # this is for checking (no used for data from beaker)
+    is_finished = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.uid
@@ -815,8 +822,8 @@ class Job(models.Model):
             'template_id': self.template.id,
             'uid': self.uid,
             'date': self.date.strftime("%Y-%m-%d %H:%M:%S"),
-            'is_running' : self.is_running,
-            'is_finished' : self.is_finished
+            'is_running': self.is_running,
+            'is_finished': self.is_finished
         }
 
     def get_uid(self):
@@ -856,12 +863,13 @@ class Recipe(models.Model):
     whiteboard = models.CharField("Whiteboard", max_length=64)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=UNKNOW)
     result = models.SmallIntegerField(choices=RESULT_CHOICES, default=UNKNOW)
-    resultrate = models.FloatField(default= -1.)
+    resultrate = models.FloatField(default=-1.)
     system = models.ForeignKey(System,)
     arch = models.ForeignKey(Arch,)
     distro = models.ForeignKey(Distro,)
     parentrecipe = models.ForeignKey("Recipe", null=True, blank=True)
-    statusbyuser = models.SmallIntegerField(choices=USERSTATUS_CHOICES, default=NONE)
+    statusbyuser = models.SmallIntegerField(
+        choices=USERSTATUS_CHOICES, default=NONE)
 
     def __unicode__(self):
         return self.uid
@@ -870,34 +878,39 @@ class Recipe(models.Model):
         return {
             'uid': self.uid,
             'whiteboard': self.whiteboard,
-            'result' : self.get_result_display(),
-            'status' : self.get_status_display(),
+            'result': self.get_result_display(),
+            'status': self.get_status_display(),
             'resultrate': self.resultrate,
             'system': self.system.to_json(),
             'arch': self.arch.name,
             'distro': self.distro.name,
-            'parentrecipe' : self.parentrecipe.to_json() if self.parentrecipe else None,
-            'statusbyuser' : self.get_statusbyuser_display()
-    }
+            'parentrecipe': self.parentrecipe.to_json() if self.parentrecipe else None,
+            'statusbyuser': self.get_statusbyuser_display()
+        }
 
     def get_template(self):
         return self.job.template
 
     def set_result(self, value):
         try:
-            self.result = [it[0] for it in RESULT_CHOICES if it[1] == value.lower()][0]
+            self.result = [it[0]
+                           for it in RESULT_CHOICES if it[1] == value.lower()][0]
         except IndexError:
-            sys.stderr.write("IndexError: result %s %s %s" % (value, self.result, RESULT_CHOICES))
+            sys.stderr.write("IndexError: result %s %s %s" %
+                             (value, self.result, RESULT_CHOICES))
 
     def get_result(self):
-        if self.statusbyuser == WAIVED: return [it[1] for it in USERSTATUS_CHOICES if it[0] == WAIVED][0]
+        if self.statusbyuser == WAIVED:
+            return [it[1] for it in USERSTATUS_CHOICES if it[0] == WAIVED][0]
         return [it[1] for it in RESULT_CHOICES if it[0] == self.result][0]
 
     def set_status(self, value):
         try:
-            self.status = [it[0] for it in self.STATUS_CHOICES if it[1] == value][0]
+            self.status = [it[0]
+                           for it in self.STATUS_CHOICES if it[1] == value][0]
         except IndexError:
-            sys.stderr.write("IndexError: status %s %s %s" % (value, self.status, self.STATUS_CHOICES))
+            sys.stderr.write("IndexError: status %s %s %s" %
+                             (value, self.status, self.STATUS_CHOICES))
 
     def get_status(self):
         try:
@@ -910,7 +923,8 @@ class Recipe(models.Model):
         self.save()
 
     def recount_result(self):
-        result = Task.objects.values('result', "statusbyuser").filter(recipe=self).annotate(Count('result')).order_by("uid")
+        result = Task.objects.values('result', "statusbyuser").filter(
+            recipe=self).annotate(Count('result')).order_by("uid")
         total, total_ok, waived = 0, 0, False
         running = None
         failed_test = []
@@ -940,12 +954,14 @@ class Recipe(models.Model):
             else:
                 self.result = PASS
             if running and running.test.name == settings.RESERVE_TEST \
-               and total_ok + 1 == total: self.set_waived()
+               and total_ok + 1 == total:
+                self.set_waived()
         if total != 0:
             self.resultrate = total_ok * 100. / total
         else:
             self.resultrate = 0
-        if waived and total_ok == total: self.set_waived()
+        if waived and total_ok == total:
+            self.set_waived()
 
     def get_date(self):
         return self.job.date
@@ -973,7 +989,8 @@ class Recipe(models.Model):
 
     def get_info(self):
         # TODO: ???? Toto je asi blbost ????
-        tests = Test.objects.filter(task__recipe=self, task__statusbyuser=NONE, task__result__in=[NEW, WARN, FAIL]).order_by("task__uid")[:1]
+        tests = Test.objects.filter(
+            task__recipe=self, task__statusbyuser=NONE, task__result__in=[NEW, WARN, FAIL]).order_by("task__uid")[:1]
         return tests
 
     def is_result_pass(self):
@@ -986,10 +1003,12 @@ class Task(models.Model):
     test = models.ForeignKey(Test)
    # date = models.DateField(null=True, blank=True)
     result = models.SmallIntegerField(choices=RESULT_CHOICES, default=UNKNOW)
-    status = models.SmallIntegerField(choices=Recipe.STATUS_CHOICES, default=UNKNOW)
-    duration = models.FloatField(default= -1.)
+    status = models.SmallIntegerField(
+        choices=Recipe.STATUS_CHOICES, default=UNKNOW)
+    duration = models.FloatField(default=-1.)
     datestart = TZDateTimeField(null=True, blank=True)
-    statusbyuser = models.SmallIntegerField(choices=USERSTATUS_CHOICES, default=NONE)
+    statusbyuser = models.SmallIntegerField(
+        choices=USERSTATUS_CHOICES, default=NONE)
     alias = models.CharField(max_length=32, blank=True, null=True)
     # def __init__(self, *args, **kwargs):
     #    super(Task, self).__init__(*args, **kwargs)
@@ -1003,8 +1022,8 @@ class Task(models.Model):
             'recipe': self.recipe.uid,
             'test': self.test.to_json(),
             'datestart': self.datestart.strftime("%Y-%m-%d %H:%M:%S") if self.datestart else None,
-            'result' : self.get_result_display(),
-            'status' : self.get_status_display(),
+            'result': self.get_result_display(),
+            'status': self.get_status_display(),
             'statusbyuser': self.get_statusbyuser_display(),
             'duration': self.duration
         }
@@ -1027,7 +1046,8 @@ class Task(models.Model):
 
         path_dir = "%sjournals/" % (settings.MEDIA_ROOT)
         path_file = "%s/%s-journal.xml" % (path_dir, self.uid)
-        if not os.path.exists(path_dir): os.makedirs(path_dir)
+        if not os.path.exists(path_dir):
+            os.makedirs(path_dir)
         f = open(path_file, "w")
         f.write(html)
         f.close()
@@ -1037,20 +1057,24 @@ class Task(models.Model):
 
     def set_result(self, value):
         try:
-            self.result = [it[0] for it in RESULT_CHOICES if it[1] == value.lower()][0]
+            self.result = [it[0]
+                           for it in RESULT_CHOICES if it[1] == value.lower()][0]
         except IndexError:
-            sys.stderr.write("IndexError: Task result %s %s %s" % (value, self.result, RESULT_CHOICES))
+            sys.stderr.write("IndexError: Task result %s %s %s" %
+                             (value, self.result, RESULT_CHOICES))
 
     def get_result(self):
-        if self.statusbyuser == WAIVED: return [it[1] for it in USERSTATUS_CHOICES if it[0] == WAIVED][0]
+        if self.statusbyuser == WAIVED:
+            return [it[1] for it in USERSTATUS_CHOICES if it[0] == WAIVED][0]
         return [it[1] for it in RESULT_CHOICES if it[0] == self.result][0]
-
 
     def set_status(self, value):
         try:
-            self.status = [it[0] for it in Recipe.STATUS_CHOICES if it[1].lower() == value.lower()][0]
+            self.status = [it[0]
+                           for it in Recipe.STATUS_CHOICES if it[1].lower() == value.lower()][0]
         except IndexError:
-            sys.stderr.write("IndexError: Task status %s %s %s" % (value, self.status, Recipe.STATUS_CHOICES))
+            sys.stderr.write("IndexError: Task status %s %s %s" %
+                             (value, self.status, Recipe.STATUS_CHOICES))
 
     def is_completed(self):
         return (self.status == Recipe.COMPLETED)

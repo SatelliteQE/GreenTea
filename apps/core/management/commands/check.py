@@ -13,12 +13,14 @@ from apps.core.models import *
 from apps.core.utils.beaker import *
 from apps.core.utils.date_helpers import currentDate
 import xmlrpclib
-import os, sys
+import os
+import sys
 import re
 import xml.dom.minidom
 from datetime import datetime, timedelta
 import time
 from optparse import make_option
+
 
 class Command(BaseCommand):
     help = ("Load data from beaker and save to db")
@@ -27,30 +29,30 @@ class Command(BaseCommand):
 
     option_list = BaseCommand.option_list + (
         make_option('--running',
-            action='store_true',
-            dest='running',
-            default=False,
-            help='check only running script (only from db) '),
+                    action='store_true',
+                    dest='running',
+                    default=False,
+                    help='check only running script (only from db) '),
         make_option('--init',
-            action='store_true',
-            dest='init',
-            default=False,
-            help='init data from beaker and save to db'),
+                    action='store_true',
+                    dest='init',
+                    default=False,
+                    help='init data from beaker and save to db'),
         make_option('--quiet',
-            action='store_true',
-            dest='quiet',
-            default=False,
-            help='quiet mode'),
+                    action='store_true',
+                    dest='quiet',
+                    default=False,
+                    help='quiet mode'),
         make_option('--min-id',
-            dest='minid',
-            help='minimum jobid in filter (optimize communication with beaker)'),
+                    dest='minid',
+                    help='minimum jobid in filter (optimize communication with beaker)'),
         make_option('--jobs',
-            dest='jobs',
-            help='check concrete jobs, for example: J:12345 J:12346'),
+                    dest='jobs',
+                    help='check concrete jobs, for example: J:12345 J:12346'),
         make_option('--default-date',
-            dest='date',
-            help='Set default date when job was started'),
-        )
+                    dest='date',
+                    help='Set default date when job was started'),
+    )
 
     def handle(self, *args, **kwargs):
         # print "args:", kwargs
@@ -60,9 +62,11 @@ class Command(BaseCommand):
 def init(*args, **kwargs):
     progress = CheckProgress()
     if settings.BEAKER_SERVER.startswith("http"):
-        client = xmlrpclib.Server("%s/RPC2" % settings.BEAKER_SERVER, verbose=0)
+        client = xmlrpclib.Server(
+            "%s/RPC2" % settings.BEAKER_SERVER, verbose=0)
     else:
-        client = xmlrpclib.Server("https://%s/RPC2" % settings.BEAKER_SERVER, verbose=0)
+        client = xmlrpclib.Server(
+            "https://%s/RPC2" % settings.BEAKER_SERVER, verbose=0)
 
     # key = client.auth.login_password(USER, PASS)
     # key = client.auth.login_krb(USER, PASS)
@@ -85,8 +89,10 @@ def init(*args, **kwargs):
         if cfg_minid:
             bkr_filter["minid"] = kwargs["minid"]
         else:
-            # find job from previous init (date) - checked only new jobs  datetime.today().date()
-            minid = Job.objects.values("uid").filter(date__lt=(currentDate() - timedelta(days=2))).order_by("-uid")[:1]
+            # find job from previous init (date) - checked only new jobs
+            # datetime.today().date()
+            minid = Job.objects.values("uid").filter(
+                date__lt=(currentDate() - timedelta(days=2))).order_by("-uid")[:1]
             if minid:
                 bkr_filter["minid"] = minid[0]["uid"][2:]
     if cfg_jobs:
@@ -94,7 +100,8 @@ def init(*args, **kwargs):
     elif cfg_init:
         jobslist = client.jobs.filter(bkr_filter)
     else:
-        jobslist = [it["uid"] for it in Job.objects.values("uid").filter(is_finished=False)]
+        jobslist = [it["uid"]
+                    for it in Job.objects.values("uid").filter(is_finished=False)]
 
     progress.totalsum = len(jobslist)
     progress.save()
@@ -105,7 +112,8 @@ def init(*args, **kwargs):
 
         data = client.taskactions.task_info(it)
         # workaround for test which set label with actial date
-        labeldates = re.findall(r"^([0-9]{4}-[0-9]{2}-[0-9]{2})", data["method"])
+        labeldates = re.findall(
+            r"^([0-9]{4}-[0-9]{2}-[0-9]{2})", data["method"])
         if labeldates:
             label = data["method"][11:]
             # if not cfg_date:
@@ -113,10 +121,12 @@ def init(*args, **kwargs):
         else:
             label = data["method"]
         jt, status = JobTemplate.objects.get_or_create(whiteboard=label)
-        if status: jt.save()
+        if status:
+            jt.save()
 
         defaults = {"template": jt}
-        if cfg_date: defaults["date"] = cfg_date
+        if cfg_date:
+            defaults["date"] = cfg_date
         job, status = Job.objects.get_or_create(uid=it, defaults=defaults)
         job.template = jt
         job.is_running = not data["is_finished"]
@@ -129,8 +139,7 @@ def init(*args, **kwargs):
                 parse_recipe(recipexml, job)
 
         if not job.is_running:
-             job.is_finished = True
+            job.is_finished = True
         job.save()
         progress.counter()
     progress.finished()
-

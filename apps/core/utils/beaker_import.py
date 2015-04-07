@@ -5,7 +5,8 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-import os, sys
+import os
+import sys
 import re
 import git
 import urllib2
@@ -22,27 +23,29 @@ from apps.core.models import *
 
 
 class Parser:
-    def __init__(self, file=None, content=None): 
+
+    def __init__(self, file=None, content=None):
         self.status = True
         try:
             if file:
-                self.content_xml =  xml.dom.minidom.parse(file)
-                self.status  = True
+                self.content_xml = xml.dom.minidom.parse(file)
+                self.status = True
             elif content:
-                self.content_xml =  xml.dom.minidom.parseString(content)
-                self.status  = True
-                
+                self.content_xml = xml.dom.minidom.parseString(content)
+                self.status = True
+
         except xml.parsers.expat.ExpatError:
             self.error = ("ERROR: %s isn't valid XML file" % file)
-            print( self.error )
+            print(self.error)
             self.status = False
 
     def recipe(self, xmlrecipe, is_guestrecipe=None):
-        
-        rt = RecipeTemplate(jobtemplate=self.job, name=xmlrecipe.getAttribute("whiteboard"))
+
+        rt = RecipeTemplate(
+            jobtemplate=self.job, name=xmlrecipe.getAttribute("whiteboard"))
         if is_guestrecipe:
-            rt.is_virtualguest=True
-            rt.virtualhost=is_guestrecipe
+            rt.is_virtualguest = True
+            rt.virtualhost = is_guestrecipe
 
         distro_family = None
         distro_variant = ""
@@ -51,22 +54,27 @@ class Parser:
             if item.nodeName == "guestrecipe":
                 self.recipe(item, is_guestrecipe=rt)
 
-            if item.nodeName == "#text": continue
+            if item.nodeName == "#text":
+                continue
             elif item.nodeName == "task":
                 parameters = []
                 for param in item.getElementsByTagName("param"):
                     name = param.getAttribute("name")
                     value = param.getAttribute("value")
                     parameters.append((name, value))
-                    #print name, value
-                tests.append([item.getAttribute("name"), parameters, item.getAttribute("role")])
+                    # print name, value
+                tests.append(
+                    [item.getAttribute("name"), parameters, item.getAttribute("role")])
             elif item.nodeName == "hostRequires":
                 for key in item.childNodes:
-                    if key.nodeName == "#text": continue
+                    if key.nodeName == "#text":
+                        continue
                     elif key.nodeName == "and":
                         for keyvalue in key.childNodes:
-                            if keyvalue.nodeName == "#text": continue
-                            if keyvalue.nodeName == "#comment": continue
+                            if keyvalue.nodeName == "#text":
+                                continue
+                            if keyvalue.nodeName == "#comment":
+                                continue
                             name = keyvalue.nodeName
                             value = keyvalue.getAttribute("value")
                             key = keyvalue.getAttribute("key").lower()
@@ -80,7 +88,8 @@ class Parser:
 
             elif item.nodeName == "distroRequires":
                 for key in item.childNodes:
-                    if key.nodeName == "#text": continue
+                    if key.nodeName == "#text":
+                        continue
                     if key.nodeName == "and":
                         for keyvalue in key.childNodes:
                             distronode = keyvalue.nodeName
@@ -88,21 +97,24 @@ class Parser:
                                 if distronode.endswith("arch"):
                                     archname = keyvalue.getAttribute("value")
                                 elif distronode.endswith("name"):
-                                    distro_name=keyvalue.getAttribute("value")
+                                    distro_name = keyvalue.getAttribute(
+                                        "value")
                                 elif distronode.endswith("variant"):
-                                    distro_variant=keyvalue.getAttribute("value")
+                                    distro_variant = keyvalue.getAttribute(
+                                        "value")
                                 elif distronode.endswith("family"):
-                                    distro_family=keyvalue.getAttribute("value")
+                                    distro_family = keyvalue.getAttribute(
+                                        "value")
                     if key.nodeName == "distro_virt":
                         rt.hmv = True
-            #else:
+            # else:
             #    print item
 
         rt.distro, status = DistroTemplate.objects.get_or_create(
             name=distro_name, distroname=distro_name,
             variant=distro_variant)
         if distro_family:
-            rt.distro.family=distro_family
+            rt.distro.family = distro_family
             rt.distro.save()
         rt.kernel_options = xmlrecipe.getAttribute("kernel_options")
         rt.kernel_options_post = xmlrecipe.getAttribute("kernel_options_post")
@@ -131,14 +143,16 @@ class Parser:
         rt.save()
 
     def run(self, position=False):
-        if not self.status: return False
+        if not self.status:
+            return False
         self.job = None
         for xmljob in self.content_xml.childNodes:
             print xmljob.nodeName
             for it in xmljob.childNodes:
                 if it.nodeName == "whiteboard":
                     whiteboard = it.firstChild.nodeValue.strip()
-                    jt, status = JobTemplate.objects.get_or_create(whiteboard=whiteboard)
+                    jt, status = JobTemplate.objects.get_or_create(
+                        whiteboard=whiteboard)
                     self.job = jt
 
                     if position:
@@ -147,5 +161,6 @@ class Parser:
 
                 elif it.nodeName == "recipeSet":
                     for xmlrecipe in it.childNodes:
-                        if xmlrecipe.nodeName == "#text": continue
+                        if xmlrecipe.nodeName == "#text":
+                            continue
                         self.recipe(xmlrecipe)

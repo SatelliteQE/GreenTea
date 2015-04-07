@@ -49,4 +49,3 @@ class Command(BaseCommand):
                 else:
                     logger.error("Problem with refresh git %s%s" %
                                  (path, repo))
-

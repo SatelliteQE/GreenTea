@@ -29,9 +29,10 @@ from apps.core.models import System, Arch, Distro, Author, PASS, RETURNWHENGREEN
 
 logger = logging.getLogger('commands')
 
+
 def total_sec(td):
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) \
-            / 10 ** 6
+        / 10 ** 6
 
 
 def strToSec(string):
@@ -61,7 +62,7 @@ class Beaker:
         auth = ""
         if settings.BEAKER_OWNER:
             auth = " --username=%s --password=%s" % (settings.BEAKER_OWNER,
-                                                    settings.BEAKER_PASS)
+                                                     settings.BEAKER_PASS)
         command = "bkr %s %s%s" % (command, param, auth)
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         return p.communicate()
@@ -75,7 +76,7 @@ class Beaker:
             return True
         else:
             logger.error("Problem with canceling of the job (%s). output: '%s'"
-                     (job.uid, "\n".join(result)))
+                         (job.uid, "\n".join(result)))
             return False
 
     def jobSchedule(self, jobT, reserve=False, schedule=None):
@@ -91,8 +92,9 @@ class Beaker:
             job = self.__jobSchedule(xmlfile, jobT)
         except:
             # FIXME
-            # TypeError: argument 1 must be string or read-only character buffer, not None
-            logging.error("schedule file %s: %s %s" % ( xmlfile, job, jobT))
+            # TypeError: argument 1 must be string or read-only character
+            # buffer, not None
+            logging.error("schedule file %s: %s %s" % (xmlfile, job, jobT))
         if job:
             os.rename(xmlfile, xmlfile.replace(tmp, slugify(job.uid)))
         return job
@@ -151,8 +153,8 @@ class Beaker:
             ssh.sendline('uptime')
             ssh.prompt(timeout=20)
             bash_comm = ("[ -e ~/reserved.lock ] || "
-                        "(return2beaker.sh 2> /dev/null && echo 'YAHOO' || "
-                        "echo 'NO')")
+                         "(return2beaker.sh 2> /dev/null && echo 'YAHOO' || "
+                         "echo 'NO')")
             # bash_comm = ("[ -e ~/reserved.lock ] || return2beaker.sh || "
             #    " (rhts-abort -t recipe -l $(grep RESULT_SERVER /etc/motd |"
             #    " cut -d'=' -f2) -r $(cat /root/RECIPE.TXT) && halt)")
@@ -160,12 +162,12 @@ class Beaker:
             ssh.prompt(timeout=20)
             if ssh.before.find("YAHOO") == -1:
                 result = self.jobCancel(recipe.job, "Emergency solution of "
-                                    "return2beaker")
+                                        "return2beaker")
         except Exception:
             logger.exception("Problem with return2beaker of the recipe (%s|%s)"
                              % (recipe.uid, recipe.job.uid))
             result = self.jobCancel(recipe.job, "Emergency solution of "
-                            "return2beaker")
+                                    "return2beaker")
         finally:
             try:
                 ssh.logout()
@@ -184,7 +186,7 @@ class Beaker:
         jobids = self.scheduleFromXmlFile(xmlfile)
         if len(jobids) > 0:
             job, st = Job.objects.get_or_create(uid=jobids[0], template=jobT,
-                            defaults={"is_finished": False, })
+                                                defaults={"is_finished": False, })
             return job
         logger.error("Problem with scheduling of the jobs from template (%s)."
                      % jobT.id)
@@ -236,18 +238,18 @@ class JobGen:
         for taskG in recipeT.grouptemplates.order_by("priority"):
             params = taskG.get_params()
             for taskT in taskG.group.grouptests.order_by("priority"):
-                if not taskT.test.is_enable: continue
+                if not taskT.test.is_enable:
+                    continue
                 params2 = taskT.get_params()
                 params2.update(params)
                 taskT.parent_params = params2
                 cache_tasks.append(self.__generateTask(taskT))
 
-
-
         tasksT = TaskTemplate.objects.filter(recipe=recipeT)\
-                    .select_related("test").order_by("priority").distinct()
+            .select_related("test").order_by("priority").distinct()
         for taskT in tasksT:
-            if not taskT.test.is_enable: continue
+            if not taskT.test.is_enable:
+                continue
             cache_tasks.append(self.__generateTask(taskT))
         return cache_tasks
 
@@ -259,7 +261,7 @@ class JobGen:
                 "priority": taskT.priority,
                 "role": taskT.role,
                 "get_role": taskT.get_role,
-               }
+                }
 
 
 def parse_task(taskxml, recipe):
@@ -267,7 +269,7 @@ def parse_task(taskxml, recipe):
 #   stat = dict()
 #    for result in taskxml.childNodes:
 #        for it in result.childNodes:
-#            #print it.getAttribute("id"), it.getAttribute("result")
+# print it.getAttribute("id"), it.getAttribute("result")
 #            res = it.getAttribute("result")
 #            if not res: continue
 #            if stat.has_key(res):
@@ -290,7 +292,7 @@ def parse_task(taskxml, recipe):
             if param.getAttribute("name") == "TASK_ALIAS":
                 task_alias = param.getAttribute("value")
 
-    # # Download data from journal.xml
+    # Download data from journal.xml
     # task_full_xml = None
     # response = None
     # try:
@@ -304,7 +306,6 @@ def parse_task(taskxml, recipe):
     #
     # if task_full_xml:
     #   task_full_xml.getElementsByTagName('starttime')[0].childNodes[0].nodeValue.strip()
-
 
     task, status = Task.objects.get_or_create(
         uid=uid,
@@ -325,6 +326,7 @@ def parse_task(taskxml, recipe):
     if task.is_completed():
         task.duration = float(strToSec(taskxml.getAttribute("duration")))
     task.save()
+
 
 def parse_recipe(recipexml, job, guestrecipe=None):
     uid = recipexml.getAttribute("id")
@@ -354,7 +356,7 @@ def parse_recipe(recipexml, job, guestrecipe=None):
             "system": system,
             "whiteboard": whiteboard,
             "distro": distro,
-            "arch": arch }
+            "arch": arch}
     )
     recipe.system = system
     recipe.set_result(str_result)
@@ -371,10 +373,12 @@ def parse_recipe(recipexml, job, guestrecipe=None):
     recipe.recount_result()
     recipe.save()
 
-    reserve = Task.objects.filter(test__name=settings.RESERVE_TEST, recipe=recipe)
+    reserve = Task.objects.filter(
+        test__name=settings.RESERVE_TEST, recipe=recipe)
 
-    logger.debug("%s status:  %s result %s" % (recipe.uid, recipe.status, recipe.result))
+    logger.debug("%s status:  %s result %s" %
+                 (recipe.uid, recipe.status, recipe.result))
     if reserve or recipe.status == Recipe.RESERVED:
-            if recipe.result == PASS  and job.template.event_finish == RETURNWHENGREEN:
+            if recipe.result == PASS and job.template.event_finish == RETURNWHENGREEN:
                 bk = Beaker()
                 bk.return2beaker(recipe)
