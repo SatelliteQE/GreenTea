@@ -21,7 +21,6 @@ from apps.core.utils.date_helpers import toUTC, currentDate, TZDateTimeField
 from taggit.managers import TaggableManager
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from apps.taskomatic.models import TaskPeriodSchedule
 
 logger = logging.getLogger(__name__)
 
@@ -576,6 +575,8 @@ class JobTemplate(models.Model):
     def is_return(self):
         return ( self.event_finish == RETURN )
 
+    def get_tags(self):
+        return ", ".join([it.name for it in self.tags.all()])
 
 
 class DistroTemplate(models.Model):
@@ -584,9 +585,6 @@ class DistroTemplate(models.Model):
     variant = models.CharField(max_length=255, blank=True, null=True)
     distroname = models.CharField(max_length=255, blank=True, null=True, \
         help_text="If field is empty, then it will use latest compose.")
-
-    def __unicode__(self):
-        return self.name
 
     def tpljobs_counter(self):
         return RecipeTemplate.objects.filter(distro=self).count()
@@ -624,10 +622,10 @@ class RecipeTemplate(models.Model, ObjParams):
     schedule = models.CharField("schedule period", max_length=255, blank=True)
 
     def __unicode__(self):
+        name = self.name
         if not self.name:
-            return "(empty)"
-        else:
-            return self.name
+            name = "(empty)"
+        return "%s - %s" % (self.id, name)
 
     def set_role(self, value):
         try:
@@ -735,6 +733,9 @@ class GroupTemplate(models.Model):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        ordering = ('name',)
+
 
 class GroupTaskTemplate(ObjParams, models.Model):
     group = models.ForeignKey(GroupTemplate, related_name="grouptasks")
@@ -805,7 +806,6 @@ class Job(models.Model):
     date = TZDateTimeField(default=datetime.now)
     is_running = models.BooleanField(default=False)
     is_finished = models.BooleanField(default=False)  # this is for checking (no used for data from beaker)
-    schedule = models.ForeignKey(TaskPeriodSchedule, null=True, blank=True)
 
     def __unicode__(self):
         return self.uid

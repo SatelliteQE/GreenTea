@@ -56,7 +56,7 @@ class DistroTemplateAdmin(reversion.VersionAdmin):
 
 
 class JobAdmin(admin.ModelAdmin):
-    list_display = ("uid", "template", "date", "is_running" )
+    list_display = ("uid", "template", "date", "is_running", )
     search_fields = ["uid", "template__whiteboard"]
     ordering = ["-date", "-is_running", ]
     inlines = [RecipeInLine]
@@ -112,7 +112,7 @@ class GitAdmin(admin.ModelAdmin):
 
 
 class JobTemplateAdmin(admin.ModelAdmin):
-    list_display = ("whiteboard", "is_enable", "period", "position" )
+    list_display = ("whiteboard", "is_enable", "period", "get_tags", "position" )
     def make_enable(modeladmin, request, queryset):
         queryset.update(is_enable=True)
     make_enable.short_description = "Set selected templates to enabled"
@@ -160,6 +160,10 @@ class GroupOwnerAdmin(admin.ModelAdmin):
     filter_horizontal = ["owners", ]
 
 
+class TaskTemplateAdmin(admin.ModelAdmin):
+    list_display = ("id", "test", "recipe" )
+
+
 class RecipeTemplateAdmin(admin.ModelAdmin):
     list_display = ("__unicode__", "jobtemplate", "distro", "archs", "hvm" )
     inlines = [GroupTaskInLine, TemplateTaskInLine]
@@ -186,7 +190,7 @@ admin.site.register(Git, GitAdmin)
 admin.site.register(Author, AuthorAdmin)
 admin.site.register(TestHistory, TestHistoryAdmin)
 admin.site.register(GroupOwner, GroupOwnerAdmin)
-admin.site.register(TaskTemplate)
+admin.site.register(TaskTemplate, TaskTemplateAdmin)
 admin.site.register(TaskRoleEnum)
 admin.site.register(JobTemplate, JobTemplateAdmin)
 admin.site.register(GroupTemplate, GroupTemplateAdmin)

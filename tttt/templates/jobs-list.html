@@ -15,6 +15,14 @@
 {% include 'search-box.html' with onlysearch=1 %}
 {% include 'detail-panel.html' %}
 
+<ul class="nav nav-tabs">
+  <li role="presentation" {%if not actualtag%}class="active" {% endif %}><a href="{% url "jobs-list" %}">All</a></li>
+  {% for tag in tags %}
+  <li role="presentation" {%if actualtag == tag.slug %}class="active" {% endif %}><a href="{% url "jobs-list" %}?tag={{tag.slug}}">{{ tag }}</a></li>
+  
+  {% endfor %}
+</ul>
+
 <h2>Statistic</h2>
 <div class="statistic"></div>
 <table width="100%">

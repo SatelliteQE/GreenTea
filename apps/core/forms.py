@@ -12,7 +12,7 @@ class FilterForm(forms.Form):
     search = forms.CharField(
                    required = False
                 )
-    format_output = forms.CharField(
+    tag = forms.CharField(
                    required = False
                 )
     def __init__(self, *args, **kwargs):

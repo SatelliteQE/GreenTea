@@ -22,6 +22,7 @@ from copy import copy
 import urllib
 import json
 import logging
+from taggit.models import Tag
 
 from apps.core.models import *
 from apps.core.utils.beaker import JobGen
@@ -279,14 +280,18 @@ class JobsListView(TemplateView):
         return super(JobsListView, self).dispatch(request, *args, **kwargs)
 
     def filterEvent(self, parameters):
-        self.forms['search'] = FilterForm(parameters)
-        if "search" in parameters:
-            if self.forms['search'].is_valid():
-                self.filters['search'] = self.forms['search']\
-                                             .cleaned_data["search"]
+        form = FilterForm(parameters)
+        if form.is_valid():
+            if "tag" in parameters:
+                self.filters['tag'] = form.cleaned_data["tag"]
+            else:
+                self.filters['tag'] = None
+            if "search" in parameters:
+                self.filters['search'] = form.cleaned_data["search"]
             else:
                 self.filters['search'] = None
                 self.forms['search'] = None
+        self.forms['search'] = form
         self.format = parameters.get("format_output")
 
     def formEvent(self, parametrs):
@@ -384,6 +389,13 @@ class JobsListView(TemplateView):
                      "job__date__range": date_range,
                      "job__template__period": JobTemplate.DAILY}
 
+        jobstag = None
+        if self.filters.get("tag"):
+                jobstag = JobTemplate.objects.filter(tags__slug = self.filters.get("tag")).values("id")
+                context["actualtag"] = self.filters.get("tag")
+                jfilters["id__in"] = jobstag
+                rfilters["job__template_id__in"] = jobstag
+
         if self.filters.get('search'):
             jfilters["whiteboard__icontains"] = self.filters.get('search')
             rfilters["job__template__whiteboard__icontains"] = self.filters.get('search')
@@ -444,23 +456,29 @@ class JobsListView(TemplateView):
 
         context['dataweek'] = self.prepare_matrix(jobs, recipes, context['labelweek'])
 
+        tag_query = ""
+        if jobstag != None: 
+            tag_query = map(lambda x: "%d" % int(x["id"]), jobstag)
+            tag_query = """ AND "core_job"."template_id" IN ( %s ) """ % ", ".join(tag_query)
         if self.filters.get('search'):
             # statistic information
-            cursor.execute("""SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
+            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
                LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
                LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
                LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
                WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s
                AND lower("core_jobtemplate"."whiteboard") LIKE lower(%s)
-               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """,
+               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
+            cursor.execute( query, 
                [(datetime.now().date() - timedelta(days=14)).isoformat(), True, JobTemplate.DAILY, "%%%s%%" % self.filters.get('search')])
         else:
-            cursor.execute("""SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
+            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
                LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
                LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
                LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
-               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s
-               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """,
+               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s """ + tag_query + """
+               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """ 
+            cursor.execute(query,
                [(datetime.now().date() - timedelta(days=14)).isoformat(), True, JobTemplate.DAILY])
 
         data = cursor.fetchall()
@@ -492,6 +510,9 @@ class JobsListView(TemplateView):
         else:
             waiveform = WaiverForm()
         context['waiveForm'] = self.forms.get('waiveForm', waiveform)
+
+        # get tags
+        context['tags'] = Tag.objects.all()
         return context
 
 
