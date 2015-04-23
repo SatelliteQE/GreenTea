@@ -471,8 +471,7 @@ class Test(models.Model):
         }
 
     def get_absolute_url(self):
-        return "%s#%s" % (reverse("tests-email", args=[self.owner.email]),
-                          self.name)
+        return  "?onlyfail=on&search=%s" % self.name
 
     def get_detail_url(self):
         return "%s" % reverse("test-detail", args=[self.id])

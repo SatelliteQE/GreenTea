@@ -68,7 +68,7 @@ Last check: {{ progress.datestart }}
 <table class="dashboard dashboard-tests">
   <thead>
 	<tr >
-		<th colspan="12"><a name="{{test}}"></a><a href="#{{test}}" class="testLink" >{{ test.name }}</a>
+		<th colspan="12"><a name="{{test}}"></a><a href="{{test.get_absolute_url}}" class="testLink" >{{ test.name }}</a>
 		{% if test.get_reposituory_url %}<a href="{{ test.get_reposituory_url }}" class="gitLink" >git</a>{% endif %} <a href="{{ test.get_detail_url }}" class="gitLink" >detail</a>
         <span class="float-right" title="Groups">{% for group in test.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
         </th>
