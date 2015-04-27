@@ -364,6 +364,15 @@ class Git(models.Model):
     def get_count(self):
         return len(Test.objects.filter(git__id=self.id))
 
+    def save(self, *args, **kwargs):
+        for key in ("url", "localurl"):
+            # remove last char "/" in url
+            url = getattr(self, key)
+            if url.endswith("/"):
+                url = url[:-1]
+                setattr(self, key, url)
+        super(Git, self).save(*args, **kwargs)
+
 
 class Author(models.Model):
     DEFAULT_AUTHOR = ("Unknown", "unknow@redhat.com")
