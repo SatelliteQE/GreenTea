@@ -224,7 +224,7 @@ class Git(models.Model):
         checkDays = int(settings.CHECK_COMMMITS_PREVIOUS_DAYS)
         if not checkDays:
             checkDays = 1
-        tests = Test.objects.filter(git=self).only('folder')
+        tests = Test.objects.filter(git=self, is_enable=True).only('folder')
         for test in tests:
             if not test.folder:
                 self.__getLog().warning("The GIT folder for test '%s'"
