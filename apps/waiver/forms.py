@@ -27,7 +27,7 @@ class WaiverForm(forms.ModelForm):
                 uid_list.append(Task.objects.get(uid=uid[2:]))
         if not uid_list:
             raise forms.ValidationError(_(u'You must fill beaker\'s unique id '
-                                           'of task, recipe or jobs'))
+                                          'of task, recipe or jobs'))
         return uid_list
 
     def clean_action(self):
@@ -53,8 +53,8 @@ class WaiverForm(forms.ModelForm):
     def save(self):
         for it in self.cleaned_data["uids"]:
             data = {
-                    "content": self.__esc(self.cleaned_data.get("content",
-                                                                "")),
+                "content": self.__esc(self.cleaned_data.get("content",
+                                                            "")),
                     "username": self.cleaned_data["username"],
                     "action": self.cleaned_data["action"],
             }
@@ -78,13 +78,13 @@ class WaiverForm(forms.ModelForm):
                 task = TaskomaticTask(title="WebUI: beaker return2beaker",
                                       common="beaker")
                 task.common_params = "beaker return2beaker "\
-                                    "--return2beaker-recipe='R:%(recipe)s' "\
-                                    "--reschedule-message='%(content)s'" % \
+                    "--return2beaker-recipe='R:%(recipe)s' "\
+                    "--reschedule-message='%(content)s'" % \
                                      data
                 task.save()
             if data["action"] == Comment.ENUM_ACTION_RESCHEDULE:
                 task = TaskomaticTask(title="WebUI: beaker reschedule",
-                                          common="beaker")
+                                      common="beaker")
                 uid = None
                 if type(it) == Recipe:
                     uid = data["recipe"].job.uid
@@ -93,11 +93,10 @@ class WaiverForm(forms.ModelForm):
                 task.common_params = "beaker reschedule "\
                                      "--reschedule-job='%s' "\
                                      "--reschedule-message='%s'" % \
-                                    (uid, self.__esc(self.cleaned_data
-                                                     .get("content", "")))
+                    (uid, self.__esc(self.cleaned_data
+                                     .get("content", "")))
                 task.save()
             if oComment.is_waived() and oComment.recipe and not data["task"]:
                 oComment.recipe.set_waived()
             elif oComment.is_waived() and oComment.task:
                 oComment.task.set_waived()
-

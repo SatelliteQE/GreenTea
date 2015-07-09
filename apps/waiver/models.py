@@ -4,7 +4,8 @@ from datetime import datetime
 from apps.core.utils.date_helpers import currentDate2, TZDateTimeField
 import json
 from south.modelsinspector import add_introspection_rules
-add_introspection_rules([], ["^apps\.core\.utils\.date_helpers\.TZDateTimeField"])
+add_introspection_rules(
+    [], ["^apps\.core\.utils\.date_helpers\.TZDateTimeField"])
 
 
 class Comment(models.Model):
@@ -25,7 +26,8 @@ class Comment(models.Model):
     content = models.TextField()
     #created_date = TZDateTimeField(default=currentDate())
     created_date = models.DateTimeField(default=currentDate2())
-    action = models.SmallIntegerField(choices=ENUM_ACTION, default=ENUM_ACTION_NONE)
+    action = models.SmallIntegerField(
+        choices=ENUM_ACTION, default=ENUM_ACTION_NONE)
 
     def __unicode__(self):
         return "%s %s" % (self.username, self.created_date)
@@ -47,4 +49,4 @@ class Comment(models.Model):
         }
 
     def is_waived(self):
-        return ( self.action == self.ENUM_ACTION_WAIVED)
+        return (self.action == self.ENUM_ACTION_WAIVED)

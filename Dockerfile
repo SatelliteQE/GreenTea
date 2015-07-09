@@ -34,14 +34,11 @@ RUN . $HOME/env/bin/activate && \
     echo 'from django.contrib.sites.models import Site; site = Site.objects.create(domain="localhost", name="localhost"); site.save()' | python $HOME/manage.py shell && \
     echo 'from django.contrib.auth.models import User; User.objects.create_superuser("admin", "admin@example.com", "pass")' | python $HOME/manage.py shell
 
-USER root
 # install cron and enable cron
-RUN yum install crontabs -y
-# set and enable cron for asynchronous
-RUN mv $HOME/tttt/conf/cron/greentea.cron /etc/cron.d/
-#ENTRYPOINT crond
+# it doesn't use for docker, only for real system
+# RUN yum install crontabs -y && mv $HOME/tttt/conf/cron/greentea.cron /etc/cron.d/
 
 USER greentea
 
 EXPOSE 8000
-CMD . $HOME/env/bin/activate && python $HOME/manage.py runserver 0.0.0.0:8000
+CMD . $HOME/bin/docker-run.sh
