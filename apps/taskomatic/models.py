@@ -61,10 +61,10 @@ class TaskPeriod(models.Model):
         command = res.pop(0)
         params = "" if len(res) == 0 else res.pop()
         label = TaskPeriodSchedule.objects.create(
-                title=self.title,
+            title=self.title,
                 period=self,
                 counter=len(TaskPeriodSchedule.objects.filter(period=self))
-                )
+        )
         task = Task.objects.create(title=self.title,
                                    common=command,
                                    common_params=params,
@@ -79,7 +79,7 @@ class Task(models.Model):
     STATUS_ENUM_DONE = 2
     STATUS_ENUM_ERROR = 3
     STATUS_ENUM = (
-       (STATUS_ENUM_WAIT, "Waiting"),
+        (STATUS_ENUM_WAIT, "Waiting"),
        (STATUS_ENUM_INPROGRESS, "In progress"),
        (STATUS_ENUM_DONE, "Done"),
        (STATUS_ENUM_ERROR, "Error"),
@@ -145,7 +145,8 @@ class Taskomatic:
     hooks = None
     logHandler = None
 
-    class  ListBufferingHandler(logging.handlers.BufferingHandler):
+    class ListBufferingHandler(logging.handlers.BufferingHandler):
+
         def shouldFlush(self, record):
             return False
 
@@ -208,7 +209,7 @@ class Taskomatic:
 
     def __cleanOldTasks(self):
         # delete old tasks with status DONE, keep only last 300 tasks
-        [it.delete() for it in Task.objects\
+        [it.delete() for it in Task.objects
             .filter(status=Task.STATUS_ENUM_DONE).order_by("-date_run")[300:]]
 
     @single_process
@@ -217,5 +218,3 @@ class Taskomatic:
         self.__checkTaskPeriods()
         self.__checkTasks()
         self.__cleanOldTasks()
-
-

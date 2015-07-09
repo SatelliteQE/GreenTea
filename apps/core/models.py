@@ -480,7 +480,7 @@ class Test(models.Model):
         }
 
     def get_absolute_url(self):
-        return  "?search=%s" % self.name
+        return "?search=%s" % self.name
 
     def get_detail_url(self):
         return "%s" % reverse("test-detail", args=[self.id])

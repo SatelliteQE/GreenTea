@@ -13,29 +13,33 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=64)),
             ('common', self.gf('django.db.models.fields.CharField')(max_length=128)),
-            ('date_last', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('date_last', self.gf('django.db.models.fields.DateTimeField')
+             (null=True, blank=True)),
             ('is_enable', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('cron', self.gf('django.db.models.fields.CharField')(default='*  *  *  *  *', max_length=64)),
+            ('cron', self.gf('django.db.models.fields.CharField')
+             (default='*  *  *  *  *', max_length=64)),
         ))
         db.send_create_signal(u'taskomatic', ['TaskPeriod'])
 
-
         # Changing field 'Task.date_run'
-        db.alter_column(u'taskomatic_task', 'date_run', self.gf('apps.core.utils.date_helpers.TZDateTimeField')(null=True))
+        db.alter_column(u'taskomatic_task', 'date_run', self.gf(
+            'apps.core.utils.date_helpers.TZDateTimeField')(null=True))
 
         # Changing field 'Task.date_create'
-        db.alter_column(u'taskomatic_task', 'date_create', self.gf('apps.core.utils.date_helpers.TZDateTimeField')())
+        db.alter_column(u'taskomatic_task', 'date_create', self.gf(
+            'apps.core.utils.date_helpers.TZDateTimeField')())
 
     def backwards(self, orm):
         # Deleting model 'TaskPeriod'
         db.delete_table(u'taskomatic_taskperiod')
 
-
         # Changing field 'Task.date_run'
-        db.alter_column(u'taskomatic_task', 'date_run', self.gf('django.db.models.fields.DateTimeField')(null=True))
+        db.alter_column(u'taskomatic_task', 'date_run', self.gf(
+            'django.db.models.fields.DateTimeField')(null=True))
 
         # Changing field 'Task.date_create'
-        db.alter_column(u'taskomatic_task', 'date_create', self.gf('django.db.models.fields.DateTimeField')())
+        db.alter_column(u'taskomatic_task', 'date_create',
+                        self.gf('django.db.models.fields.DateTimeField')())
 
     models = {
         u'taskomatic.task': {

@@ -14,16 +14,15 @@ class Migration(SchemaMigration):
             ('label', self.gf('django.db.models.fields.CharField')(max_length=32)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=64)),
             ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('date_create', self.gf('apps.core.utils.date_helpers.TZDateTimeField')(default=datetime.datetime(2014, 11, 14, 0, 0))),
+            ('date_create', self.gf('apps.core.utils.date_helpers.TZDateTimeField')
+             (default=datetime.datetime(2014, 11, 14, 0, 0))),
             ('duration', self.gf('django.db.models.fields.FloatField')()),
         ))
         db.send_create_signal(u'api', ['Performance'])
 
-
     def backwards(self, orm):
         # Deleting model 'Performance'
         db.delete_table(u'api_performance')
-
 
     models = {
         u'api.performance': {

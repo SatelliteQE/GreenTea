@@ -12,17 +12,19 @@ class Migration(SchemaMigration):
         db.create_table(u'taskomatic_taskperiodschedule', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('period', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['taskomatic.TaskPeriod'], null=True, blank=True)),
-            ('date_create', self.gf('apps.core.utils.date_helpers.TZDateTimeField')(default=datetime.datetime.now)),
+            ('period', self.gf('django.db.models.fields.related.ForeignKey')
+             (to=orm['taskomatic.TaskPeriod'], null=True, blank=True)),
+            ('date_create', self.gf('apps.core.utils.date_helpers.TZDateTimeField')
+             (default=datetime.datetime.now)),
             ('counter', self.gf('django.db.models.fields.BigIntegerField')(default=0)),
         ))
         db.send_create_signal(u'taskomatic', ['TaskPeriodSchedule'])
 
         # Adding field 'TaskPeriod.label'
         db.add_column(u'taskomatic_taskperiod', 'label',
-                      self.gf('django.db.models.fields.CharField')(max_length=64, null=True, blank=True),
+                      self.gf('django.db.models.fields.CharField')(
+                          max_length=64, null=True, blank=True),
                       keep_default=False)
-
 
     def backwards(self, orm):
         # Deleting model 'TaskPeriodSchedule'
@@ -30,7 +32,6 @@ class Migration(SchemaMigration):
 
         # Deleting field 'TaskPeriod.label'
         db.delete_column(u'taskomatic_taskperiod', 'label')
-
 
     models = {
         u'taskomatic.task': {

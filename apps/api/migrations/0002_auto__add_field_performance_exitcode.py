@@ -10,14 +10,13 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding field 'Performance.exitcode'
         db.add_column(u'api_performance', 'exitcode',
-                      self.gf('django.db.models.fields.IntegerField')(default=0),
+                      self.gf('django.db.models.fields.IntegerField')(
+                          default=0),
                       keep_default=False)
-
 
     def backwards(self, orm):
         # Deleting field 'Performance.exitcode'
         db.delete_column(u'api_performance', 'exitcode')
-
 
     models = {
         u'api.performance': {

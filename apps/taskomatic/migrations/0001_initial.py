@@ -16,17 +16,17 @@ class Migration(SchemaMigration):
             ('common_params', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('status', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('exit_result', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('date_create', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime(2014, 1, 24, 0, 0))),
-            ('date_run', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('date_create', self.gf('django.db.models.fields.DateTimeField')
+             (default=datetime.datetime(2014, 1, 24, 0, 0))),
+            ('date_run', self.gf('django.db.models.fields.DateTimeField')
+             (null=True, blank=True)),
             ('time_long', self.gf('django.db.models.fields.FloatField')(default=0.0)),
         ))
         db.send_create_signal(u'taskomatic', ['Task'])
 
-
     def backwards(self, orm):
         # Deleting model 'Task'
         db.delete_table(u'taskomatic_task')
-
 
     models = {
         u'taskomatic.task': {

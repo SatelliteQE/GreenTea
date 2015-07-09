@@ -3,7 +3,8 @@
 import os
 from django.conf import global_settings
 
-ROOT_PATH = os.path.abspath("%s/%s/" % (os.path.dirname(os.path.realpath(__file__)), "../.."))
+ROOT_PATH = os.path.abspath("%s/%s/" %
+                            (os.path.dirname(os.path.realpath(__file__)), "../.."))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -18,12 +19,17 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': ROOT_PATH + '/data.db',                      # Or path to database file if using sqlite3.
+        # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or
+        # 'oracle'.
+        'ENGINE': 'django.db.backends.sqlite3',
+        # Or path to database file if using sqlite3.
+        'NAME': ROOT_PATH + '/data.db',
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        # Set to empty string for localhost. Not used with sqlite3.
+        'HOST': '',
+        # Set to empty string for default. Not used with sqlite3.
+        'PORT': '',
     }
 }
 
@@ -92,7 +98,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -193,7 +199,7 @@ LOGGING = {
         }
     },
     'handlers': {
-       'mail_admins': {
+        'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler',
@@ -235,10 +241,10 @@ if int(os.environ.get("DDD", 0)) > 0:
 
     # Enabling django-debug-toolbar..."
     MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) \
-                            + MIDDLEWARE_CLASSES
+        + MIDDLEWARE_CLASSES
 
     DEBUG_TOOLBAR_CONFIG = {
-       'INTERCEPT_REDIRECTS': False,
+        'INTERCEPT_REDIRECTS': False,
     }
 
 

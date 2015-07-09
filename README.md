@@ -14,7 +14,7 @@ or
 ```
 git clone https://github.com/SatelliteQE/GreenTea.git
 cd GreenTea
-sudo docker --no-cache build -t greentea . 
+sudo docker build -t greentea .
 sudo docker run -i -t -p 80:8000 greentea 
 ``` 
 Service runs on port 80, you can go to link http://localhost/ (login: admin, password: pass)

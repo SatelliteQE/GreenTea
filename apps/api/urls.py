@@ -13,6 +13,7 @@ from apps.kerberos.views import *
 admin.autodiscover()
 
 urlpatterns = patterns('',
-	url(r'^', 'apps.api.views.performance', name='performance'),
-    url(r'^(?P<action>[^/]+)$', ApiView.as_view(), name='api'),
-)
+                       url(r'^', 'apps.api.views.performance', name='performance'),
+                       url(r'^(?P<action>[^/]+)$',
+                           ApiView.as_view(), name='api'),
+                       )

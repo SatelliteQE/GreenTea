@@ -2,6 +2,7 @@ from django.db import models
 from apps.core.utils.date_helpers import toUTC, currentDate, TZDateTimeField
 from datetime import timedelta
 
+
 class Performance(models.Model):
     label = models.CharField(max_length=32)
     name = models.CharField(max_length=64)

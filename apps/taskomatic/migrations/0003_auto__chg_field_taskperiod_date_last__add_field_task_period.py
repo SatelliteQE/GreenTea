@@ -10,20 +10,22 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
 
         # Changing field 'TaskPeriod.date_last'
-        db.alter_column(u'taskomatic_taskperiod', 'date_last', self.gf('apps.core.utils.date_helpers.TZDateTimeField')(null=True))
+        db.alter_column(u'taskomatic_taskperiod', 'date_last', self.gf(
+            'apps.core.utils.date_helpers.TZDateTimeField')(null=True))
         # Adding field 'Task.period'
         db.add_column(u'taskomatic_task', 'period',
-                      self.gf('django.db.models.fields.related.ForeignKey')(to=orm['taskomatic.TaskPeriod'], null=True, blank=True),
+                      self.gf('django.db.models.fields.related.ForeignKey')(
+                          to=orm[
+                              'taskomatic.TaskPeriod'], null=True, blank=True),
                       keep_default=False)
-
 
     def backwards(self, orm):
 
         # Changing field 'TaskPeriod.date_last'
-        db.alter_column(u'taskomatic_taskperiod', 'date_last', self.gf('django.db.models.fields.DateTimeField')(null=True))
+        db.alter_column(u'taskomatic_taskperiod', 'date_last', self.gf(
+            'django.db.models.fields.DateTimeField')(null=True))
         # Deleting field 'Task.period'
         db.delete_column(u'taskomatic_task', 'period_id')
-
 
     models = {
         u'taskomatic.task': {
