@@ -38,8 +38,9 @@ RUN . $HOME/env/bin/activate && \
 # it doesn't use for docker, only for real system
 # RUN yum install crontabs -y && mv $HOME/tttt/conf/cron/greentea.cron /etc/cron.d/
 
-USER greentea
 ADD ./bin/docker-run.sh $HOME/bin/docker-run.sh
 
 EXPOSE 8000
-CMD $HOME/bin/docker-run.sh
+USER greentea
+
+CMD sh $HOME/bin/docker-run.sh
