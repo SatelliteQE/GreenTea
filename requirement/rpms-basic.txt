@@ -4,7 +4,7 @@ gitweb-caching
 source-highlight
 highlight 
 libxslt-devel
-libxml12-devel
+libxml2-devel
 graphviz-devel
 python-virtualenv
 beaker-common
