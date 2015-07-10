@@ -1,18 +1,34 @@
 #!/usr/bin/bash
-# author: Pavel Studeni <pstudeni@redhat.com>
+# Author: Pavel Studeni <pstudeni@redhat.com>
 
-# how often run script for pickup tasks
-timeout=10
+# How often run script for pickup tasks in seconds
+schedule_t=10 # 10s.
+check_t=600 # 10min.
 
+
+# For asynchronous operation Green Tea needs to run cron
+# */1 * * * * 	greentea 	python /data/Greantea/manage.py pickup --traceback
 function schedule {
     while true; do
 	   python manage.py pickup -vvv
-	   sleep $timeout
+	   sleep $schedule_t
+    done
+}
+
+
+# Following command check status of beaker jobs (automation tests)
+# */20 * * * * 	greentea 	python /data/Greantea/manage.py check --quiet --traceback
+function check {
+    while true; do
+	   python manage.py check -vv
+	   sleep $check_t
     done
 }
 
 HOME=/data/GreenTea
 source  $HOME/env/bin/activate
-cd $HOME && schedule &
+cd $HOME && \
+    schedule & \
+    check &
 python $HOME/manage.py runserver 0.0.0.0:8000
 
