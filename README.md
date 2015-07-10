@@ -17,7 +17,13 @@ cd GreenTea
 sudo docker build -t greentea .
 sudo docker run -i -t -p 80:8000 greentea 
 ``` 
-Service runs on port 80, you can go to link http://localhost/ (login: admin, password: pass)
+
+Service runs on default port 80 (link on your system is http://localhost/)
+
+
+**login**: admin
+
+**password**: pass
 
 ## Setup
 
