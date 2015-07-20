@@ -166,6 +166,7 @@ INSTALLED_APPS = (
     'taggit',
     'reversion',
     'rest_framework',
+    'plugins',
 )
 
 SOUTH_MIGRATION_MODULES = {
