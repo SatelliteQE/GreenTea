@@ -15,7 +15,7 @@ from apps.core.utils.advance_command import AdvancedCommand, make_option_group
 from apps.taskomatic.models import TaskPeriodSchedule
 from datetime import datetime
 
-logger = logging.getLogger('commands')
+logger = logging.getLogger(__name__)
 
 
 class Command(AdvancedCommand):

@@ -21,6 +21,8 @@ from apps.core.utils.date_helpers import toUTC, currentDate, TZDateTimeField
 from taggit.managers import TaggableManager
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from apps.core.signals import recipe_finished, recipe_changed
+from apps.core.receivers import *
 
 logger = logging.getLogger(__name__)
 
@@ -913,12 +915,20 @@ class Recipe(models.Model):
         return [it[1] for it in RESULT_CHOICES if it[0] == self.result][0]
 
     def set_status(self, value):
+        status = self.status
         try:
             self.status = [it[0]
                            for it in self.STATUS_CHOICES if it[1] == value][0]
         except IndexError:
             sys.stderr.write("IndexError: status %s %s %s" %
                              (value, self.status, self.STATUS_CHOICES))
+            return
+
+        if status != self.status:
+            if self.status in (self.COMPLETED, self.ABORTED, self.RESERVED, self.CANCELLED):
+                recipe_finished.send(sender="models:Recipe", recipe=self)
+            else:
+                recipe_changed.send(sender="models:Recipe", recipe=self)
 
     def get_status(self):
         try:
@@ -993,7 +1003,7 @@ class Recipe(models.Model):
     def is_running(self):
         # this makes about 1000 requests into DB, I think it is not necessary here.
         # self.recount_result()
-        return self.status == self.RUNNING or self.status == self.RESERVED
+        return (self.status in (self.RUNNING, self.RESERVED))
 
     def get_info(self):
         # TODO: ???? Toto je asi blbost ????

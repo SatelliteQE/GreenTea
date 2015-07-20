@@ -17,7 +17,7 @@ from apps.core.models import JobTemplate
 from apps.core.utils.beaker import Beaker
 from apps.taskomatic.models import TaskPeriodSchedule
 
-logger = logging.getLogger('commands')
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):

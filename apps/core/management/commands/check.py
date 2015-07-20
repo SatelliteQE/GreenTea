@@ -5,6 +5,12 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
+import xmlrpclib
+import os
+import sys
+import re
+import time
+import xml.dom.minidom
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
 from django.template.defaultfilters import slugify
@@ -12,15 +18,13 @@ from django.conf import settings
 from apps.core.models import *
 from apps.core.utils.beaker import *
 from apps.core.utils.date_helpers import currentDate
-import xmlrpclib
-import os
-import sys
-import re
-import xml.dom.minidom
 from datetime import datetime, timedelta
-import time
 from optparse import make_option
 
+logger = logging.getLogger(__name__)
+
+if sys.version_info >= (2, 7, 9):
+    import ssl
 
 class Command(BaseCommand):
     help = ("Load data from beaker and save to db")
@@ -62,11 +66,17 @@ class Command(BaseCommand):
 def init(*args, **kwargs):
     progress = CheckProgress()
     if settings.BEAKER_SERVER.startswith("http"):
-        client = xmlrpclib.Server(
-            "%s/RPC2" % settings.BEAKER_SERVER, verbose=0)
+        server_url =  "%s/RPC2" % settings.BEAKER_SERVER
     else:
-        client = xmlrpclib.Server(
-            "https://%s/RPC2" % settings.BEAKER_SERVER, verbose=0)
+        server_url = "https://%s/RPC2" % settings.BEAKER_SERVER
+
+    client = xmlrpclib.Server(server_url, verbose=0)
+    if server_url.startswith("https"):
+        # workaround ssl.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED]
+        # certificate verify failed (_ssl.c:590)
+        if sys.version_info >= (2, 7, 9):
+            client = xmlrpclib.Server(server_url, verbose=0,
+                                  context=ssl._create_unverified_context())
 
     # key = client.auth.login_password(USER, PASS)
     # key = client.auth.login_krb(USER, PASS)
@@ -111,6 +121,7 @@ def init(*args, **kwargs):
             print("%d/%d (%s)" % (progress.actual, progress.totalsum, it))
 
         data = client.taskactions.task_info(it)
+
         # workaround for test which set label with actial date
         labeldates = re.findall(
             r"^([0-9]{4}-[0-9]{2}-[0-9]{2})", data["method"])

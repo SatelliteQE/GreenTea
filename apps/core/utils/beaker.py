@@ -27,7 +27,8 @@ from apps.core.models import JobTemplate, RecipeTemplate, TaskTemplate
 from apps.core.models import Job, Recipe, Test, Task
 from apps.core.models import System, Arch, Distro, Author, PASS, RETURNWHENGREEN
 
-logger = logging.getLogger('commands')
+
+logger = logging.getLogger(__name__)
 
 
 def total_sec(td):
@@ -360,6 +361,7 @@ def parse_recipe(recipexml, job, guestrecipe=None):
     )
     recipe.system = system
     recipe.set_result(str_result)
+
     recipe.set_status(str_status)
     if status:
         recipe.save()
@@ -382,3 +384,4 @@ def parse_recipe(recipexml, job, guestrecipe=None):
             if recipe.result == PASS and job.template.event_finish == RETURNWHENGREEN:
                 bk = Beaker()
                 bk.return2beaker(recipe)
+
