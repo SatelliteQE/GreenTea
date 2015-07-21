@@ -22,7 +22,6 @@ from taggit.managers import TaggableManager
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from apps.core.signals import recipe_finished, recipe_changed
-from apps.core.receivers import *
 
 logger = logging.getLogger(__name__)
 
