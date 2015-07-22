@@ -1,7 +1,11 @@
 import reversion
 from django.contrib import admin
 
-from models import *
+from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Git,
+                    GroupOwner, GroupTemplate, GroupTestTemplate, Job,
+                    JobTemplate, PhaseLabel, PhaseResult, Recipe,
+                    RecipeTemplate, System, Task, TaskRoleEnum, TaskTemplate,
+                    Test, TestHistory)
 
 
 class TemplateTaskInLine(admin.TabularInline):

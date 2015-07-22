@@ -314,23 +314,23 @@ class JobsListView(TemplateView):
         return super(self.__class__, self).render_to_response(context, **kwargs)
 
     def get_statistic(self, statistic):
-            data = statistic["data"]
-            head = [it for it in data.keys() if it != "sum"]
-            content = "date\t%s" % "\t".join(head)
-            render = OrderedDict()
-            for key, items in data.items():
-                if key == "sum":
-                    continue
-                for it in items:
-                    count = data["sum"][it]
-                    if not render.has_key(it):
-                        render[it] = [100 * items[it] / float(count), ]
-                    else:
-                        render[it].append(100 * items[it] / float(count))
-            for key, value in render.items():
-                row = "\t".join([str("%.2f" % it) for it in value])
-                content += "\n%s\t%s" % (key, row)
-            return content
+        data = statistic["data"]
+        head = [it for it in data.keys() if it != "sum"]
+        content = "date\t%s" % "\t".join(head)
+        render = OrderedDict()
+        for key, items in data.items():
+            if key == "sum":
+                continue
+            for it in items:
+                count = data["sum"][it]
+                if not render.has_key(it):
+                    render[it] = [100 * items[it] / float(count), ]
+                else:
+                    render[it].append(100 * items[it] / float(count))
+        for key, value in render.items():
+            row = "\t".join([str("%.2f" % it) for it in value])
+            content += "\n%s\t%s" % (key, row)
+        return content
 
     def render_to_response(self, context, **response_kwargs):
         # temporary return data for statis
