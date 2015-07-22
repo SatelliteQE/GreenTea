@@ -2,38 +2,34 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-from django.shortcuts import render_to_response, render
-from django.template import RequestContext
-from django.views.generic import TemplateView, View
-from django.http import HttpResponseRedirect, Http404, HttpResponse
-from django.db.models import Count
-from django.db.models import Q
-from django.core.paginator import Paginator
-from django.conf import settings
-from django.core import serializers
-from django.template import Context, Template
-from django.db import connection
-
-from datetime import date, timedelta
-from forms import FilterForm
-# from json import JSONEncoder
-import re
-import os
-import time
-from copy import copy
-import urllib
 import json
 import logging
+import os
+import re
+import time
+import urllib
+from copy import copy
+from datetime import date, timedelta
+
+from bs4 import BeautifulSoup
+from django.conf import settings
+from django.core import serializers
+from django.core.paginator import Paginator
+from django.db import connection
+from django.db.models import Q, Count
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, render_to_response
+from django.template import Context, RequestContext, Template
+from django.views.generic import TemplateView, View
 from taggit.models import Tag
 
 from apps.core.models import *
 from apps.core.utils.beaker import JobGen
+from apps.core.utils.beaker_import import *
 from apps.core.utils.date_helpers import *
-from forms import JobForm, GroupsForm
 from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
-from apps.core.utils.beaker_import import *
-from bs4 import BeautifulSoup
+from forms import FilterForm, GroupsForm, JobForm
 
 if sys.version_info < (2, 7):
     from ordereddict import OrderedDict

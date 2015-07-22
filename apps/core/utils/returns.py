@@ -2,10 +2,12 @@
 
 import os
 import sys
-import xmlrpclib
 import xml.dom.minidom
-from bkr.common.hub import HubProxy
+import xmlrpclib
+
 from django.conf import settings
+
+from bkr.common.hub import HubProxy
 
 
 def return_reservation(rid):

@@ -1,9 +1,12 @@
-from django.db import models
-from apps.core.models import Job, Recipe, Task
-from datetime import datetime
-from apps.core.utils.date_helpers import currentDate2, TZDateTimeField
 import json
+from datetime import datetime
+
+from django.db import models
 from south.modelsinspector import add_introspection_rules
+
+from apps.core.models import Job, Recipe, Task
+from apps.core.utils.date_helpers import TZDateTimeField, currentDate2
+
 add_introspection_rules(
     [], ["^apps\.core\.utils\.date_helpers\.TZDateTimeField"])
 

@@ -5,6 +5,7 @@
 # created: 24.1.2014
 
 from django.core.management.base import BaseCommand
+
 from apps.taskomatic.models import Taskomatic
 
 

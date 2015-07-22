@@ -1,8 +1,8 @@
 # Create your views here.
-from django.views.generic import TemplateView
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
-from django.contrib.auth import login, authenticate
 from django.shortcuts import redirect
+from django.views.generic import TemplateView
 
 
 class LoginView(TemplateView):

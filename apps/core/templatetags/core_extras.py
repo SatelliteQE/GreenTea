@@ -1,7 +1,8 @@
+import datetime
+import re
+
 from django import template
 from django.template.defaultfilters import stringfilter
-import re
-import datetime
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 

@@ -4,9 +4,10 @@ This adds methods for login, logout, and expecting the shell prompt.
 $Id: pxssh.py 513 2008-02-09 18:26:13Z noah $
 """
 
-from pexpect import *
-import pexpect
 import time
+
+import pexpect
+from pexpect import *
 
 __all__ = ['ExceptionPxssh', 'pxssh']
 

@@ -6,9 +6,11 @@
 # Date: 24.9.2013
 
 
-from django.http import HttpResponse
 import json
+
+from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+
 from models import Performance
 
 

@@ -1,9 +1,10 @@
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from apps.waiver.models import Comment
-from apps.core.models import Job, Task, Recipe, Author
+
+from apps.core.models import Author, Job, Recipe, Task
 from apps.taskomatic.models import Task as TaskomaticTask
+from apps.waiver.models import Comment
 
 
 class WaiverForm(forms.ModelForm):

@@ -5,21 +5,23 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-import xmlrpclib
 import os
-import sys
 import re
+import sys
 import time
 import xml.dom.minidom
-from django.core.management.base import BaseCommand, CommandError
-from django.contrib.auth.models import User
-from django.template.defaultfilters import slugify
+import xmlrpclib
+from datetime import datetime, timedelta
+from optparse import make_option
+
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand, CommandError
+from django.template.defaultfilters import slugify
+
 from apps.core.models import *
 from apps.core.utils.beaker import *
 from apps.core.utils.date_helpers import currentDate
-from datetime import datetime, timedelta
-from optparse import make_option
 
 logger = logging.getLogger(__name__)
 

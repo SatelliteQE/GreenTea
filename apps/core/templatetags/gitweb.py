@@ -1,6 +1,8 @@
 import re
+
 from django import template
 from django.conf import settings
+
 from apps.core.models import Test, TestHistory
 
 register = template.Library()

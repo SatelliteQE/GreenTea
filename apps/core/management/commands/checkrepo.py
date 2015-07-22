@@ -10,9 +10,11 @@
 # Date: 20.07.2014
 
 import logging
-from django.core.management.base import BaseCommand
-from apps.core.models import Git
+
 from django.conf import settings
+from django.core.management.base import BaseCommand
+
+from apps.core.models import Git
 
 logger = logging.getLogger(__name__)
 

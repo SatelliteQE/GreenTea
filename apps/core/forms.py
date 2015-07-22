@@ -1,6 +1,8 @@
-from django import forms
 import logging
-from models import JobTemplate, GroupTemplate, Test, GroupTestTemplate
+
+from django import forms
+
+from models import GroupTemplate, GroupTestTemplate, JobTemplate, Test
 
 logger = logging.getLogger(__name__)
 

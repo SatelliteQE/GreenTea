@@ -9,24 +9,25 @@
 # Email: mkorbel@redhat.com
 # Date: 20.07.2014
 
-import xmlrpclib
+import logging
 import os
-import sys
 import re
+import subprocess
+import sys
+import time
 import urllib2
 import xml.dom.minidom
-import time
-import logging
-import pxssh
-import subprocess
+import xmlrpclib
 from datetime import datetime, timedelta
-from django.conf import settings
-from django.template.defaultfilters import slugify
-from django.template import Context, Template
-from apps.core.models import JobTemplate, RecipeTemplate, TaskTemplate
-from apps.core.models import Job, Recipe, Test, Task
-from apps.core.models import System, Arch, Distro, Author, PASS, RETURNWHENGREEN
 
+import pxssh
+from django.conf import settings
+from django.template import Context, Template
+from django.template.defaultfilters import slugify
+
+from apps.core.models import (PASS, RETURNWHENGREEN, Arch, Author, Distro, Job,
+                              JobTemplate, Recipe, RecipeTemplate, System,
+                              Task, TaskTemplate, Test)
 
 logger = logging.getLogger(__name__)
 
@@ -384,4 +385,3 @@ def parse_recipe(recipexml, job, guestrecipe=None):
             if recipe.result == PASS and job.template.event_finish == RETURNWHENGREEN:
                 bk = Beaker()
                 bk.return2beaker(recipe)
-

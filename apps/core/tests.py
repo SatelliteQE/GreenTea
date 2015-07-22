@@ -5,12 +5,14 @@ when you run "manage.py test".
 Replace this with more appropriate tests for your application.
 """
 
+import difflib
+
 from django.test import TestCase
 from django.test.client import Client
-from apps.core.utils.beaker_import import Parser
+
 from apps.core.models import RecipeTemplate
+from apps.core.utils.beaker_import import Parser
 from apps.core.utils.job_generator import JobGen, render_job
-import difflib
 
 
 class ImportTest(TestCase):

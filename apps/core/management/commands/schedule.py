@@ -9,10 +9,12 @@
 # Email: mkorbel@redhat.com
 # Date: 20.07.2014
 
-import time
 import logging
+import time
 from optparse import make_option
+
 from django.core.management.base import BaseCommand
+
 from apps.core.models import JobTemplate
 from apps.core.utils.beaker import Beaker
 from apps.taskomatic.models import TaskPeriodSchedule

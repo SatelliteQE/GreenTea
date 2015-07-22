@@ -6,18 +6,18 @@
 # Date: 24.9.2013
 
 import os
-import sys
 import re
-import git
+import sys
 import urllib2
 import xml.dom.minidom
 from datetime import datetime, timedelta
 from optparse import make_option
 
-from django.core.management.base import BaseCommand, CommandError
-from django.contrib.auth.models import User
-from django.template.defaultfilters import slugify
+import git
 from django.conf import settings
+from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand, CommandError
+from django.template.defaultfilters import slugify
 
 from apps.core.models import *
 from apps.core.utils.beaker_import import *

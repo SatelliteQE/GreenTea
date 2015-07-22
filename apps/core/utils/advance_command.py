@@ -16,8 +16,9 @@ Example:
             # additional option groups...
         )
 """
-from django.core.management import BaseCommand, OptionParser
 from optparse import OptionGroup
+
+from django.core.management import BaseCommand, OptionParser
 
 
 def make_option_group(title, description=None, option_list=None):

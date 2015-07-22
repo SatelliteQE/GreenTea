@@ -5,15 +5,17 @@
 # Email: mkorbel@redhat.com
 # Date: 20.07.2014
 
-import time
 import logging
-from texttable import Texttable
-from optparse import make_option
-from apps.core.models import JobTemplate, Job, Recipe
-from apps.core.utils.beaker import Beaker
-from apps.core.utils.advance_command import AdvancedCommand, make_option_group
-from apps.taskomatic.models import TaskPeriodSchedule
+import time
 from datetime import datetime
+from optparse import make_option
+
+from texttable import Texttable
+
+from apps.core.models import Job, JobTemplate, Recipe
+from apps.core.utils.advance_command import AdvancedCommand, make_option_group
+from apps.core.utils.beaker import Beaker
+from apps.taskomatic.models import TaskPeriodSchedule
 
 logger = logging.getLogger(__name__)
 

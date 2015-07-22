@@ -7,23 +7,24 @@
 # Email: mkorbel@redhat.com
 # Date: 20.07.2014
 
+import inspect
+import logging
 import re
 import sys
 import time
-import logging
-import inspect
 import traceback
-from croniter import croniter
 from datetime import datetime, timedelta
-from single_process import single_process
-from django.db import models
+
+from croniter import croniter
 from django.conf import settings
 # from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, handle_default_options
+from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from apps.taskomatic.utils.stream2logger import StreamToLogger
-from apps.core.utils.date_helpers import TZDateTimeField, toLocalZone
+from single_process import single_process
 
+from apps.core.utils.date_helpers import TZDateTimeField, toLocalZone
+from apps.taskomatic.utils.stream2logger import StreamToLogger
 
 logger = logging.getLogger('commands')
 sys.stderr = StreamToLogger(logger, logging.WARN)  # Redirect stderr to logger

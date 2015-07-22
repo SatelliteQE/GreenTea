@@ -1,6 +1,7 @@
-from django.contrib import admin
-from models import *
 import reversion
+from django.contrib import admin
+
+from models import *
 
 
 class TemplateTaskInLine(admin.TabularInline):

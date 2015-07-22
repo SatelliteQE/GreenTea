@@ -5,23 +5,25 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-import urllib2
-import os
-import sys
-import re
-import git
 import logging
-import gitconfig
-from django.db import models
+import os
+import re
+import sys
+import urllib2
 from datetime import datetime
+
+import git
+import gitconfig
 from django.conf import settings
-from django.db.models import Count
-from django.core.urlresolvers import reverse
-from apps.core.utils.date_helpers import toUTC, currentDate, TZDateTimeField
-from taggit.managers import TaggableManager
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
-from apps.core.signals import recipe_finished, recipe_changed
+from django.core.urlresolvers import reverse
+from django.db import models
+from django.db.models import Count
+from taggit.managers import TaggableManager
+
+from apps.core.signals import recipe_changed, recipe_finished
+from apps.core.utils.date_helpers import TZDateTimeField, currentDate, toUTC
 
 logger = logging.getLogger(__name__)
 
