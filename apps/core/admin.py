@@ -5,7 +5,7 @@ from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Git,
                     GroupOwner, GroupTemplate, GroupTestTemplate, Job,
                     JobTemplate, PhaseLabel, PhaseResult, Recipe,
                     RecipeTemplate, System, Task, TaskRoleEnum, TaskTemplate,
-                    Test, TestHistory)
+                    Test, TestHistory, GroupTaskTemplate)
 
 
 class TemplateTaskInLine(admin.TabularInline):

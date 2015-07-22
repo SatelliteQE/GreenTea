@@ -181,19 +181,7 @@ SOUTH_MIGRATION_MODULES = {
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
-    'formatters': {
-        'verbose': {
-            'format': '%(asctime)s %(levelname)s %(module)s.%(funcName)s'
-                      '(line no. %(lineno)d): %(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
-        },
-        'simple': {
-            'format': '%(levelname)s %(module)s.%(funcName)s(%(lineno)d): '
-                      '%(message)s',
-            'datefmt': '%Y-%m-%d %H:%M:%S'
-        },
-    },
+    'disable_existing_loggers': False,
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
@@ -203,14 +191,8 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler',
-            'include_html': True,
-        },
-        'console': {
-            'level': 'DEBUG',  # 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple'
-        },
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
     },
     'loggers': {
         'django.request': {
@@ -218,11 +200,7 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
-    },
-    'root': {
-        'handlers': ['mail_admins'],
-        'level': 'INFO'
-    },
+    }
 }
 
 KRB5_TEST_USER = "username"
