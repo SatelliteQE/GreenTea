@@ -8,7 +8,6 @@ from django.core.management.base import BaseCommand
 
 from apps.taskomatic.models import Taskomatic
 
-
 class Command(BaseCommand):
     help = ('Automatization for running task')
     requires_model_validation = True
