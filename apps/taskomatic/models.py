@@ -37,7 +37,7 @@ class TaskPeriodSchedule(models.Model):
     counter = models.BigIntegerField(default=0)
 
     def __unicode__(self):
-        return self.title
+        return "[%d] %s" % (self.counter, self.title)
 
 
 class TaskPeriod(models.Model):

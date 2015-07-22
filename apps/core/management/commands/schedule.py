@@ -53,14 +53,12 @@ class Command(BaseCommand):
                     dest='tags',
                     default=False,
                     help='Filter schedule job by template tags'),
-        make_option('--schedule_id',
-                    dest='schedule_id',
-                    default=False,
-                    help='Set period schedule run'),
     )
 
     def handle(self, *args, **kwargs):
         bk = Beaker()
+        label = None
+
         filter = dict()
         if "ids" in kwargs and kwargs["ids"]:
             for it in kwargs["ids"].split():
@@ -82,8 +80,10 @@ class Command(BaseCommand):
             for xmlfile in cfg_files:
                 print bk.scheduleFromXmlFile(xmlfile)
         if "daily" in kwargs and kwargs["daily"]:
+            label = "daily"
             filter["period"] = JobTemplate.DAILY
         if "weekly" in kwargs and kwargs["weekly"]:
+            label = "weekly"
             filter["period"] = JobTemplate.WEEKLY
         if "tags" in kwargs and kwargs["tags"]:
             filter["tags__name__in"] = kwargs["tags"].split()
@@ -91,26 +91,25 @@ class Command(BaseCommand):
             filter["is_enable"] = True
             jobTs = JobTemplate.objects.filter(**filter).distinct()
             # set schedule period run
-            period = None
-            if "schedule_id" in kwargs and kwargs["schedule_id"]:
-                schedule_id = int(kwargs["schedule_id"])
-                try:
-                    schedule = TaskPeriodSchedule.objects.get(id=schedule_id)
-                except TaskPeriodSchedule.DoesNotExist:
-                    schedule = TaskPeriodSchedule.objects.create(
-                        title="default",
-                    )
+            try:
+                count = TaskPeriodSchedule.objects.filter(title=label).count()
+                schedule = TaskPeriodSchedule.objects.get(
+                    title=label, counter=count)
+            except TaskPeriodSchedule.DoesNotExist:
+                schedule = TaskPeriodSchedule.objects.create(
+                    title=label,
+                    counter=count,
+                )
 
             logger.info("%s JobTemplates are prepared." % len(jobTs))
             for jobT in jobTs:
-                bk.jobSchedule(jobT)
+                job = bk.jobSchedule(jobT, simulate=True)
+                if schedule:
+                    job.schedule = schedule
+                    job.save()
                 # Beaker guys told us we are causing too big load,
                 # so adding this sleep
                 # FIXME only temporary, rewrite code for scheduling to tttt
                 # taskomatic
                 time.sleep(45)
                 return
-#        if cfg_tpl:
-#            for it in cfg_tpl:
-#                jb = JobTemplate.objects.get(id=int(it))
-#                print jb, tmp_path

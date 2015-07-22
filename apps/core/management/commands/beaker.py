@@ -36,6 +36,10 @@ class Command(AdvancedCommand):
                             dest='simulate',
                             default=False,
                             help='Simulate action, use it with --fullinfo.'),
+                make_option('--label',
+                            dest='label',
+                            default=False,
+                            help='Name of schedule label'),
     )
     option_groups = (
         # SCHEDULE
@@ -199,7 +203,7 @@ class Command(AdvancedCommand):
                             default="",
                             help='The comment for canceling of jobs.'),
             ),
-        ),
+    ),
     )
 
     def usage(self, subcommand):
@@ -238,10 +242,13 @@ class Command(AdvancedCommand):
 
     def __scheduleActions(self, args, kwargs):
         filter = dict()
+        label = kwargs.get("label")
         if kwargs.get("daily"):
             filter["period"] = JobTemplate.DAILY
+            label = "daily"
         if kwargs.get("weekly"):
             filter["period"] = JobTemplate.WEEKLY
+            label = "weekly"
         if kwargs.get("tags"):
             filter["tags__name__in"] = kwargs.get("tags", "").split(",")
             if len(filter["tags__name__in"]) == 0:
@@ -264,6 +271,7 @@ class Command(AdvancedCommand):
                         title="%s" % datetime.now(), counter=coutner)
         if len(filter) > 0:
             self.__scheduleTemplates(filter,
+                                     label,
                                      kwargs.get("info"),
                                      kwargs.get("simulate"),
                                      kwargs.get("reservsys"))
@@ -282,19 +290,30 @@ class Command(AdvancedCommand):
         logger.error("Unsupported parameters")
         return False
 
-    def __scheduleTemplates(self, filter, fullInfo, simulate, reserve):
+    def __scheduleTemplates(self, filter, label, fullInfo, simulate, reserve):
         jobTs = JobTemplate.objects.filter(**filter).distinct()
         logger.info("%s JobTemplates are prepared." % len(jobTs))
         if fullInfo:
             table = Texttable()
             table.set_deco(Texttable.HEADER)
             table.header(["Job", "Whiteboard", "Tags"])
+
+        try:
+            count = TaskPeriodSchedule.objects.filter(title=label).count()
+            schedule = TaskPeriodSchedule.objects.get(
+                title=label, counter=count)
+        except TaskPeriodSchedule.DoesNotExist:
+            schedule = TaskPeriodSchedule.objects.create(
+                title=label,
+                counter=count,
+            )
+
         for jobT in jobTs:
             job = ""
             if not simulate:
                 job = self.beaker.jobSchedule(jobT, reserve)
                 if job:
-                    job.schedule = self.schedule
+                    job.schedule = schedule
                     job.save()
                     logger.info("%s job was successful scheduled."
                                 % job.uid)

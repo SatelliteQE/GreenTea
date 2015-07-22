@@ -24,6 +24,7 @@ from taggit.managers import TaggableManager
 
 from apps.core.signals import recipe_changed, recipe_finished
 from apps.core.utils.date_helpers import TZDateTimeField, currentDate, toUTC
+from apps.taskomatic.models import TaskPeriodSchedule
 
 logger = logging.getLogger(__name__)
 
@@ -821,6 +822,7 @@ class Job(models.Model):
     template = models.ForeignKey(JobTemplate)
     uid = models.CharField("Job ID", max_length=12, unique=True)
     date = TZDateTimeField(default=datetime.now)
+    schedule = models.ForeignKey(TaskPeriodSchedule, null=True, blank=True)
     is_running = models.BooleanField(default=False)
     # this is for checking (no used for data from beaker)
     is_finished = models.BooleanField(default=False)

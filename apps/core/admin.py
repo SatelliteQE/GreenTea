@@ -1,6 +1,13 @@
+#!/bin/python
+# -*- coding: utf-8 -*-
+
+# Author: Pavel Studenik
+# Email: pstudeni@redhat.com
+# Date: 24.9.2013
+
 import reversion
 from django.contrib import admin
-
+from django.core.urlresolvers import reverse
 from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Git,
                     GroupOwner, GroupTemplate, GroupTestTemplate, Job,
                     JobTemplate, PhaseLabel, PhaseResult, Recipe,

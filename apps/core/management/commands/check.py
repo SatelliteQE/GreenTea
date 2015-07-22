@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 if sys.version_info >= (2, 7, 9):
     import ssl
 
+
 class Command(BaseCommand):
     help = ("Load data from beaker and save to db")
     requires_model_validation = True
@@ -68,7 +69,7 @@ class Command(BaseCommand):
 def init(*args, **kwargs):
     progress = CheckProgress()
     if settings.BEAKER_SERVER.startswith("http"):
-        server_url =  "%s/RPC2" % settings.BEAKER_SERVER
+        server_url = "%s/RPC2" % settings.BEAKER_SERVER
     else:
         server_url = "https://%s/RPC2" % settings.BEAKER_SERVER
 
@@ -78,7 +79,7 @@ def init(*args, **kwargs):
         # certificate verify failed (_ssl.c:590)
         if sys.version_info >= (2, 7, 9):
             client = xmlrpclib.Server(server_url, verbose=0,
-                                  context=ssl._create_unverified_context())
+                                      context=ssl._create_unverified_context())
 
     # key = client.auth.login_password(USER, PASS)
     # key = client.auth.login_krb(USER, PASS)
