@@ -1,6 +1,7 @@
 # Django settings for tttt project.
 
 import os
+
 from django.conf import global_settings
 
 ROOT_PATH = os.path.abspath("%s/%s/" %

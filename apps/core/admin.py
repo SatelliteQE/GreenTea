@@ -8,11 +8,12 @@
 import reversion
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+
 from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Git,
-                    GroupOwner, GroupTemplate, GroupTestTemplate, Job,
-                    JobTemplate, PhaseLabel, PhaseResult, Recipe,
-                    RecipeTemplate, System, Task, TaskRoleEnum, TaskTemplate,
-                    Test, TestHistory, GroupTaskTemplate)
+                    GroupOwner, GroupTaskTemplate, GroupTemplate,
+                    GroupTestTemplate, Job, JobTemplate, PhaseLabel,
+                    PhaseResult, Recipe, RecipeTemplate, System, Task,
+                    TaskRoleEnum, TaskTemplate, Test, TestHistory)
 
 
 class TemplateTaskInLine(admin.TabularInline):

@@ -15,6 +15,21 @@
   </div>
 </div>
 
+<h1>Network <span style="color:red">(in progress)</span></h1>
+<table class="table table-striped">
+    <tr>
+        <th>Hostname</th>
+        {% for it in networking.labels %}<th>{{ it }}</th>{% endfor %}
+    </tr>
+    {% for host, value in networking.data.items %}
+    <tr><td>{{ host }}</td>
+    {% for key, it in value.items %}
+    <td>{{ it }}</td>
+    {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+
 <h1>Waiver</h1>
 
 <table class="table table-striped">

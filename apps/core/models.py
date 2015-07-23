@@ -71,6 +71,16 @@ EVENT_FINISH_ENUM = (
 )
 
 
+class EnumResult:
+
+    def __init__(self):
+        self.enums = dict(RESULT_CHOICES)
+
+    def get(self, value):
+        if type(value) == int:
+            return self.enums.get(value)
+
+
 class Arch(models.Model):
     name = models.CharField(max_length=32, unique=True)
 

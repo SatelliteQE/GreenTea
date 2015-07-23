@@ -1,9 +1,11 @@
-from django.conf.urls import patterns, include, url
 from django.conf import settings
+from django.conf.urls import include, patterns, url
 from django.contrib import admin
+
+import apps.api.urls
 from apps.core.views import *
 from apps.kerberos.views import *
-import apps.api.urls
+
 admin.autodiscover()
 
 urlpatterns = patterns('',

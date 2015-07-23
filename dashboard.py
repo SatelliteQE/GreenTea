@@ -13,23 +13,24 @@ from grappelli.dashboard.utils import get_admin_site_name
 
 
 class CustomIndexDashboard(Dashboard):
+
     """
     Custom index dashboard for www.
     """
-    
+
     def init_with_context(self, context):
         site_name = get_admin_site_name(context)
-        
+
         self.children.append(modules.Group(
             _('Group: Applications'),
             column=1,
             collapsible=True,
-            children = [
+            children=[
                 modules.AppList(
                     _('Templates'),
                     column=1,
                     collapsible=False,
-                    models=( 
+                    models=(
                         'apps.core.models.Test',
                         'apps.core.models.GroupTemplate',
                         'apps.core.models.DistroTemplate',
@@ -44,7 +45,7 @@ class CustomIndexDashboard(Dashboard):
                     _('Hisotry'),
                     column=1,
                     collapsible=False,
-                    models=( 
+                    models=(
                         'apps.waiver.models.Comment',
                         'apps.core.models.TestHistory',
                         'apps.core.models.CheckProgress',
@@ -56,7 +57,7 @@ class CustomIndexDashboard(Dashboard):
                     _('Results'),
                     column=1,
                     collapsible=False,
-                    models=( 
+                    models=(
                         'apps.core.models.Job',
                         'apps.core.models.Recipe',
                         'apps.core.models.Task',
@@ -72,12 +73,12 @@ class CustomIndexDashboard(Dashboard):
                     _('Performence'),
                     column=1,
                     collapsible=False,
-                    models=( 
+                    models=(
                         'apps.api.models.Performance',
-                        ))
+                    ))
             ]
         ))
-        
+
         # append an app list module for "Administration"
         self.children.append(modules.ModelList(
             _('Administration'),
@@ -103,7 +104,7 @@ class CustomIndexDashboard(Dashboard):
                 },
             ]
         ))
-        
+
         # append a recent actions module
         self.children.append(modules.RecentActions(
             _('Recent Actions'),

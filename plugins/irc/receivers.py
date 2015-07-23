@@ -6,7 +6,8 @@
 # Year: 2015
 
 from django.dispatch import receiver
-from apps.core.signals import recipe_finished, recipe_changed
+
+from apps.core.signals import recipe_changed, recipe_finished
 
 
 @receiver(recipe_finished)
