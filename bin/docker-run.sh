@@ -27,9 +27,19 @@ function check {
     done
 }
 
+
 HOME=/data/GreenTea
 source $HOME/env/bin/activate && cd $HOME
-schedule &
-check &
+
+# Set local settings for running instance
+# Beaker's variables
+echo "BEAKER_SERVER=\"$BEAKER_SERVER\"" >> $HOME/tttt/settings/local.py
+echo "BEAKER_OWNER=\"$BEAKER_USER\"" >> $HOME/tttt/settings/local.py
+echo "BEAKER_PASS=\"$BEAKER_PASS\"" >> $HOME/tttt/settings/local.py
+
+# Run all services of Green Tea
+schedule & # Schedule jobs
+check & # Check all running jobs
+# Run main web service
 python $HOME/manage.py runserver 0.0.0.0:8000
 
