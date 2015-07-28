@@ -8,4 +8,5 @@ libxml2-devel
 graphviz-devel
 python-virtualenv
 beaker-common
+beaker-client
 gcc

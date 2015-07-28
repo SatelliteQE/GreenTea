@@ -17,8 +17,10 @@ USER greentea
 ENV HOME /data/GreenTea
 
 RUN virtualenv $HOME/env \
-    && . $HOME/env/bin/activate \
-    && pip install -r $HOME/requirement/requirement.txt
+    && cd $HOME \
+    && . env/bin/activate \
+    && pip install -r $HOME/requirement/requirement.txt \
+    && git reset --hard && git pull
 
 # create default value for running service
 RUN python -c 'import random; print "import os\nfrom basic import *\nDEBUG=True\nSECRET_KEY=\"" + "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]) + "\"" ' > GreenTea/tttt/settings/production.py 
