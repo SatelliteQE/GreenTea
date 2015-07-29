@@ -101,9 +101,10 @@ class Command(BaseCommand):
                     counter=count,
                 )
 
-            logger.info("%s JobTemplates are prepared." % len(jobTs))
+            logger.info("%s JobTemplates are prepared by schedule %s." % (len(jobTs), schedule))
             for jobT in jobTs:
                 job = bk.jobSchedule(jobT, simulate=True)
+                logger.info("Job is created: %s" % job)
                 if schedule:
                     job.schedule = schedule
                     job.save()

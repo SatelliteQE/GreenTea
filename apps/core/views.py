@@ -748,17 +748,20 @@ class TestsListView(TemplateView):
 
         if self.filters.get('onlyfail', False):
             context["tests_bad"] = tests[:10]
-        context['data'] = data
-        context["owners"] = owners
-        context["label"] = dates_label
-        context['tests'] = testlist
-        context["paginator"] = paginator
-        context['progress'] = progress
-        context["stat"] = stat
-        context["history"] = history
-        context["urlstring"] = urllib.urlencode(dict(urllist))
-        context['repos'] = Git.objects.all().order_by('name')
-        context['groups'] = GroupOwner.objects.all().order_by('name')
+
+        context.update({
+            "data": data,
+            "owners": owners,
+            "label": dates_label,
+            "tests": testlist,
+            "paginator": paginator,
+            "progress": progress,
+            "stat": stat,
+            "history": history,
+            "urlstring": urllib.urlencode(dict(urllist)),
+            "repos": Git.objects.all().order_by('name'),
+            "groups": GroupOwner.objects.all().order_by('name'),
+            })
         return context
 
 
@@ -843,9 +846,11 @@ class JobDetailView(TemplateView):
         paginator = Paginator(jobs_list, settings.PAGINATOR_OBJECTS_ONPAGE)
         jobs = paginator.page(int(self.request.GET.get('page', 1)))
 
-        context["jobtemplate"] = oJobTmp
-        context["jobs"] = jobs
-        context['paginator'] = paginator
+        context.update({
+            "jobtemplate": oJobTmp,
+            "jobs": jobs,
+            "paginator": paginator,
+            })
         return context
 
 
@@ -863,9 +868,11 @@ class TestDetailView(TemplateView):
         paginator = Paginator(task_list, settings.PAGINATOR_OBJECTS_ONPAGE)
         tasks = paginator.page(int(self.request.GET.get('page', 1)))
 
-        context["jobtemplate"] = oTest
-        context["tasks"] = tasks
-        context['paginator'] = paginator
+        context.update({
+            "jobtemplate": oTest,
+            "tasks": tasks,
+            "paginator": paginator
+            })
         return context
 
 
@@ -896,8 +903,5 @@ class JobsDiffView(TemplateView):
 
         if self.forms['jobs'].is_valid():
             context["diffs"] = self.forms['jobs'].compare()
-
-            for it in context["diffs"]:
-                print it
 
         return self.render_to_response(context)
