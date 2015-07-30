@@ -203,7 +203,7 @@ class Command(AdvancedCommand):
                             default="",
                             help='The comment for canceling of jobs.'),
             ),
-    ),
+        ),
     )
 
     def usage(self, subcommand):
@@ -242,13 +242,16 @@ class Command(AdvancedCommand):
 
     def __scheduleActions(self, args, kwargs):
         filter = dict()
-        label = kwargs.get("label")
+        if kwargs.get("label"):
+            label = kwargs.get("label")
+            filter["schedule__label"] = label
+
         if kwargs.get("daily"):
             filter["period"] = JobTemplate.DAILY
-            label = "daily"
+            label = "daily-automation"
         if kwargs.get("weekly"):
             filter["period"] = JobTemplate.WEEKLY
-            label = "weekly"
+            label = "weekly-automation"
         if kwargs.get("tags"):
             filter["tags__name__in"] = kwargs.get("tags", "").split(",")
             if len(filter["tags__name__in"]) == 0:

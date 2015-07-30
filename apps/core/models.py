@@ -24,7 +24,7 @@ from taggit.managers import TaggableManager
 
 from apps.core.signals import recipe_changed, recipe_finished
 from apps.core.utils.date_helpers import TZDateTimeField, currentDate, toUTC
-from apps.taskomatic.models import TaskPeriodSchedule
+from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 
 logger = logging.getLogger(__name__)
 
@@ -565,6 +565,7 @@ class JobTemplate(models.Model):
     event_finish = models.SmallIntegerField(
         choices=EVENT_FINISH_ENUM, default=RETURN)
     period = models.SmallIntegerField(choices=PERIOD_ENUM, default=DAILY)
+    schedule = models.ForeignKey(TaskPeriod, null=True, blank=True)
     position = models.SmallIntegerField(default=0)
     grouprecipes = models.CharField(max_length=255, null=False, blank=True,
                                     help_text="example: {{arch}} {{whiteboard|nostartsdate}}")

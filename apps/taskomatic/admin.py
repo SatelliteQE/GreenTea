@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from models import (Task, TaskPeriodSchedule, TaskPeriod)
+from models import Task, TaskPeriod, TaskPeriodSchedule
 
 
 class TaskAdmin(admin.ModelAdmin):

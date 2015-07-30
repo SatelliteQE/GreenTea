@@ -19,7 +19,8 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
 from django.template.defaultfilters import slugify
 
-from apps.core.models import (RecipeTemplate, DistroTemplate, Arch, Test, JobTemplate, TaskTemplate)
+from apps.core.models import (Arch, DistroTemplate, JobTemplate,
+                              RecipeTemplate, TaskTemplate, Test)
 
 
 class Parser:

@@ -13,6 +13,7 @@ from datetime import date, timedelta
 
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.core.paginator import Paginator
 from django.db import connection
@@ -48,6 +49,7 @@ def render_lable(data, rule):
     return template.render(context)
 
 
+@login_required
 def import_xml(request):
     # TODO: rewrite to standard View Class
     data = {}
@@ -761,7 +763,7 @@ class TestsListView(TemplateView):
             "urlstring": urllib.urlencode(dict(urllist)),
             "repos": Git.objects.all().order_by('name'),
             "groups": GroupOwner.objects.all().order_by('name'),
-            })
+        })
         return context
 
 
@@ -850,7 +852,7 @@ class JobDetailView(TemplateView):
             "jobtemplate": oJobTmp,
             "jobs": jobs,
             "paginator": paginator,
-            })
+        })
         return context
 
 
@@ -872,7 +874,7 @@ class TestDetailView(TemplateView):
             "jobtemplate": oTest,
             "tasks": tasks,
             "paginator": paginator
-            })
+        })
         return context
 
 

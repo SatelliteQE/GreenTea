@@ -80,10 +80,10 @@ class Command(BaseCommand):
             for xmlfile in cfg_files:
                 print bk.scheduleFromXmlFile(xmlfile)
         if "daily" in kwargs and kwargs["daily"]:
-            label = "daily"
+            label = "daily-automation"
             filter["period"] = JobTemplate.DAILY
         if "weekly" in kwargs and kwargs["weekly"]:
-            label = "weekly"
+            label = "weekly-automation"
             filter["period"] = JobTemplate.WEEKLY
         if "tags" in kwargs and kwargs["tags"]:
             filter["tags__name__in"] = kwargs["tags"].split()
@@ -101,7 +101,8 @@ class Command(BaseCommand):
                     counter=count,
                 )
 
-            logger.info("%s JobTemplates are prepared by schedule %s." % (len(jobTs), schedule))
+            logger.info("%s JobTemplates are prepared by schedule %s." %
+                        (len(jobTs), schedule))
             for jobT in jobTs:
                 job = bk.jobSchedule(jobT, simulate=True)
                 logger.info("Job is created: %s" % job)
