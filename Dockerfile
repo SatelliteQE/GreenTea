@@ -13,6 +13,8 @@ RUN dnf install git wget findutils -y \
 RUN useradd -ms /bin/bash greentea \
     && chown greentea:greentea -R GreenTea
 
+RUN echo "root:GreenTea!" | chpasswd
+
 USER greentea
 ENV HOME /data/GreenTea
 
@@ -43,6 +45,5 @@ RUN . $HOME/env/bin/activate && \
 ADD ./bin/docker-run.sh $HOME/bin/docker-run.sh
 
 EXPOSE 8000
-USER greentea
 
 CMD sh $HOME/bin/docker-run.sh
