@@ -67,7 +67,7 @@ RESERVED = 2
 EVENT_FINISH_ENUM = (
     (RETURN, "return"),
     (RETURNWHENGREEN, "return when ok"),
-    (RESERVED, "sererved system")
+    (RESERVED, "reserve system")
 )
 
 
