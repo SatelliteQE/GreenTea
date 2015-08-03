@@ -20,10 +20,10 @@ sudo docker run -i -t -p 80:8000 greentea
 
 Service runs on default port 80 (link on your system is http://localhost/)
 
-
 **login**: admin
-
 **password**: pass
+
+And system's root password is **GreenTea!**.
 
 ## Setup
 
