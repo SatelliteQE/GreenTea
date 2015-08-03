@@ -64,7 +64,7 @@ class Beaker:
         auth = ""
         if settings.BEAKER_OWNER:
             auth = " --username=%s --password=%s --hub=%s" % (settings.BEAKER_OWNER,
-                                                     settings.BEAKER_PASS, settings.BEAKER_SERVER)
+                                                              settings.BEAKER_PASS, settings.BEAKER_SERVER)
         command = "bkr %s %s%s" % (command, param, auth)
         logger.debug(command)
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)

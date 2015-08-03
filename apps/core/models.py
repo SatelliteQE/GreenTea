@@ -921,7 +921,7 @@ class Recipe(models.Model):
                            for it in RESULT_CHOICES if it[1] == value.lower()][0]
         except IndexError:
             logger.error("IndexError: result %s %s %s" %
-                             (value, self.result, RESULT_CHOICES))
+                         (value, self.result, RESULT_CHOICES))
 
     def get_result(self):
         if self.statusbyuser == WAIVED:
@@ -935,7 +935,7 @@ class Recipe(models.Model):
                            for it in self.STATUS_CHOICES if it[1] == value][0]
         except IndexError:
             logger.error("IndexError: status %s %s %s" %
-                             (value, self.status, self.STATUS_CHOICES))
+                         (value, self.status, self.STATUS_CHOICES))
             return
 
         if status != self.status:
@@ -1093,7 +1093,7 @@ class Task(models.Model):
                            for it in RESULT_CHOICES if it[1] == value.lower()][0]
         except IndexError:
             logger.error("IndexError: Task result %s %s %s" %
-                             (value, self.result, RESULT_CHOICES))
+                         (value, self.result, RESULT_CHOICES))
 
     def get_result(self):
         if self.statusbyuser == WAIVED:
@@ -1106,7 +1106,7 @@ class Task(models.Model):
                            for it in Recipe.STATUS_CHOICES if it[1].lower() == value.lower()][0]
         except IndexError:
             logger.error("IndexError: Task status %s %s %s" %
-                             (value, self.status, Recipe.STATUS_CHOICES))
+                         (value, self.status, Recipe.STATUS_CHOICES))
 
     def is_completed(self):
         return (self.status == Recipe.COMPLETED)

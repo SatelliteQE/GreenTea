@@ -22,6 +22,8 @@ from django.template.defaultfilters import slugify
 from apps.core.models import (Arch, DistroTemplate, JobTemplate,
                               RecipeTemplate, TaskTemplate, Test)
 
+logger = logging.getLogger(__name__)
+
 
 class Parser:
 
@@ -36,8 +38,7 @@ class Parser:
                 self.status = True
 
         except xml.parsers.expat.ExpatError:
-            self.error = ("ERROR: %s isn't valid XML file" % file)
-            print(self.error)
+            logger.error("%s isn't valid XML file" % file)
             self.status = False
 
     def recipe(self, xmlrecipe, is_guestrecipe=None):
@@ -63,7 +64,6 @@ class Parser:
                     name = param.getAttribute("name")
                     value = param.getAttribute("value")
                     parameters.append((name, value))
-                    # print name, value
                 tests.append(
                     [item.getAttribute("name"), parameters, item.getAttribute("role")])
             elif item.nodeName == "hostRequires":
@@ -108,8 +108,6 @@ class Parser:
                                         "value")
                     if key.nodeName == "distro_virt":
                         rt.hmv = True
-            # else:
-            #    print item
 
         rt.distro, status = DistroTemplate.objects.get_or_create(
             name=distro_name, distroname=distro_name,
@@ -148,7 +146,6 @@ class Parser:
             return False
         self.job = None
         for xmljob in self.content_xml.childNodes:
-            print xmljob.nodeName
             for it in xmljob.childNodes:
                 if it.nodeName == "whiteboard":
                     whiteboard = it.firstChild.nodeValue.strip()

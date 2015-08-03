@@ -201,7 +201,7 @@ class Taskomatic:
             if task.common in self.hooks:
                 task.run(self.hooks[task.common], self.logHandler)
             else:
-                print "operation '%s' is not supported" % task.common
+                logger.warning("operation '%s' is not supported" % task.common)
 
     def __cleanOldTasks(self):
         # delete old tasks with status DONE, keep only last 300 tasks

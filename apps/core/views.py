@@ -303,7 +303,7 @@ class JobsListView(TemplateView):
                 self.forms['waiveFrom'].save()
                 self.forms['waiveFrom'].clean()
             else:
-                print self.forms['waiveFrom'].errors
+                logger.warning(self.forms['waiveFrom'].errors)
 
     def get(self, request, *args, **kwargs):
         self.filterEvent(request.GET)
@@ -564,7 +564,7 @@ class TestsListView(TemplateView):
                 self.forms['waiveFrom'].save()
                 self.forms['waiveFrom'] = WaiverForm()
             else:
-                print self.forms['waiveFrom'].errors
+                logger.warning(self.forms['waiveFrom'].errors)
 
     def get(self, request, *args, **kwargs):
         self.filterEvent(request.GET, *args, **kwargs)
@@ -707,7 +707,7 @@ class TestsListView(TemplateView):
 
             test = data[id_email]["tests"][it["test__name"]]
             # FIXME - better solution - duplicate code in models and here
-            # print it
+
             lb = render_lable({
                 "arch": it["recipe__arch__name"],
                 "distro": it["recipe__distro__name"],
