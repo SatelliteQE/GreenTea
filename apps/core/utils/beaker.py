@@ -63,9 +63,10 @@ class Beaker:
         """
         auth = ""
         if settings.BEAKER_OWNER:
-            auth = " --username=%s --password=%s" % (settings.BEAKER_OWNER,
-                                                     settings.BEAKER_PASS)
+            auth = " --username=%s --password=%s --hub=%s" % (settings.BEAKER_OWNER,
+                                                     settings.BEAKER_PASS, settings.BEAKER_SERVER)
         command = "bkr %s %s%s" % (command, param, auth)
+        logger.debug(command)
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         return p.communicate()
 
@@ -96,7 +97,7 @@ class Beaker:
             # FIXME
             # TypeError: argument 1 must be string or read-only character
             # buffer, not None
-            logging.error("schedule file %s: %s %s" % (xmlfile, job, jobT))
+            logger.error("schedule file %s: %s %s" % (xmlfile, job, jobT))
         if job:
             os.rename(xmlfile, xmlfile.replace(tmp, slugify(job.uid)))
         return job

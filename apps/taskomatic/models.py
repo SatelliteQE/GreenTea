@@ -27,7 +27,6 @@ from apps.core.utils.date_helpers import TZDateTimeField, toLocalZone
 from apps.taskomatic.utils.stream2logger import StreamToLogger
 
 logger = logging.getLogger(__name__)
-sys.stderr = StreamToLogger(logger, logging.WARN)  # Redirect stderr to logger
 
 
 class TaskPeriodSchedule(models.Model):

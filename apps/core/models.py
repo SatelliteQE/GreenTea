@@ -920,7 +920,7 @@ class Recipe(models.Model):
             self.result = [it[0]
                            for it in RESULT_CHOICES if it[1] == value.lower()][0]
         except IndexError:
-            sys.stderr.write("IndexError: result %s %s %s" %
+            logger.error("IndexError: result %s %s %s" %
                              (value, self.result, RESULT_CHOICES))
 
     def get_result(self):
@@ -934,7 +934,7 @@ class Recipe(models.Model):
             self.status = [it[0]
                            for it in self.STATUS_CHOICES if it[1] == value][0]
         except IndexError:
-            sys.stderr.write("IndexError: status %s %s %s" %
+            logger.error("IndexError: status %s %s %s" %
                              (value, self.status, self.STATUS_CHOICES))
             return
 
@@ -1092,7 +1092,7 @@ class Task(models.Model):
             self.result = [it[0]
                            for it in RESULT_CHOICES if it[1] == value.lower()][0]
         except IndexError:
-            sys.stderr.write("IndexError: Task result %s %s %s" %
+            logger.error("IndexError: Task result %s %s %s" %
                              (value, self.result, RESULT_CHOICES))
 
     def get_result(self):
@@ -1105,7 +1105,7 @@ class Task(models.Model):
             self.status = [it[0]
                            for it in Recipe.STATUS_CHOICES if it[1].lower() == value.lower()][0]
         except IndexError:
-            sys.stderr.write("IndexError: Task status %s %s %s" %
+            logger.error("IndexError: Task status %s %s %s" %
                              (value, self.status, Recipe.STATUS_CHOICES))
 
     def is_completed(self):
