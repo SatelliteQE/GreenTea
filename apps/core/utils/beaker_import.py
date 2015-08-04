@@ -5,6 +5,7 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
+import logging
 import os
 import re
 import sys
