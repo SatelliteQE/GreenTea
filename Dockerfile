@@ -15,6 +15,10 @@ RUN useradd -ms /bin/bash greentea \
 
 RUN echo "root:GreenTea!" | chpasswd
 
+# fixed CA for Red Hat
+ADD /.bin/redhat-update-ca.sh $HOME/bin/docker-run.sh
+RUN sh $HOME/bin/redhat-update-ca.sh
+
 USER greentea
 ENV HOME /data/GreenTea
 

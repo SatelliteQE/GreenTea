@@ -524,8 +524,11 @@ class JobsListView(TemplateView):
             waiveform = WaiverForm()
         context['waiveForm'] = self.forms.get('waiveForm', waiveform)
 
-        # get tags
+        # get all tags
         context['tags'] = Tag.objects.all()
+
+        context["events"] = Event.objects.filter(
+            datestart__lt=datetime.now, dateend__gt=datetime.now)
         return context
 
 

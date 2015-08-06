@@ -1165,3 +1165,29 @@ class CheckProgress(models.Model):
     def get_duration(self):
         if self.dateend:
             return (self.dateend - self.datestart)
+
+
+class Event(models.Model):
+    ALERT_SUCCESS = 0
+    ALERT_INFO = 1
+    ALERT_WARNING = 2
+    ALERT_DANGER = 3
+    ENUM_ALERT = (
+        (ALERT_SUCCESS, "success"),
+        (ALERT_INFO, "info"),
+        (ALERT_WARNING, "warning"),
+        (ALERT_DANGER, "danger"),
+    )
+    title = models.CharField(max_length=126)
+    description = models.TextField()
+    alert = models.SmallIntegerField(
+        choices=ENUM_ALERT, default=ALERT_INFO)
+    is_enabled = models.BooleanField(default=True)
+    datestart = models.DateTimeField(default=currentDate)
+    dateend = models.DateTimeField(default=currentDate, null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s (%s - %s)" % (self.title, self.datestart, self.dateend)
+
+    def get_alert(self):
+        return filter(lambda x: x[0] == self.alert, self.ENUM_ALERT)[0][1]

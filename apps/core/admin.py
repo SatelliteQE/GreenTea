@@ -9,8 +9,8 @@ import reversion
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 
-from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Git,
-                    GroupOwner, GroupTaskTemplate, GroupTemplate,
+from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Event,
+                    Git, GroupOwner, GroupTaskTemplate, GroupTemplate,
                     GroupTestTemplate, Job, JobTemplate, PhaseLabel,
                     PhaseResult, Recipe, RecipeTemplate, System, Task,
                     TaskRoleEnum, TaskTemplate, Test, TestHistory)
@@ -214,6 +214,7 @@ admin.site.register(Test, TestAdmin)
 admin.site.register(Task, TaskAdmin)
 admin.site.register(System)
 admin.site.register(Arch)
+admin.site.register(Event)
 admin.site.register(Distro)
 admin.site.register(Git, GitAdmin)
 admin.site.register(Author, AuthorAdmin)

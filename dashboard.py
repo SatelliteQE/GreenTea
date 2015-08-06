@@ -31,6 +31,7 @@ class CustomIndexDashboard(Dashboard):
                     column=1,
                     collapsible=False,
                     models=(
+                        'apps.core.models.Event',
                         'apps.core.models.Test',
                         'apps.core.models.GroupTemplate',
                         'apps.core.models.DistroTemplate',
