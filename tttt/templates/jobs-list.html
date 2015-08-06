@@ -12,6 +12,14 @@
 <h1>Job Trends</h1>
 <p>Last check: {{ progress.datestart }}</p>
 
+{% if events %}
+{% for event in events %}
+<div class="alert alert-{{event.get_alert}}" role="alert">
+<b>{{event.title}}</b> {{event.description}} (end is {{event.dateend}})
+</div>
+{% endfor %}
+{% endif %}
+
 {% include 'search-box.html' with onlysearch=1 %}
 {% include 'detail-panel.html' %}
 
