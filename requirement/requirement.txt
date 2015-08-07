@@ -1,15 +1,15 @@
 Django < 1.8
-django - grappelli < 2.6
-django - debug - toolbar
-django - taggit
-django - reversion < 1.9
-django - widget - tweaks
-django - filter
+django-grappelli < 2.6
+django-debug-toolbar
+django-taggit
+django-reversion < 1.9
+django-widget-tweaks
+django-filter
 pygraphviz
 django_extensions
 GitPython
 south
-python - dateutil
+python-dateutil
 pytz
 lxml
 pexpect

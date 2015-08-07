@@ -2,7 +2,7 @@ python-psycopg2
 python-pexpect
 gitweb-caching
 source-highlight
-highlight 
+highlight
 libxslt-devel
 libxml2-devel
 graphviz-devel
