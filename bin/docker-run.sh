@@ -22,7 +22,7 @@ function schedule {
 function check {
     echo "service check run ..."
     while true; do
-        python manage.py check
+        python manage.py check_beaker
         sleep $check_t
     done
 }

@@ -20,6 +20,7 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Count
+from django.utils import timezone
 from taggit.managers import TaggableManager
 
 from apps.core.signals import recipe_changed, recipe_finished
@@ -77,7 +78,7 @@ class EnumResult:
         self.enums = dict(RESULT_CHOICES)
 
     def get(self, value):
-        if type(value) == int:
+        if isinstance(value, int):
             return self.enums.get(value)
 
 
@@ -908,7 +909,8 @@ class Recipe(models.Model):
             'system': self.system.to_json(),
             'arch': self.arch.name,
             'distro': self.distro.name,
-            'parentrecipe': self.parentrecipe.to_json() if self.parentrecipe else None,
+            'parentrecipe':
+                self.parentrecipe.to_json() if self.parentrecipe else None,
             'statusbyuser': self.get_statusbyuser_display()
         }
 
@@ -1053,7 +1055,8 @@ class Task(models.Model):
             'uid': self.uid,
             'recipe': self.recipe.uid,
             'test': self.test.to_json(),
-            'datestart': self.datestart.strftime("%Y-%m-%d %H:%M:%S") if self.datestart else None,
+            'datestart': self.datestart.strftime(
+                "%Y-%m-%d %H:%M:%S") if self.datestart else None,
             'result': self.get_result_display(),
             'status': self.get_status_display(),
             'statusbyuser': self.get_statusbyuser_display(),
@@ -1072,7 +1075,7 @@ class Task(models.Model):
         try:
             response = urllib2.urlopen(url)
             html = response.read()
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             print url, ":", e.getcode()
             return None
 
@@ -1183,8 +1186,8 @@ class Event(models.Model):
     alert = models.SmallIntegerField(
         choices=ENUM_ALERT, default=ALERT_INFO)
     is_enabled = models.BooleanField(default=True)
-    datestart = models.DateTimeField(default=currentDate)
-    dateend = models.DateTimeField(default=currentDate, null=True, blank=True)
+    datestart = models.DateTimeField(default=timezone.now)
+    dateend = models.DateTimeField(default=timezone.now, null=True, blank=True)
 
     def __unicode__(self):
         return "%s (%s - %s)" % (self.title, self.datestart, self.dateend)

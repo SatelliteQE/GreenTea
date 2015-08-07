@@ -8,45 +8,23 @@ from south.v2 import SchemaMigration
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'GroupOwner'
-        db.create_table(u'core_groupowner', (
+        # Adding model 'Event'
+        db.create_table(u'core_event', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')
-             (unique=True, max_length=255)),
-            ('email_notification', self.gf(
-                'django.db.models.fields.BooleanField')(default=True)),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=126)),
+            ('description', self.gf('django.db.models.fields.TextField')()),
+            ('alert', self.gf('django.db.models.fields.SmallIntegerField')(default=1)),
+            ('is_enabled', self.gf('django.db.models.fields.BooleanField')(default=True)),
+            ('datestart', self.gf('django.db.models.fields.DateTimeField')
+             (default=datetime.datetime.now)),
+            ('dateend', self.gf('django.db.models.fields.DateTimeField')
+             (default=datetime.datetime.now, null=True, blank=True)),
         ))
-        db.send_create_signal(u'core', ['GroupOwner'])
-
-        # Adding M2M table for field owners on 'GroupOwner'
-        m2m_table_name = db.shorten_name(u'core_groupowner_owners')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('groupowner', models.ForeignKey(
-                orm[u'core.groupowner'], null=False)),
-            ('author', models.ForeignKey(orm[u'core.author'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['groupowner_id', 'author_id'])
-
-        # Adding M2M table for field groups on 'Test'
-        m2m_table_name = db.shorten_name(u'core_test_groups')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('test', models.ForeignKey(orm[u'core.test'], null=False)),
-            ('groupowner', models.ForeignKey(
-                orm[u'core.groupowner'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['test_id', 'groupowner_id'])
+        db.send_create_signal(u'core', ['Event'])
 
     def backwards(self, orm):
-        # Deleting model 'GroupOwner'
-        db.delete_table(u'core_groupowner')
-
-        # Removing M2M table for field owners on 'GroupOwner'
-        db.delete_table(db.shorten_name(u'core_groupowner_owners'))
-
-        # Removing M2M table for field groups on 'Test'
-        db.delete_table(db.shorten_name(u'core_test_groups'))
+        # Deleting model 'Event'
+        db.delete_table(u'core_event')
 
     models = {
         u'contenttypes.contenttype': {
@@ -91,7 +69,7 @@ class Migration(SchemaMigration):
                  [], {'null': 'True', 'blank': 'True'}),
             'datestart':
                 ('django.db.models.fields.DateTimeField', [], {
-                 'default': 'datetime.datetime(2015, 2, 12, 0, 0)'}),
+                 'default': 'datetime.datetime(2015, 8, 6, 0, 0)'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'totalsum': ('django.db.models.fields.IntegerField', [], {})
         },
@@ -117,6 +95,25 @@ class Migration(SchemaMigration):
             'variant': ('django.db.models.fields.CharField', [], {
                         'max_length': '255', 'null': 'True', 'blank': 'True'})
         },
+        u'core.event': {
+            'Meta': {'object_name': 'Event'},
+            'alert':
+                ('django.db.models.fields.SmallIntegerField',
+                 [], {'default': '1'}),
+            'dateend': ('django.db.models.fields.DateTimeField', [], {
+                        'default': 'datetime.datetime.now', 'null': 'True', 'blank': 'True'}),
+            'datestart':
+                ('django.db.models.fields.DateTimeField',
+                 [], {'default': 'datetime.datetime.now'}),
+            'description': ('django.db.models.fields.TextField', [], {}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_enabled':
+                ('django.db.models.fields.BooleanField',
+                 [], {'default': 'True'}),
+            'title':
+                ('django.db.models.fields.CharField',
+                 [], {'max_length': '126'})
+        },
         u'core.git': {
             'Meta': {'object_name': 'Git'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -130,7 +127,7 @@ class Migration(SchemaMigration):
                  [], {'unique': 'True', 'max_length': '255'})
         },
         u'core.groupowner': {
-            'Meta': {'object_name': 'GroupOwner'},
+            'Meta': {'ordering': "['name']", 'object_name': 'GroupOwner'},
             'email_notification':
                 ('django.db.models.fields.BooleanField',
                  [], {'default': 'True'}),
@@ -142,7 +139,9 @@ class Migration(SchemaMigration):
                        'to': u"orm['core.Author']", 'null': 'True', 'symmetrical': 'False'})
         },
         u'core.grouptasktemplate': {
-            'Meta': {'object_name': 'GroupTaskTemplate'},
+            'Meta':
+                {'ordering': "('priority',)",
+                 'object_name': 'GroupTaskTemplate'},
             'group': ('django.db.models.fields.related.ForeignKey', [], {
                       'related_name': "'grouptasks'", 'to': u"orm['core.GroupTemplate']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -157,7 +156,7 @@ class Migration(SchemaMigration):
                      'to': u"orm['core.TaskRoleEnum']", 'null': 'True', 'blank': 'True'})
         },
         u'core.grouptemplate': {
-            'Meta': {'object_name': 'GroupTemplate'},
+            'Meta': {'ordering': "('name',)", 'object_name': 'GroupTemplate'},
             'description':
                 ('django.db.models.fields.TextField',
                  [], {'null': 'True', 'blank': 'True'}),
@@ -166,7 +165,9 @@ class Migration(SchemaMigration):
                 ('django.db.models.fields.CharField', [], {'max_length': '64'})
         },
         u'core.grouptesttemplate': {
-            'Meta': {'object_name': 'GroupTestTemplate'},
+            'Meta':
+                {'ordering': "('priority',)",
+                 'object_name': 'GroupTestTemplate'},
             'group': ('django.db.models.fields.related.ForeignKey', [], {
                       'related_name': "'grouptests'", 'to': u"orm['core.GroupTemplate']"}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
@@ -193,6 +194,8 @@ class Migration(SchemaMigration):
             'is_running':
                 ('django.db.models.fields.BooleanField',
                  [], {'default': 'False'}),
+            'schedule': ('django.db.models.fields.related.ForeignKey', [], {
+                         'to': u"orm['taskomatic.TaskPeriodSchedule']", 'null': 'True', 'blank': 'True'}),
             'template':
                 ('django.db.models.fields.related.ForeignKey',
                  [], {'to': u"orm['core.JobTemplate']"}),
@@ -220,6 +223,8 @@ class Migration(SchemaMigration):
             'position':
                 ('django.db.models.fields.SmallIntegerField',
                  [], {'default': '0'}),
+            'schedule': ('django.db.models.fields.related.ForeignKey', [], {
+                         'to': u"orm['taskomatic.TaskPeriod']", 'null': 'True', 'blank': 'True'}),
             'whiteboard':
                 ('django.db.models.fields.CharField',
                  [], {'unique': 'True', 'max_length': '255'})
@@ -468,6 +473,40 @@ class Migration(SchemaMigration):
                  [], {'db_index': 'True'}),
             'tag': ('django.db.models.fields.related.ForeignKey', [], {
                     'related_name': "u'taggit_taggeditem_items'", 'to': u"orm['taggit.Tag']"})
+        },
+        u'taskomatic.taskperiod': {
+            'Meta': {'object_name': 'TaskPeriod'},
+            'common':
+                ('django.db.models.fields.CharField',
+                 [], {'max_length': '128'}),
+            'cron': ('django.db.models.fields.CharField', [], {
+                     'default': "'*  *  *  *  *'", 'max_length': '64'}),
+            'date_last':
+                ('apps.core.utils.date_helpers.TZDateTimeField',
+                 [], {'null': 'True', 'blank': 'True'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'is_enable':
+                ('django.db.models.fields.BooleanField',
+                 [], {'default': 'False'}),
+            'label':
+                ('django.db.models.fields.SlugField',
+                 [], {'unique': 'True', 'max_length': '64'}),
+            'title':
+                ('django.db.models.fields.CharField', [], {'max_length': '64'})
+        },
+        u'taskomatic.taskperiodschedule': {
+            'Meta': {'object_name': 'TaskPeriodSchedule'},
+            'counter':
+                ('django.db.models.fields.BigIntegerField',
+                 [], {'default': '0'}),
+            'date_create':
+                ('apps.core.utils.date_helpers.TZDateTimeField',
+                 [], {'default': 'datetime.datetime.now'}),
+            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'period': ('django.db.models.fields.related.ForeignKey', [], {
+                       'to': u"orm['taskomatic.TaskPeriod']", 'null': 'True', 'blank': 'True'}),
+            'title':
+                ('django.db.models.fields.CharField', [], {'max_length': '64'})
         }
     }
 
