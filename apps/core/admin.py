@@ -42,7 +42,7 @@ class RecipeTemplateInLineSmall(admin.TabularInline):
     model = RecipeTemplate
     extra = 0
     fields = ("get_recipe_link", "is_enabled", "name",
-              "is_virtualguest", "role", "arch", "distro",)
+              "is_virtualguest", ("role", "arch"), "distro",)
     readonly_fields = ("get_recipe_link", "is_enabled", "arch")
 
     def is_enabled(self, obj):

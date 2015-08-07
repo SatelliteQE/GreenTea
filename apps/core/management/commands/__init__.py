@@ -1,4 +1,4 @@
 import beaker
 import checkrepo
-import check
+import check_beaker
 import schedule

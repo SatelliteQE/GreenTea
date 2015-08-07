@@ -1171,6 +1171,9 @@ class CheckProgress(models.Model):
 
 
 class Event(models.Model):
+
+    """Universal object for craating notification for users"""
+
     ALERT_SUCCESS = 0
     ALERT_INFO = 1
     ALERT_WARNING = 2
