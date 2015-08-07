@@ -325,7 +325,7 @@ class JobsListView(TemplateView):
                 continue
             for it in items:
                 count = data["sum"][it]
-                if not render.has_key(it):
+                if it not in render:
                     render[it] = [100 * items[it] / float(count), ]
                 else:
                     render[it].append(100 * items[it] / float(count))
@@ -353,7 +353,7 @@ class JobsListView(TemplateView):
             whiteboard = recipe.job.template.whiteboard
             lb = render_lable(recipe.get_dict(), data[whiteboard].grouprecipes)
             tmp_recipe = data[whiteboard].recipes
-            if not tmp_recipe.has_key(lb):
+            if lb not in tmp_recipe:
                 tmp_recipe[lb] = dict()
                 tmp_recipe[lb]["job"] = whiteboard
                 tmp_recipe[lb]["days"] = OrderedDict()
@@ -363,7 +363,7 @@ class JobsListView(TemplateView):
                         "recipe": None, "schedule": []}
             labeldate = recipe.get_date().date()
             # recipe isn't in range of date # FIXME
-            if not tmp_recipe[lb]["days"].has_key(labeldate):
+            if labeldate not in tmp_recipe[lb]["days"]:
                 continue
 
             tmp_recipe[lb]["days"][labeldate]["recipe"] = recipe
@@ -467,7 +467,7 @@ class JobsListView(TemplateView):
             jobs, recipes, context['labelweek'])
 
         tag_query = ""
-        if jobstag != None:
+        if jobstag is not None:
             tag_query = map(lambda x: "%d" % int(x["id"]), jobstag)
             tag_query = """ AND "core_job"."template_id" IN ( %s ) """ % ", ".join(
                 tag_query)
@@ -528,7 +528,7 @@ class JobsListView(TemplateView):
         context['tags'] = Tag.objects.all()
 
         context["events"] = Event.objects.filter(
-            is_enabled=True, datestart__lt=datetime.now,\
+            is_enabled=True, datestart__lt=datetime.now,
             dateend__gt=datetime.now)
         return context
 
@@ -545,13 +545,13 @@ class TestsListView(TemplateView):
     def filterEvent(self, parameters, *args, **kwargs):
         self.filters = {'onlyfail': False}
         self.forms['search'] = FilterForm(parameters)
-        if parameters.has_key('repo'):
+        if 'repo' in parameters:
             self.filters['repo_id'] = parameters.get('repo')
-        if parameters.has_key('group'):
+        if 'group' in parameters:
             self.filters['group_id'] = parameters.get('group')
-        if kwargs.has_key('email'):
+        if 'email' in kwargs:
             self.filters['email'] = kwargs.get('email')
-        if parameters.has_key("search"):
+        if 'search' in parameters:
             self.filters['email'] = None
             if self.forms['search'].is_valid():
                 self.filters['onlyfail'] = self.forms[
@@ -562,7 +562,7 @@ class TestsListView(TemplateView):
                 self.forms['search'] = None
 
     def formEvent(self, parametrs):
-        if parametrs.has_key("uids"):
+        if 'uids' in parametrs:
             self.forms['waiveFrom'] = WaiverForm(parametrs)
             if self.forms['waiveFrom'].is_valid():
                 self.forms['waiveFrom'].save()
@@ -631,9 +631,9 @@ class TestsListView(TemplateView):
                 if lday >= day:
                     day = lday
                     break
-            if not history.has_key(change.test.id):
+            if change.test.id not in history:
                 history[change.test.id] = dict()
-            if not history[change.test.id].has_key(day):
+            if day not in history[change.test.id]:
                 history[change.test.id][day] = list()
             history[change.test.id][day].insert(0, change)
 # depList = list() # Test.objects.filter(dependencies=change.test).values("id")
@@ -653,14 +653,14 @@ class TestsListView(TemplateView):
             # TODO: This is not good solution, it should be replaced
             day = date.today() - timedelta(days=1)
             testFilter['task__recipe__job__date__gt'] = day
-        if self.filters.has_key('email') and self.filters["email"]:
+        if 'email' in self.filters and self.filters["email"]:
             testFilter['owner__email'] = self.filters.get('email')
             # taskFilter['test__owner__email'] = self.filters.get('email')
 
-        if self.filters.has_key('repo_id'):
+        if 'repo_id' in self.filters:
             taskFilter['test__git__id'] = self.filters.get('repo_id')
             testFilter["git__id"] = self.filters.get('repo_id')
-        if self.filters.has_key('group_id'):
+        if 'group_id' in self.filters:
             taskFilter['test__groups__id'] = self.filters.get('group_id')
             testFilter["groups__id"] = self.filters.get('group_id')
 
@@ -690,7 +690,7 @@ class TestsListView(TemplateView):
         for it in testlist.object_list:
             email = owners[
                 it.owner_id].email if it.owner_id else "unknow@redhat.com"
-            if not data.has_key(email):
+            if email not in data:
                 data[email] = dict(
                     {"tests": OrderedDict(), 'owner': owners[it.owner_id]})
             ids.append(it.id)
@@ -705,8 +705,8 @@ class TestsListView(TemplateView):
                 continue
             id_email = it["test__owner__email"]
             # use for filters
-            if not (data.has_key(id_email) and
-                    data[id_email]["tests"].has_key(it["test__name"])):
+            if not (id_email in data and
+                    it["test__name"] in data[id_email]["tests"]):
                 continue
 
             test = data[id_email]["tests"][it["test__name"]]
@@ -720,7 +720,7 @@ class TestsListView(TemplateView):
                 "alias": it["alias"],
             }, it["recipe__job__template__grouprecipes"])
             test_label = (it["recipe__job__template__whiteboard"], lb)
-            if not test.labels.has_key(test_label):
+            if test_label not in test.labels:
                 test.labels[test_label] = OrderedDict()
                 for day in dates_label:
                     test.labels[test_label][day] = None
@@ -728,7 +728,7 @@ class TestsListView(TemplateView):
             label = test.labels[test_label]
 
             labeldate = it["recipe__job__date"].date()
-            if not label.has_key(labeldate):
+            if labeldate not in label:
                 continue
 
             reschedule = 0
@@ -750,7 +750,7 @@ class TestsListView(TemplateView):
             progress = None
 
         urllist = filter(
-            lambda (x, y): x != "page", self.request.GET.copy().items())
+            lambda x_y: x_y[0] != "page", self.request.GET.copy().items())
 
         if self.filters.get('onlyfail', False):
             context["tests_bad"] = tests[:10]
@@ -800,8 +800,8 @@ class HomePageView(TemplateView):
             schedule = it.get("recipe__job__schedule__id")
             result, count = ER.get(it.get("result")), it.get("hosts")
             labels.add(schedule)
-            if data.has_key(hostname):
-                if not data[hostname].has_key(schedule):
+            if hostname in data:
+                if schedule not in data[hostname]:
                     data[hostname].update({schedule: {result: count}})
                 data[hostname][schedule][result] = count
             else:
@@ -893,7 +893,7 @@ class JobsDiffView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
 
-        if self.forms.has_key('jobs'):
+        if 'jobs' in self.forms:
             context["form"] = self.forms['jobs']
         else:
             context["form"] = JobForm()

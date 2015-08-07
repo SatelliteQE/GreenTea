@@ -21,13 +21,19 @@ class Migration(SchemaMigration):
     models = {
         u'api.performance': {
             'Meta': {'object_name': 'Performance'},
-            'date_create': ('apps.core.utils.date_helpers.TZDateTimeField', [], {'default': 'datetime.datetime(2014, 11, 14, 0, 0)'}),
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'date_create':
+                ('apps.core.utils.date_helpers.TZDateTimeField', [], {
+                 'default': 'datetime.datetime(2014, 11, 14, 0, 0)'}),
+            'description':
+                ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'duration': ('django.db.models.fields.FloatField', [], {}),
             'exitcode': ('django.db.models.fields.IntegerField', [], {}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'label': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '64'})
+            'label':
+                ('django.db.models.fields.CharField',
+                 [], {'max_length': '32'}),
+            'name':
+                ('django.db.models.fields.CharField', [], {'max_length': '64'})
         }
     }
 

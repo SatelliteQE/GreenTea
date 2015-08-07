@@ -3,8 +3,9 @@ from django.conf.urls import include, patterns, url
 from django.contrib import admin
 
 import apps.api.urls
-from apps.core.views import *
-from apps.kerberos.views import *
+from apps.core.views import (HomePageView, JobDetailView, JobsDiffView,
+                             JobsListView, TestDetailView, TestsListView)
+from apps.kerberos.views import LoginView
 
 admin.autodiscover()
 

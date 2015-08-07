@@ -24,7 +24,7 @@ DATABASES = {
         # 'oracle'.
         'ENGINE': 'django.db.backends.sqlite3',
         # Or path to database file if using sqlite3.
-        'NAME': ROOT_PATH + '/data.db',
+        'NAME': os.path.join(ROOT_PATH, 'data.db'),
         'USER': '',                      # Not used with sqlite3.
         'PASSWORD': '',                  # Not used with sqlite3.
         # Set to empty string for localhost. Not used with sqlite3.
@@ -99,7 +99,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 # Make this unique, and don't share it with anybody.
@@ -163,16 +163,13 @@ INSTALLED_APPS = (
     'apps.kerberos',
     'apps.api',
     'django_extensions',
-    'south',
     'taggit',
     'reversion',
     'rest_framework',
     'plugins',
 )
 
-SOUTH_MIGRATION_MODULES = {
-    'taggit': 'taggit.south_migrations',
-}
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
@@ -215,8 +212,8 @@ KRB5_SERVICE = 'krbtgt@AS.EXAMPLE.COM'
 LOGIN_REDIRECT_URL = '/'
 
 if int(os.environ.get("DDD", 0)) > 0:
-    #LOGGING['loggers']['commands']['handlers'] = ['console', ]
-    #LOGGING['loggers']['commands']['propagate'] = False
+    # LOGGING['loggers']['commands']['handlers'] = ['console', ]
+    # LOGGING['loggers']['commands']['propagate'] = False
     LOGGING['root']['handlers'].append('console')
 
     # Enabling django-debug-toolbar..."

@@ -1,4 +1,9 @@
-import json
+#!/bin/python
+# -*- coding: utf-8 -*-
+
+# Author: Pavel Studenik <pstudeni@redhat.com>
+# Date: 2013-2015
+
 from datetime import datetime
 
 from django.db import models

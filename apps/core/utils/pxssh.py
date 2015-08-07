@@ -35,10 +35,10 @@ class pxssh (spawn):
     shells.
 
     Example that runs a few commands on a remote server and prints the result::
-        
+
         import pxssh
         import getpass
-        try:                                                            
+        try:
             s = pxssh.pxssh()
             hostname = raw_input('hostname: ')
             username = raw_input('username: ')
@@ -75,7 +75,8 @@ class pxssh (spawn):
             s.login (hostname, username, password)
     """
 
-    def __init__(self, timeout=30, maxread=2000, searchwindowsize=None, logfile=None, cwd=None, env=None):
+    def __init__(self, timeout=30, maxread=2000,
+                 searchwindowsize=None, logfile=None, cwd=None, env=None):
         spawn.__init__(self, None, timeout=timeout, maxread=maxread,
                        searchwindowsize=searchwindowsize, logfile=logfile, cwd=cwd, env=env)
 
@@ -163,7 +164,8 @@ class pxssh (spawn):
 
     # TODO: This is getting messy and I'm pretty sure this isn't perfect.
     # TODO: I need to draw a flow chart for this.
-    def login(self, server, username, password='', terminal_type='ansi', original_prompt=r"[#$]", login_timeout=10, port=None, auto_prompt_reset=False):
+    def login(self, server, username, password='', terminal_type='ansi',
+              original_prompt=r"[#$]", login_timeout=10, port=None, auto_prompt_reset=False):
         """This logs the user into the given server. It uses the
         'original_prompt' to try to find the prompt right after login. When it
         finds the prompt it immediately tries to reset the prompt to something
@@ -179,7 +181,7 @@ class pxssh (spawn):
         to guess when we have reached the prompt. Then we hope for the best and
         blindly try to reset the prompt to something more unique. If that fails
         then login() raises an ExceptionPxssh exception.
-        
+
         In some situations it is not possible or desirable to reset the
         original prompt. In this case, set 'auto_prompt_reset' to False to
         inhibit setting the prompt to the UNIQUE_PROMPT. Remember that pxssh

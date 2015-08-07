@@ -10,7 +10,6 @@
 import inspect
 import logging
 import re
-import sys
 import time
 import traceback
 from datetime import datetime, timedelta
@@ -24,7 +23,6 @@ from django.utils.translation import ugettext_lazy as _
 from single_process import single_process
 
 from apps.core.utils.date_helpers import TZDateTimeField, toLocalZone
-from apps.taskomatic.utils.stream2logger import StreamToLogger
 
 logger = logging.getLogger(__name__)
 

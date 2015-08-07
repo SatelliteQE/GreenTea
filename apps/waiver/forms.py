@@ -59,9 +59,9 @@ class WaiverForm(forms.ModelForm):
                     "username": self.cleaned_data["username"],
                     "action": self.cleaned_data["action"],
             }
-            data["recipe"] = it if type(it) == Recipe else None
-            data["job"] = it if type(it) == Job else None
-            if type(it) == Task:
+            data["recipe"] = it if isinstance(it, Recipe) else None
+            data["job"] = it if isinstance(it, Job) else None
+            if isinstance(it, Task):
                 data["task"] = it
                 data["recipe"] = it.recipe
             else:
@@ -75,7 +75,7 @@ class WaiverForm(forms.ModelForm):
             oComment.set_time()
 
             if data["action"] == Comment.ENUM_ACTION_RETURN and\
-               type(it) == Recipe:
+               isinstance(it, Recipe):
                 task = TaskomaticTask(title="WebUI: beaker return2beaker",
                                       common="beaker")
                 task.common_params = "beaker return2beaker "\
@@ -87,9 +87,9 @@ class WaiverForm(forms.ModelForm):
                 task = TaskomaticTask(title="WebUI: beaker reschedule",
                                       common="beaker")
                 uid = None
-                if type(it) == Recipe:
+                if isinstance(it, Recipe):
                     uid = data["recipe"].job.uid
-                elif type(it) == Job:
+                elif isinstance(it, Job):
                     uid = data["job"].uid
                 task.common_params = "beaker reschedule "\
                                      "--reschedule-job='%s' "\

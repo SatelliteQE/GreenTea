@@ -13,7 +13,7 @@ class LoginView(TemplateView):
 
     def dispatch(self, *args, **kwargs):
         self.remote_user = self.request.META[
-            "REMOTE_USER"] if self.request.META.has_key("REMOTE_USER") else None
+            "REMOTE_USER"] if "REMOTE_USER" in self.request.META else None
 
         if not self.remote_user:
             return redirect(reverse("admin:index"))
@@ -22,7 +22,7 @@ class LoginView(TemplateView):
         email = self.remote_user.lower()
         password = "nimda"  # TODO better default password
 
-        if self.remote_user != None:
+        if self.remote_user is not None:
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
