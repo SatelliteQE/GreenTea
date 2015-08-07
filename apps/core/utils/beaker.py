@@ -62,10 +62,13 @@ class Beaker:
             Execute beaker command
         """
         auth = ""
+        hub = settings.BEAKER_SERVER
+        if not hub.startswith("http"):
+            hub = "https://%s" % hub
         if settings.BEAKER_OWNER:
-            auth = " --username=%s --password=%s --hub=%s" % (settings.BEAKER_OWNER,
-                                                              settings.BEAKER_PASS, settings.BEAKER_SERVER)
-        command = "bkr %s %s%s" % (command, param, auth)
+            auth = "--username=%s --password=%s" % (settings.BEAKER_OWNER,
+                                                    settings.BEAKER_PASS)
+        command = "bkr %s %s %s --hub=%s" % (command, param, auth, hub)
         logger.debug(command)
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         return p.communicate()

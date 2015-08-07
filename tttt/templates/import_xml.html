@@ -1,6 +1,6 @@
 {% extends "basic.html" %}
 
-{% block title %}Job Template{% endblock %}
+{% block title %}Import Job Template{% endblock %}
 
 {% block content %}
 
@@ -10,26 +10,24 @@
 </ul>
 
 
-<h1>Job Template</h1>
+<h1>Import Job Template</h1>
 <h2>{{ job.whiteboard }}</h2>
 
 {% if job %}
 <div class="alert alert-info">
-<p><b>Job Template:</b><a href="{% url 'admin:core_jobtemplate_change' job.id %}" >{{ job.whiteboard }}</a></p>
+	<p><b>Job Template:</b><a href="{% url 'admin:core_jobtemplate_change' job.id %}" >{{ job.whiteboard }}</a></p>
 </div>
 <div class="alert alert-info">
-<b>Recipe templates:</b>
-<ul>
-{% for it in recipes %}
-<li><a href="{% url 'admin:core_recipetemplate_change' it.id %}">{{it}}</a></li>
-{% endfor %}
-</ul>
+	<b>Recipe templates:</b>
+	<ul>
+	{% for it in recipes %}
+		<li><a href="{% url 'admin:core_recipetemplate_change' it.id %}">{{it}}</a></li>
+	{% endfor %}
+	</ul>
 </div>
 {% endif %}
 
-{% if error %}
-<div class="alert alert-danger">{{ error }}</div>
-{% endif %}
+{% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
 <br> 
 <form action="" method="POST" class="tableform" id="job">
     {% csrf_token %}    

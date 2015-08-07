@@ -15,7 +15,7 @@ from texttable import Texttable
 from apps.core.models import Job, JobTemplate, Recipe
 from apps.core.utils.advance_command import AdvancedCommand, make_option_group
 from apps.core.utils.beaker import Beaker
-from apps.taskomatic.models import TaskPeriodSchedule
+from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 
 logger = logging.getLogger(__name__)
 
@@ -246,12 +246,6 @@ class Command(AdvancedCommand):
             label = kwargs.get("label")
             filter["schedule__label"] = label
 
-        if kwargs.get("daily"):
-            filter["period"] = JobTemplate.DAILY
-            label = "daily-automation"
-        if kwargs.get("weekly"):
-            filter["period"] = JobTemplate.WEEKLY
-            label = "weekly-automation"
         if kwargs.get("tags"):
             filter["tags__name__in"] = kwargs.get("tags", "").split(",")
             if len(filter["tags__name__in"]) == 0:
@@ -301,15 +295,13 @@ class Command(AdvancedCommand):
             table.set_deco(Texttable.HEADER)
             table.header(["Job", "Whiteboard", "Tags"])
 
-        try:
-            count = TaskPeriodSchedule.objects.filter(title=label).count()
-            schedule = TaskPeriodSchedule.objects.get(
-                title=label, counter=count)
-        except TaskPeriodSchedule.DoesNotExist:
-            schedule = TaskPeriodSchedule.objects.create(
-                title=label,
-                counter=count,
-            )
+        period = TaskPeriod.objects.get(label=label)
+        count = TaskPeriodSchedule.objects.filter(period=period).count()
+        schedule = TaskPeriodSchedule.objects.create(
+            title=label,
+            period=period,
+            counter=count,
+        )
 
         for jobT in jobTs:
             job = ""
