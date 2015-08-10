@@ -1,0 +1,5 @@
+pylama
+pylint
+isort
+
+-r requirement.txt

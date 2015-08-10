@@ -19,14 +19,10 @@ from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
 from django.template.defaultfilters import slugify
 
-from apps.core.models import *
-from apps.core.utils.beaker import *
+from apps.core.utils.beaker import parse_job
 from apps.core.utils.date_helpers import currentDate
 
 logger = logging.getLogger(__name__)
-
-if sys.version_info >= (2, 7, 9):
-    import ssl
 
 
 class Command(BaseCommand):
@@ -68,21 +64,6 @@ class Command(BaseCommand):
 
 def init(*args, **kwargs):
     progress = CheckProgress()
-    if settings.BEAKER_SERVER.startswith("http"):
-        server_url = "%s/RPC2" % settings.BEAKER_SERVER
-    else:
-        server_url = "https://%s/RPC2" % settings.BEAKER_SERVER
-
-    client = xmlrpclib.Server(server_url, verbose=0)
-    if server_url.startswith("https"):
-        # workaround ssl.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED]
-        # certificate verify failed (_ssl.c:590)
-        if sys.version_info >= (2, 7, 9):
-            client = xmlrpclib.Server(server_url, verbose=0,
-                                      context=ssl._create_unverified_context())
-
-    # key = client.auth.login_password(USER, PASS)
-    # key = client.auth.login_krb(USER, PASS)
 
     cfg_running = kwargs["running"]
     cfg_init = kwargs["init"]
@@ -118,42 +99,13 @@ def init(*args, **kwargs):
 
     progress.totalsum = len(jobslist)
     progress.save()
-
+    bkr = Beaker()
     for it in jobslist:
         if not cfg_quiet:
-            print("%d/%d (%s)" % (progress.actual, progress.totalsum, it))
+            logger.info(
+                "%d/%d (%s)" %
+                (progress.actual, progress.totalsum, it))
 
-        data = client.taskactions.task_info(it)
-
-        # workaround for test which set label with actial date
-        labeldates = re.findall(
-            r"^([0-9]{4}-[0-9]{2}-[0-9]{2})", data["method"])
-        if labeldates:
-            label = data["method"][11:]
-            # if not cfg_date:
-            #    cfg_date = datetime.strptime(labeldates[0],"%Y-%m-%d")
-        else:
-            label = data["method"]
-        jt, status = JobTemplate.objects.get_or_create(whiteboard=label)
-        if status:
-            jt.save()
-
-        defaults = {"template": jt}
-        if cfg_date:
-            defaults["date"] = cfg_date
-        job, status = Job.objects.get_or_create(uid=it, defaults=defaults)
-        job.template = jt
-        job.is_running = not data["is_finished"]
-
-        if ((cfg_running and job.is_running) or not job.is_finished):
-            content = client.taskactions.to_xml(it)
-            dom = xml.dom.minidom.parseString(content)
-
-            for recipexml in dom.getElementsByTagName("recipe"):
-                parse_recipe(recipexml, job)
-
-        if not job.is_running:
-            job.is_finished = True
-        job.save()
+        bkr.parse_job(it)
         progress.counter()
     progress.finished()

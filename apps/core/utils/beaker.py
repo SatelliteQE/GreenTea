@@ -31,6 +31,9 @@ from apps.core.models import (PASS, RETURNWHENGREEN, Arch, Author, Distro, Job,
 
 logger = logging.getLogger(__name__)
 
+if sys.version_info >= (2, 7, 9):
+    import ssl
+
 
 def total_sec(td):
     return (td.microseconds + (td.seconds + td.days * 24 * 3600) * 10 ** 6) \
@@ -57,18 +60,25 @@ def strToSec(string):
 
 class Beaker:
 
+    def __init__(self):
+        self.username = getattr(settings, "BEAKER_OWNER")
+        self.password = getattr(settings, "BEAKER_PASS")
+
+        self.hub = getattr(settings, "BEAKER_SERVER")
+        if not self.hub.startswith("http"):
+            self.hub = "https://%s" % self.hub
+        self.server_url = "%s/RPC2" % self.hub
+
     def execute(self, command, param):
         """
             Execute beaker command
         """
         auth = ""
-        hub = settings.BEAKER_SERVER
-        if not hub.startswith("http"):
-            hub = "https://%s" % hub
-        if settings.BEAKER_OWNER:
-            auth = "--username=%s --password=%s" % (settings.BEAKER_OWNER,
-                                                    settings.BEAKER_PASS)
-        command = "bkr %s %s %s --hub=%s" % (command, param, auth, hub)
+        if self.username:
+            auth = "--username=%s --password=%s" % (self.username,
+                                                    self.password)
+        command = "bkr %s %s %s --hub=%s" % (command, param, auth, self.hub)
+        print command
         logger.debug(command)
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         return p.communicate()
@@ -181,9 +191,12 @@ class Beaker:
                 pass
         return result
 
+    def scheduleFromContent(self, xmlcontent):
+        logger.error("Method is not implemented")
+
     def scheduleFromXmlFile(self, xmlfile):
         if not os.path.isfile(xmlfile):
-            logger.error("XML file '%s' does not exist." % xmlfile)
+            logger.error("XML file '%s' doesn't exist." % xmlfile)
             return None
         result = self.execute("job-submit", xmlfile)
         return re.findall(r"'(J:[0-9]+)'", result[0])
@@ -197,6 +210,48 @@ class Beaker:
         logger.error("Problem with scheduling of the jobs from template (%s)."
                      % jobT.id)
         return None
+
+    def parse_job(self, jobid):
+        client = xmlrpclib.Server(self.server_url, verbose=0)
+        if self.server_url.startswith("https"):
+            # workaround ssl.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED]
+            # certificate verify failed (_ssl.c:590)
+            if sys.version_info >= (2, 7, 9):
+                client = xmlrpclib.Server(self.server_url, verbose=0,
+                                          context=ssl._create_unverified_context())
+
+        data = client.taskactions.task_info(jobid)
+
+        # workaround for test which set label with actial date
+        labeldates = re.findall(
+            r"^([0-9]{4}-[0-9]{2}-[0-9]{2})", data["method"])
+        if labeldates:
+            label = data["method"][11:]
+            # if not cfg_date:
+            #    cfg_date = datetime.strptime(labeldates[0],"%Y-%m-%d")
+        else:
+            label = data["method"]
+        jt, status = JobTemplate.objects.get_or_create(whiteboard=label)
+        if status:
+            jt.save()
+
+        defaults = {"template": jt}
+        if cfg_date:
+            defaults["date"] = cfg_date
+        job, status = Job.objects.get_or_create(uid=it, defaults=defaults)
+        job.template = jt
+        job.is_running = not data["is_finished"]
+
+        if ((cfg_running and job.is_running) or not job.is_finished):
+            content = client.taskactions.to_xml(it)
+            dom = xml.dom.minidom.parseString(content)
+
+            for recipexml in dom.getElementsByTagName("recipe"):
+                parse_recipe(recipexml, job)
+
+        if not job.is_running:
+            job.is_finished = True
+        job.save()
 
 
 class JobGen:
