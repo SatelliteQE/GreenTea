@@ -211,7 +211,7 @@ class Beaker:
                      % jobT.id)
         return None
 
-    def parse_job(self, jobid):
+    def parse_job(self, jobid, running=True, date_created=None):
         client = xmlrpclib.Server(self.server_url, verbose=0)
         if self.server_url.startswith("https"):
             # workaround ssl.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED]
@@ -236,14 +236,14 @@ class Beaker:
             jt.save()
 
         defaults = {"template": jt}
-        if cfg_date:
-            defaults["date"] = cfg_date
-        job, status = Job.objects.get_or_create(uid=it, defaults=defaults)
+        if date_created:
+            defaults["date"] = date_created
+        job, status = Job.objects.get_or_create(uid=jobid, defaults=defaults)
         job.template = jt
         job.is_running = not data["is_finished"]
 
-        if ((cfg_running and job.is_running) or not job.is_finished):
-            content = client.taskactions.to_xml(it)
+        if ((running and job.is_running) or not job.is_finished):
+            content = client.taskactions.to_xml(jobid)
             dom = xml.dom.minidom.parseString(content)
 
             for recipexml in dom.getElementsByTagName("recipe"):

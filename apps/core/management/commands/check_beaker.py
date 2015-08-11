@@ -106,6 +106,6 @@ def init(*args, **kwargs):
                 "%d/%d (%s)" %
                 (progress.actual, progress.totalsum, it))
 
-        bkr.parse_job(it)
+        bkr.parse_job(it, running=cfg_running, created_date=cfg_date)
         progress.counter()
     progress.finished()

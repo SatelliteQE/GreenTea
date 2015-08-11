@@ -12,7 +12,7 @@ import os
 from django.test import TestCase
 from django.test.client import Client
 
-from apps.core.models import RecipeTemplate
+from apps.core.models import RecipeTemplate, Job
 from apps.core.utils.beaker import Beaker, JobGen
 from apps.core.utils.beaker_import import Parser
 
@@ -87,9 +87,15 @@ class BeakerTest(TestCase):
 
         #xmlcontent = get_content_from_file(xmlpath)
         #self.assertIsNotNone(xmlcontent, msg="file %s is not load" % xmlcontent)
+        jobids = bkr.scheduleFromXmlFile(xmlpath)
 
-        #jobid = bkr.scheduleFromXmlFile(xmlpath)
-        jobid = ("J:1045253", )
-        self.assertIsNotNone(jobid, msg="job is not created")
+        for jobid in jobids:
+            self.assertIsNotNone(jobid, msg="job is not created")
 
-        print bkr.parse_job(jobid)
+            # check jobs from beaker
+            bkr.parse_job(jobid)
+
+            job = Job.objects.get(uid=jobid)
+
+            # cancel created job
+            bkr.jobCancel(job)
