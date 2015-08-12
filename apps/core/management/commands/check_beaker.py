@@ -11,15 +11,17 @@ import sys
 import time
 import xml.dom.minidom
 import xmlrpclib
+import logging
 from datetime import datetime, timedelta
 from optparse import make_option
+from apps.core.models import CheckProgress, Job
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
 from django.template.defaultfilters import slugify
 
-from apps.core.utils.beaker import parse_job
+from apps.core.utils.beaker import Beaker
 from apps.core.utils.date_helpers import currentDate
 
 logger = logging.getLogger(__name__)
