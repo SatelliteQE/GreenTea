@@ -7,6 +7,7 @@
 
 import os
 import re
+import ssl
 import sys
 import time
 import xml.dom.minidom
@@ -72,15 +73,13 @@ def init(*args, **kwargs):
     cfg_minid = kwargs["minid"]
     cfg_date = kwargs["date"]
     cfg_quiet = kwargs["quiet"]
-    if kwargs["jobs"]:
-        cfg_jobs = kwargs["jobs"].split(" ")
-    else:
-        cfg_jobs = None
 
     if cfg_date:
         cfg_date = datetime.strptime(kwargs["date"], "%Y-%m-%d")
 
-    if cfg_init:
+    if kwargs["jobs"]:
+        jobslist = kwargs["jobs"].split(" ")
+    elif cfg_init:
         bkr_filter = {"owner": settings.BEAKER_OWNER}
         if cfg_minid:
             bkr_filter["minid"] = kwargs["minid"]
@@ -91,9 +90,12 @@ def init(*args, **kwargs):
                 date__lt=(currentDate() - timedelta(days=2))).order_by("-uid")[:1]
             if minid:
                 bkr_filter["minid"] = minid[0]["uid"][2:]
-    if cfg_jobs:
-        jobslist = cfg_jobs
-    elif cfg_init:
+
+        if settings.BEAKER_SERVER.startswith("http"):
+                server_url = "%s/RPC2" % settings.BEAKER_SERVER
+        else:
+                server_url = "https://%s/RPC2" % settings.BEAKER_SERVER
+        client = xmlrpclib.Server(server_url, context=ssl._create_unverified_context())
         jobslist = client.jobs.filter(bkr_filter)
     else:
         jobslist = [it["uid"]
@@ -108,6 +110,6 @@ def init(*args, **kwargs):
                 "%d/%d (%s)" %
                 (progress.actual, progress.totalsum, it))
 
-        bkr.parse_job(it, running=cfg_running, created_date=cfg_date)
+        bkr.parse_job(it, running=cfg_running, date_created=cfg_date)
         progress.counter()
     progress.finished()
