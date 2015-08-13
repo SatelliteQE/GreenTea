@@ -31,20 +31,20 @@ class Command(AdvancedCommand):
                     dest='info',
                     default=False,
                     help='Show more informations.'),
-                make_option('--simulate',
-                            action='store_true',
-                            dest='simulate',
-                            default=False,
-                            help='Simulate action, use it with --fullinfo.'),
-                make_option('--label',
-                            dest='label',
-                            default=False,
-                            help='Name of schedule label'),
+        make_option('--simulate',
+                    action='store_true',
+                    dest='simulate',
+                    default=False,
+                    help='Simulate action, use it with --fullinfo.'),
+        make_option('--label',
+                    dest='label',
+                    default=False,
+                    help='Name of schedule label'),
     )
     option_groups = (
         # SCHEDULE
-         make_option_group(
-             'Options for schedule',
+        make_option_group(
+            'Options for schedule',
             description='Options for scheduling of jobs in beaker',
             option_list=(
                 make_option('--schedule-all',
@@ -81,10 +81,10 @@ class Command(AdvancedCommand):
                             default=False,
                             help='Set period schedule run'),
             ),
-         ),
+        ),
         # RESCHEDULE
-         make_option_group(
-             'Options for reschedule',
+        make_option_group(
+            'Options for reschedule',
             description='Options for rescheduling of jobs',
             option_list=(
                 make_option('--reschedule-all',
@@ -121,10 +121,10 @@ class Command(AdvancedCommand):
                             default="",
                             help='The comment for rescheduling of jobs.'),
             ),
-         ),
+        ),
         # RETURN2BEAKER
-         make_option_group(
-             'Options for return2beaker',
+        make_option_group(
+            'Options for return2beaker',
             description='Options for return2beaker of jobs',
             option_list=(
                 make_option('--return2beaker-all',
@@ -162,7 +162,7 @@ class Command(AdvancedCommand):
                             help='Return2beaker jobs, which have required tags.'
                             'We can use more values, separated by comma'),
             ),
-         ),
+        ),
         # CANCEL
         make_option_group(
             'Options for cancel',
@@ -210,7 +210,7 @@ class Command(AdvancedCommand):
         return (" %%prog %s (schedule|reschedule|return2beaker|cancel) "
                 "[options]\n\n=== This utility provides functions for playing"
                 " with beaker ==\n")\
-               % subcommand
+            % subcommand
 
     def handle(self, *args, **kwargs):
         if len(args) == 0:
@@ -265,7 +265,7 @@ class Command(AdvancedCommand):
             except TaskPeriodSchedule.DoesNotExist:
                 coutner = len(TaskPeriodSchedule.objects.filter(period=None))
                 self.schedule = TaskPeriodSchedule.objects.create(
-                        title="%s" % datetime.now(), counter=coutner)
+                    title="%s" % datetime.now(), counter=coutner)
         if len(filter) > 0:
             self.__scheduleTemplates(filter,
                                      label,
@@ -357,9 +357,9 @@ class Command(AdvancedCommand):
                 return False
         if kwargs.get("all") or len(filter) > 0:
             self.__rescheduleTemplates(filter,
-                                     kwargs.get("info"),
-                                     kwargs.get("simulate"),
-                                     kwargs.get("message"))
+                                       kwargs.get("info"),
+                                       kwargs.get("simulate"),
+                                       kwargs.get("message"))
             return True
         logger.error("Unsupported parameters")
         return False
@@ -414,7 +414,7 @@ class Command(AdvancedCommand):
                 return False
         if kwargs.get("template"):
             filter['job__template__id__in'] = kwargs.get("template", "")\
-                                                   .split(',')
+                .split(',')
             if len(filter['job__template__id__in']) == 0:
                 logger.error("Minimal one job template is required.")
                 return False
@@ -425,7 +425,7 @@ class Command(AdvancedCommand):
                 return False
         if kwargs.get("recipe"):
             filter['uid__in'] = kwargs.get("recipe", "").replace('R:', '')\
-                                        .replace("'", "").split(',')
+                .replace("'", "").split(',')
             if len(filter['uid__in']) == 0:
                 logger.error("Minimal one recipe is required.")
                 return False

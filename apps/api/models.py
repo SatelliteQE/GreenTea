@@ -6,7 +6,7 @@ from apps.core.utils.date_helpers import TZDateTimeField, currentDate, toUTC
 
 
 class Performance(models.Model):
-    label = models.CharField(max_length=32)
+    label = models.CharField(max_length=32, blank=True, null=True)
     name = models.CharField(max_length=64)
     description = models.TextField(blank=True)
     date_create = TZDateTimeField(default=currentDate)

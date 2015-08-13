@@ -74,9 +74,9 @@ class Task(models.Model):
     STATUS_ENUM_ERROR = 3
     STATUS_ENUM = (
         (STATUS_ENUM_WAIT, "Waiting"),
-       (STATUS_ENUM_INPROGRESS, "In progress"),
-       (STATUS_ENUM_DONE, "Done"),
-       (STATUS_ENUM_ERROR, "Error"),
+        (STATUS_ENUM_INPROGRESS, "In progress"),
+        (STATUS_ENUM_DONE, "Done"),
+        (STATUS_ENUM_ERROR, "Error"),
     )
     # user = models.ForeignKey(User)
     title = models.CharField(max_length=64)

@@ -203,7 +203,8 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
             context['adminform'].form.fields['virtualhost'].queryset = RecipeTemplate.objects\
                 .filter(jobtemplate=kwargs["obj"].jobtemplate, is_virtualguest=False)\
                 .exclude(id=kwargs["obj"].id)
-        return super(RecipeTemplateAdmin, self).render_change_form(request, context, args, kwargs)
+        return super(RecipeTemplateAdmin, self).render_change_form(
+            request, context, args, kwargs)
 
 
 admin.site.register(Job, JobAdmin)

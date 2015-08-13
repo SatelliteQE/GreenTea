@@ -10,13 +10,16 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding model 'TaskPeriodSchedule'
         db.create_table(u'taskomatic_taskperiodschedule', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=64)),
+            (u'id', self.gf('django.db.models.fields.AutoField')
+             (primary_key=True)),
+            ('title', self.gf('django.db.models.fields.CharField')
+             (max_length=64)),
             ('period', self.gf('django.db.models.fields.related.ForeignKey')
              (to=orm['taskomatic.TaskPeriod'], null=True, blank=True)),
             ('date_create', self.gf('apps.core.utils.date_helpers.TZDateTimeField')
              (default=datetime.datetime.now)),
-            ('counter', self.gf('django.db.models.fields.BigIntegerField')(default=0)),
+            ('counter', self.gf(
+                'django.db.models.fields.BigIntegerField')(default=0)),
         ))
         db.send_create_signal(u'taskomatic', ['TaskPeriodSchedule'])
 

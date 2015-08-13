@@ -267,7 +267,7 @@ class JobGen:
     def getXML(self, jobT, reserve=False, **kwargs):
         recipesT = RecipeTemplate.objects\
             .filter(jobtemplate=jobT, is_virtualguest=False)
-            # .select_related("distro", "virtualguests")
+        # .select_related("distro", "virtualguests")
         recipesS = list()
         for recipeT in recipesT:
             if len(recipeT.getArchsForToday()) == 0:
@@ -335,16 +335,16 @@ class JobGen:
 
 def parse_task(taskxml, recipe):
 
-#   stat = dict()
-#    for result in taskxml.childNodes:
-#        for it in result.childNodes:
-# print it.getAttribute("id"), it.getAttribute("result")
-#            res = it.getAttribute("result")
-#            if not res: continue
-#            if stat.has_key(res):
-#                stat[res] += 1
-#            else:
-#                stat[res] = 1
+    #   stat = dict()
+    #    for result in taskxml.childNodes:
+    #        for it in result.childNodes:
+    # print it.getAttribute("id"), it.getAttribute("result")
+    #            res = it.getAttribute("result")
+    #            if not res: continue
+    #            if stat.has_key(res):
+    #                stat[res] += 1
+    #            else:
+    #                stat[res] = 1
 
     testname = taskxml.getAttribute("name")
     test, status = Test.objects.get_or_create(name=testname, defaults={
@@ -449,6 +449,6 @@ def parse_recipe(recipexml, job, guestrecipe=None):
     logger.debug("%s status:  %s result %s" %
                  (recipe.uid, recipe.status, recipe.result))
     if reserve or recipe.status == Recipe.RESERVED:
-            if recipe.result == PASS and job.template.event_finish == RETURNWHENGREEN:
-                bk = Beaker()
-                bk.return2beaker(recipe)
+        if recipe.result == PASS and job.template.event_finish == RETURNWHENGREEN:
+            bk = Beaker()
+            bk.return2beaker(recipe)

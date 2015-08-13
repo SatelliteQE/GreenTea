@@ -8,12 +8,16 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding model 'TaskPeriod'
         db.create_table(u'taskomatic_taskperiod', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=64)),
-            ('common', self.gf('django.db.models.fields.CharField')(max_length=128)),
+            (u'id', self.gf('django.db.models.fields.AutoField')
+             (primary_key=True)),
+            ('title', self.gf('django.db.models.fields.CharField')
+             (max_length=64)),
+            ('common', self.gf('django.db.models.fields.CharField')
+             (max_length=128)),
             ('date_last', self.gf('django.db.models.fields.DateTimeField')
              (null=True, blank=True)),
-            ('is_enable', self.gf('django.db.models.fields.BooleanField')(default=False)),
+            ('is_enable', self.gf(
+                'django.db.models.fields.BooleanField')(default=False)),
             ('cron', self.gf('django.db.models.fields.CharField')
              (default='*  *  *  *  *', max_length=64)),
         ))

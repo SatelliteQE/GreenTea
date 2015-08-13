@@ -18,10 +18,10 @@ from models import Performance
 def performance(request):
     perf = Performance(
         label=request.POST.get("label"),
-                            name=request.POST.get("name"),
-                            description=request.POST.get("description"),
-                            exitcode=request.POST.get("exitcode", -1),
-                            duration=request.POST.get("duration")
+        name=request.POST.get("name"),
+        description=request.POST.get("description"),
+        exitcode=request.POST.get("exitcode", -1),
+        duration=request.POST.get("duration")
     )
     perf.save()
     data = "ok"

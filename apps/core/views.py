@@ -2,11 +2,10 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
+from datetime import datetime
 import json
 import logging
-import os
-import re
-import time
+import sys
 import urllib
 from copy import copy
 from datetime import date, timedelta
@@ -14,17 +13,20 @@ from datetime import date, timedelta
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core import serializers
 from django.core.paginator import Paginator
 from django.db import connection
 from django.db.models import Q, Count
-from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, render_to_response
-from django.template import Context, RequestContext, Template
+from django.http import Http404, HttpResponse
+from django.shortcuts import render
+from django.template import Context, Template
 from django.views.generic import TemplateView, View
 from taggit.models import Tag
 
-from apps.core.models import *
+from apps.core.models import (FAIL, NEW, RESULT_CHOICES, WAIVED, WARN, Author,
+                              CheckProgress, EnumResult, Event, Git,
+                              GroupOwner, Job, JobTemplate, Recipe,
+                              RecipeTemplate, Task, TaskPeriodSchedule, Test,
+                              TestHistory)
 from apps.core.utils.beaker import JobGen
 from apps.core.utils.beaker_import import Parser
 from apps.core.utils.date_helpers import TZDatetime, currentDate
@@ -128,7 +130,7 @@ class ApiView(View):
                                  .timetuple()[:3], hour=18, minute=55))
         rescheduled = Job.objects.filter(template=recipe.job.template,
                                          date__range=date_range)\
-                                 .exclude(id=recipe.job.id)
+            .exclude(id=recipe.job.id)
         return [job.to_json() for job in rescheduled]
 
     def getRecipeComments(self, recipe):
@@ -313,7 +315,8 @@ class JobsListView(TemplateView):
         self.formEvent(request.POST)
         self.get(request, *args, **kwargs)
         context = self.get_context_data(**kwargs)
-        return super(self.__class__, self).render_to_response(context, **kwargs)
+        return super(self.__class__, self).render_to_response(
+            context, **kwargs)
 
     def get_statistic(self, statistic):
         data = statistic["data"]
@@ -339,7 +342,8 @@ class JobsListView(TemplateView):
         if self.format == "txt":
             content = self.get_statistic(context['statistic'])
             return HttpResponse(content, content_type='text/plain')
-        return super(self.__class__, self).render_to_response(context, **response_kwargs)
+        return super(self.__class__, self).render_to_response(
+            context, **response_kwargs)
 
     def prepare_matrix(self, jobs, recipes, label=None):
         data, reschedule = OrderedDict(), 0
@@ -397,11 +401,11 @@ class JobsListView(TemplateView):
 
         jobstag = None
         if self.filters.get("tag"):
-                jobstag = JobTemplate.objects.filter(
-                    tags__slug=self.filters.get("tag")).values("id")
-                context["actualtag"] = self.filters.get("tag")
-                jfilters["id__in"] = jobstag
-                rfilters["job__template_id__in"] = jobstag
+            jobstag = JobTemplate.objects.filter(
+                tags__slug=self.filters.get("tag")).values("id")
+            context["actualtag"] = self.filters.get("tag")
+            jfilters["id__in"] = jobstag
+            rfilters["job__template_id__in"] = jobstag
 
         if self.filters.get('search'):
             jfilters["whiteboard__icontains"] = self.filters.get('search')
@@ -590,7 +594,8 @@ class TestsListView(TemplateView):
             waiveform = WaiverForm()
         context['waiveForm'] = self.forms.get('waiveForm', waiveform)
 
-        return super(self.__class__, self).render_to_response(context, **response_kwargs)
+        return super(self.__class__, self).render_to_response(
+            context, **response_kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
@@ -608,7 +613,7 @@ class TestsListView(TemplateView):
         # taskFilter['recipe__job__template__is_enable'] = True
         # Owners
         owners = dict([(it.id, it)
-                      for it in Author.objects.filter(is_enabled=True).annotate(dcount=Count('test'))])
+                       for it in Author.objects.filter(is_enabled=True).annotate(dcount=Count('test'))])
         # date Labels
         dates_label = create_matrix(settings.PREVIOUS_DAYS + 1)
         # History
@@ -736,9 +741,9 @@ class TestsListView(TemplateView):
                 reschedule = label[labeldate].reschedule + 1
             label[labeldate] = Task(
                 id=it["id"],
-                    uid=it["uid"],
-                    result=it["result"],
-                    statusbyuser=it["statusbyuser"],
+                uid=it["uid"],
+                result=it["result"],
+                statusbyuser=it["statusbyuser"],
             )
             label[labeldate].resultrate = it["recipe__resultrate"]
             label[labeldate].recipe_uid = "%s" % it["recipe__uid"]

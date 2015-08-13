@@ -1,5 +1,5 @@
 Django < 1.8
-django-grappelli < 2.6
+django-grappelli < 2.7
 django-debug-toolbar
 django-taggit
 django-reversion < 1.9
