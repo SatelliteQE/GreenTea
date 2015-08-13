@@ -6,19 +6,8 @@
 # Date: 24.9.2013
 
 import logging
-import os
-import re
-import sys
-import urllib2
 import xml.dom.minidom
 from datetime import datetime, timedelta
-from optparse import make_option
-
-import git
-from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.management.base import BaseCommand, CommandError
-from django.template.defaultfilters import slugify
 
 from apps.core.models import (Arch, DistroTemplate, JobTemplate,
                               RecipeTemplate, TaskTemplate, Test)

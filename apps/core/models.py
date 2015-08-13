@@ -96,7 +96,7 @@ class Distro(models.Model):
         return self.name
 
 
-class ObjParams():
+class ObjParams(object):
 
     def get_params(self):
         params = {}
@@ -252,7 +252,7 @@ class Git(models.Model):
                            '--follow',
                            'HEAD',
                            "%s/%s" % (self.path_absolute, test.folder))\
-                      .split('\n')
+                .split('\n')
             self.__saveCommits(test, rows)
 
     def __getGitCmd(self):
@@ -598,7 +598,8 @@ class JobTemplate(models.Model):
 
     def admin_url(self):
         content_type = ContentType.objects.get_for_model(self.__class__)
-        return reverse("admin:%s_%s_change" % (content_type.app_label, content_type.model), args=(self.id,))
+        return reverse("admin:%s_%s_change" % (
+            content_type.app_label, content_type.model), args=(self.id,))
 
     def is_return(self):
         return (self.event_finish == RETURN)
@@ -672,7 +673,8 @@ class RecipeTemplate(models.Model, ObjParams):
         return ", ".join([it.name for it in self.get_arch()])
 
     def get_tasks(self):
-        return self.tasks.filter(test__is_enable=True).select_related("test").order_by("priority")
+        return self.tasks.filter(test__is_enable=True).select_related(
+            "test").order_by("priority")
 
     # TODO: Remove Arch rotation
     # This solution of rotation of Arch is not good idea.
@@ -941,14 +943,16 @@ class Recipe(models.Model):
             return
 
         if status != self.status:
-            if self.status in (self.COMPLETED, self.ABORTED, self.RESERVED, self.CANCELLED):
+            if self.status in (
+                    self.COMPLETED, self.ABORTED, self.RESERVED, self.CANCELLED):
                 recipe_finished.send(sender="models:Recipe", recipe=self)
             else:
                 recipe_changed.send(sender="models:Recipe", recipe=self)
 
     def get_status(self):
         try:
-            return [it[1] for it in self.STATUS_CHOICES if it[0] == self.status][0]
+            return [it[1]
+                    for it in self.STATUS_CHOICES if it[0] == self.status][0]
         except IndexError:
             return "uknow-%s" % self.status
 
@@ -1185,6 +1189,7 @@ class Event(models.Model):
         (ALERT_DANGER, "danger"),
     )
     title = models.CharField(max_length=126)
+    url = models.CharField(max_length=256)
     description = models.TextField()
     alert = models.SmallIntegerField(
         choices=ENUM_ALERT, default=ALERT_INFO)

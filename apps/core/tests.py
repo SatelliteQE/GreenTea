@@ -12,7 +12,7 @@ import os
 from django.test import TestCase
 from django.test.client import Client
 
-from apps.core.models import RecipeTemplate, Job
+from apps.core.models import Job, RecipeTemplate
 from apps.core.utils.beaker import Beaker, JobGen
 from apps.core.utils.beaker_import import Parser
 
@@ -58,7 +58,8 @@ class ImportTest(TestCase):
 
     def test_basic_import(self):
         pwd = os.path.dirname(__file__)
-        for xmltestfile in glob.glob("%s/example.*" % os.path.join(pwd, "tests")):
+        for xmltestfile in glob.glob(
+                "%s/example.*" % os.path.join(pwd, "tests")):
             self.xmlimport(xmltestfile)
 
 

@@ -5,22 +5,13 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-import os
-import re
-import sys
-import urllib2
-import xml.dom.minidom
-from datetime import datetime, timedelta
 from optparse import make_option
 
-import git
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, CommandError
-from django.template.defaultfilters import slugify
 
-from apps.core.models import *
-from apps.core.utils.beaker_import import *
+from apps.core.models import (DistroTemplate, Job, Recipe, RecipeTemplate,
+                              Task, TaskTemplate)
+from apps.core.utils.beaker_import import Parser
 
 
 class Command(BaseCommand):
@@ -67,13 +58,13 @@ def init(*args, **kwargs):
             distro.save()
             recipe = RecipeTemplate(
                 jobtemplate=job.template,
-                        name=it.whiteboard,
-                        distro=distro
+                name=it.whiteboard,
+                distro=distro
             )
             recipe.save()
             for task in Task.objects.filter(recipe=it):
                 new_task = TaskTemplate(
                     test=task.test,
-                        recipe=recipe,
+                    recipe=recipe,
                 )
                 new_task.save()

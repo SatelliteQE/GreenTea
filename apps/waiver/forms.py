@@ -56,8 +56,8 @@ class WaiverForm(forms.ModelForm):
             data = {
                 "content": self.__esc(self.cleaned_data.get("content",
                                                             "")),
-                    "username": self.cleaned_data["username"],
-                    "action": self.cleaned_data["action"],
+                "username": self.cleaned_data["username"],
+                "action": self.cleaned_data["action"],
             }
             data["recipe"] = it if isinstance(it, Recipe) else None
             data["job"] = it if isinstance(it, Job) else None
