@@ -67,6 +67,7 @@ class Command(BaseCommand):
 
 def init(*args, **kwargs):
     progress = CheckProgress()
+    bkr = Beaker()
 
     cfg_running = kwargs["running"]
     cfg_init = kwargs["init"]
@@ -90,20 +91,13 @@ def init(*args, **kwargs):
                 date__lt=(currentDate() - timedelta(days=2))).order_by("-uid")[:1]
             if minid:
                 bkr_filter["minid"] = minid[0]["uid"][2:]
-
-        if settings.BEAKER_SERVER.startswith("http"):
-                server_url = "%s/RPC2" % settings.BEAKER_SERVER
-        else:
-                server_url = "https://%s/RPC2" % settings.BEAKER_SERVER
-        client = xmlrpclib.Server(server_url, context=ssl._create_unverified_context())
-        jobslist = client.jobs.filter(bkr_filter)
+        jobslist = bkr.listJobs(bkr_filter)
     else:
         jobslist = [it["uid"]
                     for it in Job.objects.values("uid").filter(is_finished=False)]
 
     progress.totalsum = len(jobslist)
     progress.save()
-    bkr = Beaker()
     for it in jobslist:
         if not cfg_quiet:
             logger.info(
