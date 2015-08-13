@@ -5,22 +5,13 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-import os
-import re
-import ssl
-import sys
-import time
-import xml.dom.minidom
-import xmlrpclib
 import logging
 from datetime import datetime, timedelta
 from optparse import make_option
 from apps.core.models import CheckProgress, Job
 
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.management.base import BaseCommand, CommandError
-from django.template.defaultfilters import slugify
+from django.core.management.base import BaseCommand
 
 from apps.core.utils.beaker import Beaker
 from apps.core.utils.date_helpers import currentDate
