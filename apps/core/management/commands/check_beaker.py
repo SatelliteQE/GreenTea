@@ -5,21 +5,13 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-import os
-import re
-import sys
-import time
-import xml.dom.minidom
-import xmlrpclib
 import logging
 from datetime import datetime, timedelta
 from optparse import make_option
 from apps.core.models import CheckProgress, Job
 
 from django.conf import settings
-from django.contrib.auth.models import User
-from django.core.management.base import BaseCommand, CommandError
-from django.template.defaultfilters import slugify
+from django.core.management.base import BaseCommand
 
 from apps.core.utils.beaker import Beaker
 from apps.core.utils.date_helpers import currentDate
@@ -66,21 +58,20 @@ class Command(BaseCommand):
 
 def init(*args, **kwargs):
     progress = CheckProgress()
+    bkr = Beaker()
 
     cfg_running = kwargs["running"]
     cfg_init = kwargs["init"]
     cfg_minid = kwargs["minid"]
     cfg_date = kwargs["date"]
     cfg_quiet = kwargs["quiet"]
-    if kwargs["jobs"]:
-        cfg_jobs = kwargs["jobs"].split(" ")
-    else:
-        cfg_jobs = None
 
     if cfg_date:
         cfg_date = datetime.strptime(kwargs["date"], "%Y-%m-%d")
 
-    if cfg_init:
+    if kwargs["jobs"]:
+        jobslist = kwargs["jobs"].split(" ")
+    elif cfg_init:
         bkr_filter = {"owner": settings.BEAKER_OWNER}
         if cfg_minid:
             bkr_filter["minid"] = kwargs["minid"]
@@ -91,23 +82,19 @@ def init(*args, **kwargs):
                 date__lt=(currentDate() - timedelta(days=2))).order_by("-uid")[:1]
             if minid:
                 bkr_filter["minid"] = minid[0]["uid"][2:]
-    if cfg_jobs:
-        jobslist = cfg_jobs
-    elif cfg_init:
-        jobslist = client.jobs.filter(bkr_filter)
+        jobslist = bkr.listJobs(bkr_filter)
     else:
         jobslist = [it["uid"]
                     for it in Job.objects.values("uid").filter(is_finished=False)]
 
     progress.totalsum = len(jobslist)
     progress.save()
-    bkr = Beaker()
     for it in jobslist:
         if not cfg_quiet:
             logger.info(
                 "%d/%d (%s)" %
                 (progress.actual, progress.totalsum, it))
 
-        bkr.parse_job(it, running=cfg_running, created_date=cfg_date)
+        bkr.parse_job(it, running=cfg_running, date_created=cfg_date)
         progress.counter()
     progress.finished()
