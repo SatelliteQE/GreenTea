@@ -293,7 +293,8 @@ class JobGen:
         jobT.cache_recipes = recipesS
         kwargs['job'] = jobT
         kwargs['default_packages'] = settings.BEAKER_DEFAULT_PACKAGES
-        return self.__renderXML(kwargs)
+        content = self.__renderXML(kwargs)
+        return content
 
     def __renderXML(self, kwargs):
         path = os.path.dirname(__file__)
