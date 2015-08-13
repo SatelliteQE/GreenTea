@@ -15,7 +15,7 @@ from django.test.client import Client
 from apps.core.models import Job, RecipeTemplate
 from apps.core.utils.beaker import Beaker, JobGen
 from apps.core.utils.beaker_import import Parser
-
+from bs4 import BeautifulSoup
 
 def get_content_from_file(filename):
     f = open(filename)
@@ -42,10 +42,15 @@ class ImportTest(TestCase):
         job = JobGen()
         xml = job.getXML(s.job)
         xml_old = get_content_from_file(filename)
-        xml = xml.splitlines(True)
-        xml_old = xml_old.splitlines(True)
-        d = difflib.unified_diff(xml, xml_old)
-        diff = "".join(d)
+
+        xml = u"%s" % "".join(xml.splitlines(True))
+        xml_old = u"%s" % "".join(xml_old.splitlines(True))
+
+        bs1 = BeautifulSoup(xml_old, "lxml")
+        bs2 = BeautifulSoup("".join(xml), "lxml")
+
+        d = difflib.unified_diff(bs1.prettify().split("\n"), bs2.prettify().split("\n"))
+        diff = "\n".join(d)
 
         print "-----------"
         print "'%s'" % diff
