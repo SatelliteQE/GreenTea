@@ -211,7 +211,7 @@ class Beaker:
                      % jobT.id)
         return None
 
-    def parse_job(self, jobid, running=True, date_created=None):
+    def _getXMLRPCClient(self):
         client = xmlrpclib.Server(self.server_url, verbose=0)
         if self.server_url.startswith("https"):
             # workaround ssl.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED]
@@ -219,7 +219,10 @@ class Beaker:
             if sys.version_info >= (2, 7, 9):
                 client = xmlrpclib.Server(self.server_url, verbose=0,
                                           context=ssl._create_unverified_context())
+        return client
 
+    def parse_job(self, jobid, running=True, date_created=None):
+        client = self._getXMLRPCClient()
         data = client.taskactions.task_info(jobid)
 
         # workaround for test which set label with actial date
@@ -252,6 +255,11 @@ class Beaker:
         if not job.is_running:
             job.is_finished = True
         job.save()
+
+    def listJobs(self, filter={}):
+        """List and filter beaker jobs."""
+        client = self._getXMLRPCClient()
+        return client.jobs.filter(filter)
 
 
 class JobGen:
