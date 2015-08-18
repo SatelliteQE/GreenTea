@@ -75,8 +75,8 @@ class Beaker:
         """
         auth = ""
         if self.username:
-            auth = "--username=%s --password=%s" % (self.username,
-                                                    self.password)
+            auth = "--username='%s' --password='%s'" % (self.username,
+                                                        self.password)
         command = "bkr %s %s %s --hub=%s" % (command, param, auth, self.hub)
         print command
         logger.debug(command)
