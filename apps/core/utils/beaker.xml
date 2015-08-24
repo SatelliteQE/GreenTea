@@ -1,5 +1,5 @@
 {% load core_extras %}
-<job {% if not is_manual %}group="satellite"{%endif%} retention_tag="scratch">
+<job group="{{ job_group }}" retention_tag="scratch">
   <whiteboard>{{ job.whiteboard }}</whiteboard>
   <recipeSet priority="Normal">
   {% for r in job.cache_recipes %}
