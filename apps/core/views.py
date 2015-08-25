@@ -56,7 +56,7 @@ def import_xml(request):
     # TODO: rewrite to standard View Class
     data = {}
     if request.POST and "textxml" in request.POST:
-        xml = request.POST["textxml"]
+        xml = request.POST["textxml"].strip()
         s = Parser(content=xml)
         if not s.status:
             data["error"] = s.error
