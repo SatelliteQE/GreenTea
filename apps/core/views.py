@@ -2,7 +2,6 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-from datetime import datetime
 import json
 import logging
 import sys

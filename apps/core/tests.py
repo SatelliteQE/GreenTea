@@ -17,6 +17,7 @@ from apps.core.models import Job, RecipeTemplate
 from apps.core.utils.beaker import Beaker, JobGen
 from apps.core.utils.beaker_import import Parser
 
+
 def get_content_from_file(filename):
     f = open(filename)
     xml_content = f.read()
