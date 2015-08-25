@@ -151,7 +151,7 @@ class JobListObject:
                 "job__template__is_enable": True
             })
             recipes = Recipe.objects.filter(**self.filters)\
-                .select_related("job", "job__template", "arch", "distro")\
+                .select_related("job", "job__template", "arch", "distro", "job__schedule")\
                 .order_by("job__template", "job")
 
             # Initial object schedule plan
@@ -378,7 +378,54 @@ class JobsListView(TemplateView):
         return super(self.__class__, self).render_to_response(
             context, **kwargs)
 
-    def get_statistic(self, statistic):
+    def get_statistic(self):
+        jobstag = JobTemplate.objects.filter(
+            tags__slug=self.filters.get("tag"))
+
+        cursor = connection.cursor()
+        tag_query = ""
+        if jobstag:
+            tag_query = map(lambda x: "%d" % int(x.id), jobstag)
+            tag_query = """ AND "core_job"."template_id" IN ( %s ) """ % ", ".join(
+                tag_query)
+        if self.filters.get('search'):
+            # statistic information
+            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
+               LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
+               LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
+               LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
+               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s
+               AND lower("core_jobtemplate"."whiteboard") LIKE lower(%s)
+               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
+            cursor.execute(query,
+                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True, "%%%s%%" % self.filters.get('search')])
+        else:
+            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
+               LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
+               LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
+               LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
+               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s """ + tag_query + """
+               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
+            cursor.execute(query,
+                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True])
+
+        data = cursor.fetchall()
+        label = OrderedDict()
+        T = lambda x: dict(RESULT_CHOICES)[x]
+        for it in data:
+            if not it[0] in label.keys():
+                label.update({it[0]: 0})
+        statistic = {
+            "data": {"sum": copy(label)}, "label": copy(label)}
+        for it in data:
+            if not T(it[1]) in statistic['data'].keys():
+                statistic['data'][T(it[1])] = copy(label)
+
+            if it[0] in statistic['data']["sum"]:
+                pass
+            statistic['data'][T(it[1])][it[0]] = it[2]
+            statistic['data']["sum"][it[0]] += it[2]
+
         data = statistic["data"]
         head = [it for it in data.keys() if it != "sum"]
         content = "date\t%s" % "\t".join(head)
@@ -400,7 +447,7 @@ class JobsListView(TemplateView):
     def render_to_response(self, context, **response_kwargs):
         # temporary return data for statis
         if self.format == "txt":
-            content = self.get_statistic(context['statistic'])
+            content = self.get_statistic()
             return HttpResponse(content, content_type='text/plain')
         return super(self.__class__, self).render_to_response(
             context, **response_kwargs)
@@ -467,100 +514,6 @@ class JobsListView(TemplateView):
         # Get all data from database for jobs ###
         joblist = JobListObject(**filters)
         context['plans'] = joblist.get_data()
-
-        # TO delete
-
-        # create label
-        cursor = connection.cursor()
-        cursor.execute("""SELECT DISTINCT date("core_job"."date") AS "date" FROM "core_job"
-                INNER JOIN "core_jobtemplate" ON ("core_job"."template_id" = "core_jobtemplate"."id")
-                WHERE ("core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s )
-                ORDER BY date desc LIMIT %s""", [True, JobTemplate.WEEKLY, settings.PREVIOUS_DAYS, ],)
-        # sqllite return unicode
-        # postgresql return datetime
-        udate = lambda a: a.date() if type(a) in (datetime,) else a
-        context['labelweek'] = [udate(it[0]) for it in cursor.fetchall()]
-
-        # FIXME
-        try:
-            date_range = (context['labelweek'][-1], datetime.now())
-        except IndexError:
-            date_range = (datetime.now(), datetime.now())
-
-        jfilters = {"is_enable": True, "period": JobTemplate.WEEKLY}
-        rfilters = {"job__template__is_enable": True,
-                    "job__date__range": date_range,
-                    "job__template__period": JobTemplate.WEEKLY}
-
-        if self.filters.get('search'):
-            jfilters["whiteboard__icontains"] = self.filters.get('search')
-            rfilters["job__template__whiteboard__icontains"] = self.filters.get(
-                'search')
-
-        jobs = JobTemplate.objects.filter(**jfilters)
-        recipes = Recipe.objects.filter(**rfilters)\
-                        .select_related("job", "job__template", "arch", "distro")\
-                        .annotate(Count('id'))
-
-        # ORM doen't work correct ###
-
-        # labelweek = [it.strftime("%Y-%m-%d") for it in Job.objects.values("date")\
-        #        .filter(
-        #             template__period=JobTemplate.WEEKLY,
-        #             template__is_enable=True,
-        #             date__lt=datetime.today().date(),
-        #         )\
-        #        .extra({'date_day': "date(date)"})\
-        #        .values("date_day").order_by("date")\
-        #        .annotate(Count('id'))\
-        # .dates("date", "day").order_by("-date")[:settings.PREVIOUS_DAYS]] # skip today - only previous day
-        context['labelweek'].reverse()
-
-        context['dataweek'] = self.prepare_matrix(
-            jobs, recipes, context['labelweek'])
-
-        tag_query = ""
-        if jobstag is not None:
-            tag_query = map(lambda x: "%d" % int(x.id), jobstag)
-            tag_query = """ AND "core_job"."template_id" IN ( %s ) """ % ", ".join(
-                tag_query)
-        if self.filters.get('search'):
-            # statistic information
-            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
-               LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
-               LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
-               LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
-               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s
-               AND lower("core_jobtemplate"."whiteboard") LIKE lower(%s)
-               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
-            cursor.execute(query,
-                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True, JobTemplate.DAILY, "%%%s%%" % self.filters.get('search')])
-        else:
-            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
-               LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
-               LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
-               LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
-               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s """ + tag_query + """
-               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
-            cursor.execute(query,
-                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True, JobTemplate.DAILY])
-
-        data = cursor.fetchall()
-        label = OrderedDict()
-        T = lambda x: dict(RESULT_CHOICES)[x]
-        for it in data:
-            if not it[0] in label.keys():
-                label.update({it[0]: 0})
-        context['statistic'] = {
-            "data": {"sum": copy(label)}, "label": copy(label)}
-        for it in data:
-            if not T(it[1]) in context['statistic']['data'].keys():
-                context['statistic']['data'][T(it[1])] = copy(label)
-
-            if it[0] in context['statistic']['data']["sum"]:
-                pass
-            context['statistic']['data'][T(it[1])][it[0]] = it[2]
-            context['statistic']['data']["sum"][it[0]] += it[2]
 
         try:
             context['progress'] = CheckProgress.objects.order_by(
