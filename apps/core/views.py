@@ -25,11 +25,12 @@ from taggit.models import Tag
 from apps.core.models import (FAIL, NEW, RESULT_CHOICES, WAIVED, WARN, Author,
                               CheckProgress, EnumResult, Event, Git,
                               GroupOwner, Job, JobTemplate, Recipe,
-                              RecipeTemplate, Task, TaskPeriodSchedule, Test,
+                              RecipeTemplate, Task, Test,
                               TestHistory)
 from apps.core.utils.beaker import JobGen
 from apps.core.utils.beaker_import import Parser
 from apps.core.utils.date_helpers import TZDatetime, currentDate
+from apps.taskomatic.models import TaskPeriodSchedule
 from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
 from forms import FilterForm, GroupsForm, JobForm
@@ -116,6 +117,64 @@ def statistic(request):
     content = "TODO"
     # we need create statistic page
     return HttpResponse(content, content_type='text/plain')
+
+class JobListObject:
+
+    def __init__(self, filters={}):
+        self.filters=filters
+        self.schedules = TaskPeriodSchedule.objects.values("period", "id", "counter")\
+            .annotate(number=Count('period', distinct=True))\
+            .order_by("period", "-counter")
+        self.plans = {}
+
+        self.create_matrix()
+
+    def create_matrix(self):
+        for plan in self.schedules:
+            key = plan["period"]
+            if not key in self.plans:
+                self.plans[key] = {"data": [plan["id"],], "max_num": plan["counter"]}
+                self.plans[key]["label"] = range(0, plan["counter"]+1)
+            else:
+                self.plans[key]["data"].append(plan["id"])
+
+
+    def execute(self):
+
+        for key, it in self.plans.items():
+            self.filters.update({
+                "job__schedule_id__in": it["data"], 
+                "job__template__is_enable": True
+                })
+            recipes = Recipe.objects.filter(**self.filters)\
+                    .select_related("job", "job__template", "arch", "distro")\
+                    .order_by("job__template", "job")
+
+            # Initial object schedule plan
+            if not "object" in it.keys():
+                it["object"] = recipes[0].job.schedule.period
+
+            objects = {}
+            for recipe in recipes:
+                template = recipe.job.template_id
+                if not template in objects:
+                    objects[template] = {
+                        "object": recipe.job.template,
+                        "data" : {
+                            recipe.job.schedule: recipe
+                        }
+                    }
+                else:
+                    objects[template]["data"].update({
+                        recipe.job.schedule: recipe
+                    })
+            self.plans[key]["objects"] = objects
+
+
+    def get_data(self):
+        self.execute()
+        return self.plans
+
 
 
 class ApiView(View):
@@ -386,6 +445,8 @@ class JobsListView(TemplateView):
         context['GITWEB_URL'] = settings.GITWEB_URL
 
         # Forms ###
+        joblist = JobListObject()
+        context['plans'] = joblist.get_data()
 
         # daily ###
         context['label'] = create_matrix(settings.PREVIOUS_DAYS)

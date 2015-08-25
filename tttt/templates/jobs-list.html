@@ -55,6 +55,28 @@
 <a name="Dashboard"></a>
 <h2>Dashboard</h2>
 
+{% for key, plan in plans.items %}
+<table class="dashboard dashboard-jobs">
+  <thead>
+      <tr><th colspan="5"><h4>{{plan.object}}</h4></th></tr>
+      <tr>
+          <th>Job</th>
+          <th>Recipe</th>
+          {% for it in plan.label %}
+          <th class="date"><a href="#" >{{it}}</a></th>
+          {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+    {% for key, item in plan.objects.items %}
+    >> {{ key }} {{ item }}
+        {% include "jobs-list-item.html" %}
+    {% endfor %}
+    </tbody>
+</table>
+<br>
+{% endfor %}
+
 <table class="dashboard dashboard-jobs">
 	<thead>
 	    <tr><th colspan="11"><h4>Daily</h4></th></tr>

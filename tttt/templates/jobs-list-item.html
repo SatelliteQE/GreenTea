@@ -1,8 +1,7 @@
-{% for label, recipe in item.recipes.items %}
 <tr>
-    <td>{% ifchanged %}<a href="{{item.get_absolute_url}}" >{{ recipe.job }}</a>{% endifchanged %}</td>
-    <td>{{ recipe.label }}</td>
-    {% for date, atom in recipe.days.items %}
+    <td>{% ifchanged %}<a href="{{item.object.get_absolute_url}}" >{{ item.object }}</a>{% endifchanged %}</td>
+    <td>{{ item.object }}</td>
+    {% for atom in item.data %}
     <td {% if atom.recipe.uid %}id="R:{{atom.recipe.uid}}"{% endif %} class="field-value {% if not atom.recipe.is_result_pass %} field-job{% endif %} status-{{atom.recipe.get_result}}">
        <div class="rWrapper">
         <div class="icons-tr"><span class="glyphicon glyphicon-eye-open" title="System is selected."></span></div>
@@ -16,4 +15,3 @@
     </td>
     {% endfor %}
 </tr>
-{% endfor %}
