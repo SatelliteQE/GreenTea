@@ -1034,6 +1034,10 @@ class Recipe(models.Model):
     def is_result_pass(self):
         return (PASS == self.result)
 
+    def reschedule(self):
+        # TODO
+        pass
+
 
 class Task(models.Model):
     uid = models.CharField("Task ID", max_length=12, unique=True)

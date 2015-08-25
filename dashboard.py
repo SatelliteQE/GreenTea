@@ -39,6 +39,13 @@ class CustomIndexDashboard(Dashboard):
                         'apps.core.models.RecipeTemplate',
                         'apps.core.models.TaskTemplate',
                         'apps.core.models.TaskRoleEnum',
+                    ),
+                ),
+                modules.AppList(
+                    _('Backend'),
+                    column=1,
+                    collapsible=False,
+                    models=(
                         'apps.taskomatic.models.TaskPeriod',
                     ),
                 ),
@@ -95,7 +102,7 @@ class CustomIndexDashboard(Dashboard):
             children=[
                 {
                     'title': _('Django Documentation'),
-                    'url': 'https://docs.djangoproject.com/en/1.5/',
+                    'url': 'https://docs.djangoproject.com/en/1.7/',
                     'external': True,
                 },
                 {
