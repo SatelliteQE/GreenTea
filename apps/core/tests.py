@@ -9,13 +9,13 @@ import difflib
 import glob
 import os
 
+from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.test.client import Client
 
 from apps.core.models import Job, RecipeTemplate
 from apps.core.utils.beaker import Beaker, JobGen
 from apps.core.utils.beaker_import import Parser
-from bs4 import BeautifulSoup
 
 def get_content_from_file(filename):
     f = open(filename)
@@ -49,7 +49,9 @@ class ImportTest(TestCase):
         bs1 = BeautifulSoup(xml_old, "lxml")
         bs2 = BeautifulSoup("".join(xml), "lxml")
 
-        d = difflib.unified_diff(bs1.prettify().split("\n"), bs2.prettify().split("\n"))
+        d = difflib.unified_diff(
+            bs1.prettify().split("\n"),
+            bs2.prettify().split("\n"))
         diff = "\n".join(d)
 
         print "-----------"

@@ -8,7 +8,7 @@ import logging
 import sys
 import urllib
 from copy import copy
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from bs4 import BeautifulSoup
 from django.conf import settings
@@ -25,11 +25,11 @@ from taggit.models import Tag
 from apps.core.models import (FAIL, NEW, RESULT_CHOICES, WAIVED, WARN, Author,
                               CheckProgress, EnumResult, Event, Git,
                               GroupOwner, Job, JobTemplate, Recipe,
-                              RecipeTemplate, Task, TaskPeriodSchedule, Test,
-                              TestHistory)
+                              RecipeTemplate, Task, Test, TestHistory)
 from apps.core.utils.beaker import JobGen
 from apps.core.utils.beaker_import import Parser
 from apps.core.utils.date_helpers import TZDatetime, currentDate
+from apps.taskomatic.models import TaskPeriodSchedule
 from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
 from forms import FilterForm, GroupsForm, JobForm
@@ -116,6 +116,67 @@ def statistic(request):
     content = "TODO"
     # we need create statistic page
     return HttpResponse(content, content_type='text/plain')
+
+
+class JobListObject:
+
+    def __init__(self, **filters):
+        self.filters = filters
+        self.schedules = TaskPeriodSchedule.objects.values("period", "id", "counter")\
+            .annotate(number=Count('period', distinct=True))\
+            .order_by("period", "-counter")
+        self.plans = {}
+
+        self.create_matrix()
+
+    def create_matrix(self):
+        for plan in self.schedules:
+            key = plan["period"]
+            if not key in self.plans:
+                self.plans[key] = {
+                    "data": [
+                        plan["id"],
+                    ],
+                    "max_num": plan["counter"]}
+                self.plans[key]["label"] = range(0, plan["counter"] + 1)
+            else:
+                self.plans[key]["data"].append(plan["id"])
+        for key, it in self.plans.items():
+            it["count"] = len(it["data"])
+
+    def execute(self):
+
+        for key, it in self.plans.items():
+            self.filters.update({
+                "job__schedule_id__in": it["data"],
+                "job__template__is_enable": True
+            })
+            recipes = Recipe.objects.filter(**self.filters)\
+                .select_related("job", "job__template", "arch", "distro", "job__schedule")\
+                .order_by("job__template", "job")
+
+            # Initial object schedule plan
+            if not "object" in it.keys():
+                it["object"] = recipes[0].job.schedule.period
+
+            objects = {}
+            for recipe in recipes:
+                template = recipe.job.template_id
+                id_counter = recipe.job.schedule.counter
+                if not template in objects:
+                    label = dict([(k, None) for k in it["label"]])
+                    objects[template] = {
+                        "object": recipe.job.template,
+                        "data": label,
+                    }
+                objects[template]["data"].update({
+                    id_counter: recipe
+                })
+            self.plans[key]["objects"] = objects
+
+    def get_data(self):
+        self.execute()
+        return self.plans
 
 
 class ApiView(View):
@@ -318,7 +379,54 @@ class JobsListView(TemplateView):
         return super(self.__class__, self).render_to_response(
             context, **kwargs)
 
-    def get_statistic(self, statistic):
+    def get_statistic(self):
+        jobstag = JobTemplate.objects.filter(
+            tags__slug=self.filters.get("tag"))
+
+        cursor = connection.cursor()
+        tag_query = ""
+        if jobstag:
+            tag_query = map(lambda x: "%d" % int(x.id), jobstag)
+            tag_query = """ AND "core_job"."template_id" IN ( %s ) """ % ", ".join(
+                tag_query)
+        if self.filters.get('search'):
+            # statistic information
+            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
+               LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
+               LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
+               LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
+               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s
+               AND lower("core_jobtemplate"."whiteboard") LIKE lower(%s)
+               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
+            cursor.execute(query,
+                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True, "%%%s%%" % self.filters.get('search')])
+        else:
+            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
+               LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
+               LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
+               LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
+               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s """ + tag_query + """
+               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
+            cursor.execute(query,
+                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True])
+
+        data = cursor.fetchall()
+        label = OrderedDict()
+        T = lambda x: dict(RESULT_CHOICES)[x]
+        for it in data:
+            if not it[0] in label.keys():
+                label.update({it[0]: 0})
+        statistic = {
+            "data": {"sum": copy(label)}, "label": copy(label)}
+        for it in data:
+            if not T(it[1]) in statistic['data'].keys():
+                statistic['data'][T(it[1])] = copy(label)
+
+            if it[0] in statistic['data']["sum"]:
+                pass
+            statistic['data'][T(it[1])][it[0]] = it[2]
+            statistic['data']["sum"][it[0]] += it[2]
+
         data = statistic["data"]
         head = [it for it in data.keys() if it != "sum"]
         content = "date\t%s" % "\t".join(head)
@@ -340,7 +448,7 @@ class JobsListView(TemplateView):
     def render_to_response(self, context, **response_kwargs):
         # temporary return data for statis
         if self.format == "txt":
-            content = self.get_statistic(context['statistic'])
+            content = self.get_statistic()
             return HttpResponse(content, content_type='text/plain')
         return super(self.__class__, self).render_to_response(
             context, **response_kwargs)
@@ -385,133 +493,28 @@ class JobsListView(TemplateView):
         context['waiveClass'] = Comment
         context['GITWEB_URL'] = settings.GITWEB_URL
 
-        # Forms ###
+        # tags
+        context["actualtag"] = self.filters.get("tag")
+        context['tags'] = Tag.objects.all()
 
-        # daily ###
-        context['label'] = create_matrix(settings.PREVIOUS_DAYS)
+        ### get scheduled jobs ###
+        filters, jobstag = {}, {}
 
-        jfilters = {"is_enable": True, "period": JobTemplate.DAILY}
-        date_range = (TZDatetime(*context['label'][0].timetuple()[:6]),
-                      TZDatetime(
-                          *context['label'][-1].timetuple()[:3], hour=23, minute=55)
-                      )
-        rfilters = {"job__template__is_enable": True,
-                    "job__date__range": date_range,
-                    "job__template__period": JobTemplate.DAILY}
+        if self.filters.get('search'):
+            filters.update({
+                "job__template__whiteboard__icontains": self.filters.get('search'),
+            })
 
-        jobstag = None
         if self.filters.get("tag"):
             jobstag = JobTemplate.objects.filter(
-                tags__slug=self.filters.get("tag")).values("id")
-            context["actualtag"] = self.filters.get("tag")
-            jfilters["id__in"] = jobstag
-            rfilters["job__template_id__in"] = jobstag
+                tags__slug=self.filters.get("tag"))
+            filters.update({
+                "job__template__in": jobstag,
+            })
 
-        if self.filters.get('search'):
-            jfilters["whiteboard__icontains"] = self.filters.get('search')
-            rfilters["job__template__whiteboard__icontains"] = self.filters.get(
-                'search')
-
-        jobs = JobTemplate.objects.filter(**jfilters).order_by("position")
-        recipes = Recipe.objects.filter(**rfilters)\
-                        .select_related("job", "job__template", "arch", "distro")\
-                        .order_by("job__template__position", "uid")\
-                        .annotate(Count('id'))
-        context['data'] = self.prepare_matrix(jobs, recipes)
-
-        # weekly ###
-
-        # create label
-        cursor = connection.cursor()
-        cursor.execute("""SELECT DISTINCT date("core_job"."date") AS "date" FROM "core_job"
-                INNER JOIN "core_jobtemplate" ON ("core_job"."template_id" = "core_jobtemplate"."id")
-                WHERE ("core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s )
-                ORDER BY date desc LIMIT %s""", [True, JobTemplate.WEEKLY, settings.PREVIOUS_DAYS, ],)
-        # sqllite return unicode
-        # postgresql return datetime
-        udate = lambda a: a.date() if type(a) in (datetime,) else a
-        context['labelweek'] = [udate(it[0]) for it in cursor.fetchall()]
-
-        # FIXME
-        try:
-            date_range = (context['labelweek'][-1], datetime.now())
-        except IndexError:
-            date_range = (datetime.now(), datetime.now())
-
-        jfilters = {"is_enable": True, "period": JobTemplate.WEEKLY}
-        rfilters = {"job__template__is_enable": True,
-                    "job__date__range": date_range,
-                    "job__template__period": JobTemplate.WEEKLY}
-
-        if self.filters.get('search'):
-            jfilters["whiteboard__icontains"] = self.filters.get('search')
-            rfilters["job__template__whiteboard__icontains"] = self.filters.get(
-                'search')
-
-        jobs = JobTemplate.objects.filter(**jfilters)
-        recipes = Recipe.objects.filter(**rfilters)\
-                        .select_related("job", "job__template", "arch", "distro")\
-                        .annotate(Count('id'))
-
-        # ORM doen't work correct ###
-
-        # labelweek = [it.strftime("%Y-%m-%d") for it in Job.objects.values("date")\
-        #        .filter(
-        #             template__period=JobTemplate.WEEKLY,
-        #             template__is_enable=True,
-        #             date__lt=datetime.today().date(),
-        #         )\
-        #        .extra({'date_day': "date(date)"})\
-        #        .values("date_day").order_by("date")\
-        #        .annotate(Count('id'))\
-        # .dates("date", "day").order_by("-date")[:settings.PREVIOUS_DAYS]] # skip today - only previous day
-        context['labelweek'].reverse()
-
-        context['dataweek'] = self.prepare_matrix(
-            jobs, recipes, context['labelweek'])
-
-        tag_query = ""
-        if jobstag is not None:
-            tag_query = map(lambda x: "%d" % int(x["id"]), jobstag)
-            tag_query = """ AND "core_job"."template_id" IN ( %s ) """ % ", ".join(
-                tag_query)
-        if self.filters.get('search'):
-            # statistic information
-            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
-               LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
-               LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
-               LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
-               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s
-               AND lower("core_jobtemplate"."whiteboard") LIKE lower(%s)
-               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
-            cursor.execute(query,
-                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True, JobTemplate.DAILY, "%%%s%%" % self.filters.get('search')])
-        else:
-            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
-               LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
-               LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
-               LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
-               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s AND "core_jobtemplate"."period" = %s """ + tag_query + """
-               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
-            cursor.execute(query,
-                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True, JobTemplate.DAILY])
-
-        data = cursor.fetchall()
-        label = OrderedDict()
-        T = lambda x: dict(RESULT_CHOICES)[x]
-        for it in data:
-            if not it[0] in label.keys():
-                label.update({it[0]: 0})
-        context['statistic'] = {
-            "data": {"sum": copy(label)}, "label": copy(label)}
-        for it in data:
-            if not T(it[1]) in context['statistic']['data'].keys():
-                context['statistic']['data'][T(it[1])] = copy(label)
-
-            if it[0] in context['statistic']['data']["sum"]:
-                pass
-            context['statistic']['data'][T(it[1])][it[0]] = it[2]
-            context['statistic']['data']["sum"][it[0]] += it[2]
+        # Get all data from database for jobs ###
+        joblist = JobListObject(**filters)
+        context['plans'] = joblist.get_data()
 
         try:
             context['progress'] = CheckProgress.objects.order_by(
@@ -529,7 +532,6 @@ class JobsListView(TemplateView):
         context['waiveForm'] = self.forms.get('waiveForm', waiveform)
 
         # get all tags
-        context['tags'] = Tag.objects.all()
 
         context["events"] = Event.objects.filter(
             is_enabled=True, datestart__lt=datetime.now,
