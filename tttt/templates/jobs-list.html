@@ -58,7 +58,7 @@
 {% for key, plan in plans.items %}
 <table class="dashboard dashboard-jobs">
   <thead>
-      <tr><th colspan="5"><h4>{{plan.object}}</h4></th></tr>
+      <tr><th colspan="{{plan.count|add:2}}"><h4>{{plan.object}}</h4></th></tr>
       <tr>
           <th>Job</th>
           <th>Recipe</th>
@@ -69,7 +69,6 @@
     </thead>
     <tbody>
     {% for key, item in plan.objects.items %}
-    >> {{ key }} {{ item }}
         {% include "jobs-list-item.html" %}
     {% endfor %}
     </tbody>
@@ -77,42 +76,6 @@
 <br>
 {% endfor %}
 
-<table class="dashboard dashboard-jobs">
-	<thead>
-	    <tr><th colspan="11"><h4>Daily</h4></th></tr>
-	    <tr>
-	        <th>Job</th>
-	        <th>Recipe</th>
-	        {% for it in label %}
-	        <th class="date"><a href="#" >{{it|date:"Y-m-d"}}</a></th>
-	        {% endfor %}
-	    </tr>
-    </thead>
-    <tbody>
-    {% for key, item in data.items %}
-        {% include "jobs-list-item.html" %}
-    {% endfor %}
-    </tbody>
-</table>
-<br>
-
-<table class="dashboard dashboard-jobs" >
-	<thead>
-	    <tr><th colspan="11"><h4>Weekly</h4></th></tr>
-	    <tr>
-	        <th>Job</th>
-	        <th>Recipe</th>
-	        {% for it in labelweek %}
-	        <th class="date"><a href="#" >{{it|date:"Y-m-d"}}</a></th>
-	        {% endfor %}
-	    </tr>
-    </thead>
-    <tbody>
-    {% for key, item in dataweek.items %}
-        {% include "jobs-list-item.html" %}
-    {% endfor %}
-    </tbody>
-</table>
 {% include 'legends.html' %}
 
 <script src="http://d3js.org/d3.v3.js"></script>

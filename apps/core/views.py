@@ -2,13 +2,12 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-from datetime import datetime
 import json
 import logging
 import sys
 import urllib
 from copy import copy
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from bs4 import BeautifulSoup
 from django.conf import settings
@@ -25,8 +24,7 @@ from taggit.models import Tag
 from apps.core.models import (FAIL, NEW, RESULT_CHOICES, WAIVED, WARN, Author,
                               CheckProgress, EnumResult, Event, Git,
                               GroupOwner, Job, JobTemplate, Recipe,
-                              RecipeTemplate, Task, Test,
-                              TestHistory)
+                              RecipeTemplate, Task, Test, TestHistory)
 from apps.core.utils.beaker import JobGen
 from apps.core.utils.beaker_import import Parser
 from apps.core.utils.date_helpers import TZDatetime, currentDate
@@ -118,10 +116,11 @@ def statistic(request):
     # we need create statistic page
     return HttpResponse(content, content_type='text/plain')
 
+
 class JobListObject:
 
-    def __init__(self, filters={}):
-        self.filters=filters
+    def __init__(self, **filters):
+        self.filters = filters
         self.schedules = TaskPeriodSchedule.objects.values("period", "id", "counter")\
             .annotate(number=Count('period', distinct=True))\
             .order_by("period", "-counter")
@@ -133,22 +132,27 @@ class JobListObject:
         for plan in self.schedules:
             key = plan["period"]
             if not key in self.plans:
-                self.plans[key] = {"data": [plan["id"],], "max_num": plan["counter"]}
-                self.plans[key]["label"] = range(0, plan["counter"]+1)
+                self.plans[key] = {
+                    "data": [
+                        plan["id"],
+                    ],
+                    "max_num": plan["counter"]}
+                self.plans[key]["label"] = range(0, plan["counter"] + 1)
             else:
                 self.plans[key]["data"].append(plan["id"])
-
+        for key, it in self.plans.items():
+            it["count"] = len(it["data"])
 
     def execute(self):
 
         for key, it in self.plans.items():
             self.filters.update({
-                "job__schedule_id__in": it["data"], 
+                "job__schedule_id__in": it["data"],
                 "job__template__is_enable": True
-                })
+            })
             recipes = Recipe.objects.filter(**self.filters)\
-                    .select_related("job", "job__template", "arch", "distro")\
-                    .order_by("job__template", "job")
+                .select_related("job", "job__template", "arch", "distro")\
+                .order_by("job__template", "job")
 
             # Initial object schedule plan
             if not "object" in it.keys():
@@ -157,24 +161,21 @@ class JobListObject:
             objects = {}
             for recipe in recipes:
                 template = recipe.job.template_id
+                id_counter = recipe.job.schedule.counter
                 if not template in objects:
+                    label = dict([(k, None) for k in it["label"]])
                     objects[template] = {
                         "object": recipe.job.template,
-                        "data" : {
-                            recipe.job.schedule: recipe
-                        }
+                        "data": label,
                     }
-                else:
-                    objects[template]["data"].update({
-                        recipe.job.schedule: recipe
-                    })
+                objects[template]["data"].update({
+                    id_counter: recipe
+                })
             self.plans[key]["objects"] = objects
-
 
     def get_data(self):
         self.execute()
         return self.plans
-
 
 
 class ApiView(View):
@@ -444,43 +445,30 @@ class JobsListView(TemplateView):
         context['waiveClass'] = Comment
         context['GITWEB_URL'] = settings.GITWEB_URL
 
-        # Forms ###
-        joblist = JobListObject()
-        context['plans'] = joblist.get_data()
+        # tags
+        context["actualtag"] = self.filters.get("tag")
+        context['tags'] = Tag.objects.all()
 
-        # daily ###
-        context['label'] = create_matrix(settings.PREVIOUS_DAYS)
-
-        jfilters = {"is_enable": True, "period": JobTemplate.DAILY}
-        date_range = (TZDatetime(*context['label'][0].timetuple()[:6]),
-                      TZDatetime(
-                          *context['label'][-1].timetuple()[:3], hour=23, minute=55)
-                      )
-        rfilters = {"job__template__is_enable": True,
-                    "job__date__range": date_range,
-                    "job__template__period": JobTemplate.DAILY}
-
-        jobstag = None
-        if self.filters.get("tag"):
-            jobstag = JobTemplate.objects.filter(
-                tags__slug=self.filters.get("tag")).values("id")
-            context["actualtag"] = self.filters.get("tag")
-            jfilters["id__in"] = jobstag
-            rfilters["job__template_id__in"] = jobstag
+        ### get scheduled jobs ###
+        filters, jobstag = {}, {}
 
         if self.filters.get('search'):
-            jfilters["whiteboard__icontains"] = self.filters.get('search')
-            rfilters["job__template__whiteboard__icontains"] = self.filters.get(
-                'search')
+            filters.update({
+                "job__template__whiteboard__icontains": self.filters.get('search'),
+            })
 
-        jobs = JobTemplate.objects.filter(**jfilters).order_by("position")
-        recipes = Recipe.objects.filter(**rfilters)\
-                        .select_related("job", "job__template", "arch", "distro")\
-                        .order_by("job__template__position", "uid")\
-                        .annotate(Count('id'))
-        context['data'] = self.prepare_matrix(jobs, recipes)
+        if self.filters.get("tag"):
+            jobstag = JobTemplate.objects.filter(
+                tags__slug=self.filters.get("tag"))
+            filters.update({
+                "job__template__in": jobstag,
+            })
 
-        # weekly ###
+        # Get all data from database for jobs ###
+        joblist = JobListObject(**filters)
+        context['plans'] = joblist.get_data()
+
+        # TO delete
 
         # create label
         cursor = connection.cursor()
@@ -533,7 +521,7 @@ class JobsListView(TemplateView):
 
         tag_query = ""
         if jobstag is not None:
-            tag_query = map(lambda x: "%d" % int(x["id"]), jobstag)
+            tag_query = map(lambda x: "%d" % int(x.id), jobstag)
             tag_query = """ AND "core_job"."template_id" IN ( %s ) """ % ", ".join(
                 tag_query)
         if self.filters.get('search'):
@@ -590,7 +578,6 @@ class JobsListView(TemplateView):
         context['waiveForm'] = self.forms.get('waiveForm', waiveform)
 
         # get all tags
-        context['tags'] = Tag.objects.all()
 
         context["events"] = Event.objects.filter(
             is_enabled=True, datestart__lt=datetime.now,
