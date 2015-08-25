@@ -52,8 +52,13 @@
 {% endfor %}
 </table>
 
+<h2>Dashboard <span id="slider-value-info">1</span></h2>
 <a name="Dashboard"></a>
-<h2>Dashboard</h2>
+
+<div class="slider">
+{{ forms.slider}}
+<div id="slider"></div>
+</div>
 
 {% for key, plan in plans.items %}
 <table class="dashboard dashboard-jobs">
@@ -80,5 +85,20 @@
 
 <script src="http://d3js.org/d3.v3.js"></script>
 <script src="/media/js/graph.js"></script>
+
+<script>
+  $(function() {
+    $( "#slider" ).slider({
+      range: "max",
+      min: -20,
+      max: 0,
+      value: 1,
+      slide: function( event, ui ) {
+        $( "#id_slider" ).val( ui.value );
+        $( "#slider-value-info" ).html( ui.value );
+      }
+    });
+  });
+</script>
 
 {% endblock %}

@@ -236,3 +236,13 @@ table.dashboard .rTriangle > div, .pTriangle > div { position:relative; }
 
 .statistic {
 }
+
+.slider {
+	margin: 20px 10px 20px 10px;
+}
+
+#id_slider {
+	display: none;
+}
+
+.slider .ui-slider-range { background: #729fcf; }

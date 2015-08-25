@@ -1020,6 +1020,11 @@ class Recipe(models.Model):
             "whiteboard": self.whiteboard,
         }
 
+    def get_label(self):
+        print "ok"
+        print self.get_dict()
+        return render_lable(self.get_dict(), self.job.template.grouprecipes)
+
     def is_running(self):
         # this makes about 1000 requests into DB, I think it is not necessary here.
         # self.recount_result()

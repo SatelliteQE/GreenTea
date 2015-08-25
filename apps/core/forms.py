@@ -17,6 +17,9 @@ class FilterForm(forms.Form):
     tag = forms.CharField(
         required=False
     )
+    slider = forms.CharField(
+        required=False
+    )
 
     def __init__(self, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)

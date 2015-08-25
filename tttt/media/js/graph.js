@@ -13,7 +13,7 @@ var y = d3.scale.linear()
     .range([height, 0]);
 
 var color = d3.scale.category20();
-console.debug(color);
+//console.debug(color);
 var xAxis = d3.svg.axis()
     .scale(x)
     .orient("bottom");
@@ -38,7 +38,7 @@ var svg = d3.select(".statistic").append("svg")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 url = window.location.href;
-console.debug(url);
+// console.debug(url);
 if(url.indexOf("?") > 0){
   url = url + "&format_output=txt"
 } else {
@@ -54,7 +54,7 @@ d3.tsv(url, function(error, data) {
     return {
       name: name,
       values: data.map(function(d) {
-        console.debug({date: d.date, y: d[name] / 100});
+        //console.debug({date: d.date, y: d[name] / 100});
         return {date: d.date, y: d[name] / 100};
       })
     };
@@ -62,7 +62,7 @@ d3.tsv(url, function(error, data) {
 
   x.domain(d3.extent(data, function(d) { return d.date; }));
 
-  console.debug(data);
+  //console.debug(data);
 
   var browser = svg.selectAll(".browser")
       .data(browsers)

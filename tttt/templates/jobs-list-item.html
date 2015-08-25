@@ -1,6 +1,6 @@
 <tr>
     <td>{% ifchanged %}<a href="{{item.object.get_absolute_url}}" >{{ item.object }}</a>{% endifchanged %}</td>
-    <td>{{ item.object }}</td>
+    <td>{{ item.object.get_label }}</td>
     {% for k, recipe in item.data.items %}
     <td {% if atom.recipe.uid %}id="R:{{recipe.uid}}"{% endif %} class="field-value {% if not recipe.is_result_pass %} field-job{% endif %} status-{{recipe.get_result}}">
        <div class="rWrapper">

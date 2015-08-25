@@ -118,6 +118,8 @@ def statistic(request):
 
 
 class JobListObject:
+    range_size = 10
+    history_back = 0
 
     def __init__(self, **filters):
         self.filters = filters
@@ -126,7 +128,8 @@ class JobListObject:
             .order_by("period", "-counter")
         self.plans = {}
 
-        self.create_matrix()
+    def set_history(self, value=0):
+        self.history_back = int(value)
 
     def create_matrix(self):
         for plan in self.schedules:
@@ -137,17 +140,25 @@ class JobListObject:
                         plan["id"],
                     ],
                     "max_num": plan["counter"]}
-                self.plans[key]["label"] = range(0, plan["counter"] + 1)
+
+                actual_max = plan["counter"] + 1
+                self.plans[key]["label"] = range(
+                    actual_max -
+                    self.range_size -
+                    self.history_back,
+                    actual_max -
+                    self.history_back)
             else:
                 self.plans[key]["data"].append(plan["id"])
+
         for key, it in self.plans.items():
-            it["count"] = len(it["data"])
+            it["count"] = len(it["label"])
 
     def execute(self):
 
         for key, it in self.plans.items():
             self.filters.update({
-                "job__schedule_id__in": it["data"],
+                "job__schedule__counter__in": it["label"],
                 "job__template__is_enable": True
             })
             recipes = Recipe.objects.filter(**self.filters)\
@@ -163,7 +174,7 @@ class JobListObject:
                 template = recipe.job.template_id
                 id_counter = recipe.job.schedule.counter
                 if not template in objects:
-                    label = dict([(k, None) for k in it["label"]])
+                    label = OrderedDict([(k, None) for k in it["label"]])
                     objects[template] = {
                         "object": recipe.job.template,
                         "data": label,
@@ -174,6 +185,7 @@ class JobListObject:
             self.plans[key]["objects"] = objects
 
     def get_data(self):
+        self.create_matrix()
         self.execute()
         return self.plans
 
@@ -513,6 +525,8 @@ class JobsListView(TemplateView):
 
         # Get all data from database for jobs ###
         joblist = JobListObject(**filters)
+        if self.request.GET.get("back"):
+            joblist.set_history(self.request.GET.get("back"))
         context['plans'] = joblist.get_data()
 
         try:
