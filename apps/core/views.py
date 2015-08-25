@@ -2,6 +2,7 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
+import hashlib
 import json
 import logging
 import sys
@@ -17,14 +18,14 @@ from django.db import connection
 from django.db.models import Q, Count
 from django.http import Http404, HttpResponse
 from django.shortcuts import render
-from django.template import Context, Template
 from django.views.generic import TemplateView, View
 from taggit.models import Tag
 
 from apps.core.models import (FAIL, NEW, RESULT_CHOICES, WAIVED, WARN, Author,
                               CheckProgress, EnumResult, Event, Git,
                               GroupOwner, Job, JobTemplate, Recipe,
-                              RecipeTemplate, Task, Test, TestHistory)
+                              RecipeTemplate, Task, Test, TestHistory,
+                              render_lable)
 from apps.core.utils.beaker import JobGen
 from apps.core.utils.beaker_import import Parser
 from apps.core.utils.date_helpers import TZDatetime, currentDate
@@ -40,14 +41,6 @@ else:
 
 
 logger = logging.getLogger(__name__)
-
-
-def render_lable(data, rule):
-    rule = "{%% load core_extras %%}%s" % rule
-    template = Template(rule)
-    context = Context(data)
-    # print "%s - %s" % ( data, rule)
-    return template.render(context)
 
 
 @login_required
@@ -163,20 +156,24 @@ class JobListObject:
             })
             recipes = Recipe.objects.filter(**self.filters)\
                 .select_related("job", "job__template", "arch", "distro", "job__schedule")\
-                .order_by("job__template", "job")
+                .order_by("job__template__position", "job_id")
 
             # Initial object schedule plan
             if not "object" in it.keys():
                 it["object"] = recipes[0].job.schedule.period
 
-            objects = {}
+            objects = OrderedDict()
             for recipe in recipes:
-                template = recipe.job.template_id
+                template_label = recipe.get_label()
+                template = hashlib.sha224(
+                    "%s%s" %
+                    (template_label, recipe.job.template)).hexdigest()
                 id_counter = recipe.job.schedule.counter
                 if not template in objects:
                     label = OrderedDict([(k, None) for k in it["label"]])
                     objects[template] = {
                         "object": recipe.job.template,
+                        "label": template_label,
                         "data": label,
                     }
                 objects[template]["data"].update({

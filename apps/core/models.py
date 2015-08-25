@@ -20,6 +20,7 @@ from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.db.models import Count
+from django.template import Context, Template
 from django.utils import timezone
 from taggit.managers import TaggableManager
 
@@ -70,6 +71,14 @@ EVENT_FINISH_ENUM = (
     (RETURNWHENGREEN, "return when ok"),
     (RESERVED, "reserve system")
 )
+
+
+def render_lable(data, rule):
+    rule = "{%% load core_extras %%}%s" % rule
+    template = Template(rule)
+    context = Context(data)
+    # print "%s - %s" % ( data, rule)
+    return template.render(context)
 
 
 class EnumResult:
@@ -1021,8 +1030,6 @@ class Recipe(models.Model):
         }
 
     def get_label(self):
-        print "ok"
-        print self.get_dict()
         return render_lable(self.get_dict(), self.job.template.grouprecipes)
 
     def is_running(self):
