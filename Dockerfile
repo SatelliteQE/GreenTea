@@ -33,7 +33,7 @@ RUN python -c 'import random; print "import os\nfrom basic import *\nDEBUG=True\
 
 RUN mkdir -p $HOME/tttt/static \
     && . $HOME/env/bin/activate \
-    && python $HOME/manage.py syncdb --no-input || true \
+    && python $HOME/manage.py syncdb --noinput \
     && python $HOME/manage.py migrate \
     && python $HOME/manage.py collectstatic -c --noinput
 
