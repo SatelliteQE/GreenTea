@@ -43,6 +43,13 @@ else:
 logger = logging.getLogger(__name__)
 
 
+def render_label(data, rule):
+    rule = "{%% load core_extras %%}%s" % rule
+    template = Template(rule)
+    context = Context(data)
+    return template.render(context)
+
+
 @login_required
 def import_xml(request):
     # TODO: rewrite to standard View Class
@@ -681,25 +688,38 @@ class TestsListView(TemplateView):
             taskFilter['test__groups__id'] = self.filters.get('group_id')
             testFilter["groups__id"] = self.filters.get('group_id')
 
-        date_range = (TZDatetime(*dates_label[0].timetuple()[:6]),
-                      TZDatetime(*dates_label[-1].timetuple()[:3], hour=23, minute=55))
-        taskFilter['recipe__job__date__range'] = date_range
+        # Determine TaskPeriodSchedule IDs we are interested in (7 newest)
+        start, end = 0, 7
+        periods = TaskPeriodSchedule.objects.all().values(
+            "title", "date_create", "id", "counter").order_by("title", "-date_create")
+        period_ids = map(lambda x: x["id"], periods)
+        taskFilter['recipe__job__schedule__id__in'] = period_ids
+
+        # We are interested only in tasks with owner set (FIXME: why?)
         taskFilter['test__owner__is_enabled'] = True
 
+        # Load all the interesting Task-s (task is executed Test)
+        # TODO: Do we really need all these fields?
+        # TODO: Whats the `annotate()` for?
         tasks = Task.objects.filter(**taskFilter).values(
             "recipe__job__template__whiteboard", "test__name", "recipe__resultrate", "recipe__arch__name",
             "test__owner__email", "recipe__uid", "recipe__job__date", "result", "id", "uid", "recipe",
             "statusbyuser", "recipe__job__template__grouprecipes", "recipe__arch__name",
-            "recipe__whiteboard", "recipe__distro__name", "alias")\
+            "recipe__whiteboard", "recipe__distro__name", "alias", "recipe__job__schedule__id")\
             .order_by("test__owner__name", "recipe__job__template__whiteboard") \
             .annotate(Count('id'))
 
-        # tests = Test.objects.filter(**testFilter).annotate(count = Count('id')).order_by("count", "name")
+        # We are interested only in tasks with owner set (FIXME: why?)
         testFilter['owner__is_enabled'] = True
+
+        # Load all the Test-s
+        # TODO: Why are we ordering these?
+        # TODO: Cant we somehow lomit this query to return only count of items per paginator settings
         tests = Test.objects.filter(**testFilter) \
             .annotate(count_fail=Count('task__result'))\
             .annotate(Count('id')).order_by("-count_fail")
 
+        # Determine Test IDs we are interested in as per paginator
         paginator = Paginator(tests, settings.PAGINATOR_OBJECTS_ONPAGE)
         testlist = paginator.page(int(self.request.GET.get('page', 1)))
         ids = []
@@ -714,21 +734,27 @@ class TestsListView(TemplateView):
             it.labels = OrderedDict()
             data[email]["tests"][it.name] = it
 
-        # use only selected task
+        # Limit Task-s we are working with only to Test-s shown on current page
         tasks = tasks.filter(test__in=ids)
+
+        # Some variable... TODO
         stat = {"tasks": len(tasks), "tests": paginator.count}
+
+        # Process all the Task-s
         for it in tasks:
-            if it['recipe__job__date'].weekday() in [4, 5]:
-                continue
-            id_email = it["test__owner__email"]
-            # use for filters
-            if not (id_email in data and
-                    it["test__name"] in data[id_email]["tests"]):
+            email = it["test__owner__email"]
+
+            # Skip Task-s owned by somebody else than we want and with unrelated name
+            if email not in data or \
+               it["test__name"] not in data[email]["tests"]:
                 continue
 
-            test = data[id_email]["tests"][it["test__name"]]
-            # FIXME - better solution - duplicate code in models and here
+            # Using refference just make a shortcut to "data..." structure
+            test = data[email]["tests"][it["test__name"]]
 
+            # If Task-s JobTemplate have "Grouprecipes" template set
+            # (e.g. "{{arch}}"), render that template (i.e. get actual
+            # value for the template)
             lb = render_lable({
                 "arch": it["recipe__arch__name"],
                 "distro": it["recipe__distro__name"],
@@ -737,29 +763,36 @@ class TestsListView(TemplateView):
                 "alias": it["alias"],
             }, it["recipe__job__template__grouprecipes"])
             test_label = (it["recipe__job__template__whiteboard"], lb)
+
+            # Create empty matrix
+            # TODO: When can this "if ..." expression fail? Why is it here?
             if test_label not in test.labels:
                 test.labels[test_label] = OrderedDict()
-                for day in dates_label:
-                    test.labels[test_label][day] = None
+                for period_id in period_ids:
+                    test.labels[test_label][period_id] = None
 
+            # Using refference just make a shortcut to "test..." structure
             label = test.labels[test_label]
 
-            labeldate = it["recipe__job__date"].date()
-            if labeldate not in label:
+            period_id = it["recipe__job__schedule__id"]
+            if period_id not in label:
                 continue
 
+            # Handle reschedules in a way... TODO
             reschedule = 0
-            if label[labeldate]:
-                reschedule = label[labeldate].reschedule + 1
-            label[labeldate] = Task(
+            if label[period_id]:
+                reschedule = label[period_id].reschedule + 1
+
+            # Fill matrix with actual data (i.e. info about Task)
+            label[period_id] = Task(
                 id=it["id"],
                 uid=it["uid"],
                 result=it["result"],
                 statusbyuser=it["statusbyuser"],
             )
-            label[labeldate].resultrate = it["recipe__resultrate"]
-            label[labeldate].recipe_uid = "%s" % it["recipe__uid"]
-            label[labeldate].reschedule = reschedule
+            label[period_id].resultrate = it["recipe__resultrate"]
+            label[period_id].recipe_uid = "%s" % it["recipe__uid"]
+            label[period_id].reschedule = reschedule
 
         try:
             progress = CheckProgress.objects.order_by("-datestart")[0]
@@ -775,7 +808,7 @@ class TestsListView(TemplateView):
         context.update({
             "data": data,
             "owners": owners,
-            "label": dates_label,
+            "label": period_ids,
             "tests": testlist,
             "paginator": paginator,
             "progress": progress,

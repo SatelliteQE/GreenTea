@@ -79,7 +79,7 @@ Last check: {{ progress.datestart }}
 	    {% with change=changes|keyvalue:labelone %}
 	    <th {% if change %} data-container="body" data-toggle="popover" data-params="{% for chit in change %}{{chit.id}}|{% endfor %}"{% endif %}
 	        class="{% if change %}{% if change.0.test.id == test.id %}rTriangle rBorder {% else %}pTriangle pBorder {% endif %}{% endif %}date">
-	        {{labelone|date:"Y-m-d"}}</th>
+	        {{labelone}}</th>
 	    {% endwith %}
 	    {% endfor %}
 	</tr>
