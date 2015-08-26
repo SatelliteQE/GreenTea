@@ -11,17 +11,6 @@
 <input type="submit" name="submit" value="diff" class="btn btn-primary" />
 </form>
 
-
-{% for recipe in diffs %}
-	{% for key, it in recipe.items %}
-		<h2>{{ key }}</h2>
-		<ul>
-		{% for itt in it %}
-		<li style="color: {% if itt.0 %}green{% else %}red{% endif%}">{{ itt.1 }}</li>
-		{% endfor %}
-		</ul>
-	{% endfor %}
-
-{% endfor %}
+{{ diff|safe }}
 
 {% endblock %}

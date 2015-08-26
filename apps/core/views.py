@@ -79,19 +79,24 @@ def import_group(request):
     return render(request, 'import_group.html', data)
 
 
-def to_xml(request, id):
-    # TODO: rewrite to standard View Class
-    jg = JobGen()
-    try:
-        jobT = JobTemplate.objects.get(id=id)
-    except JobTemplate.DoesNotExist:
-        raise Http404
-    xml = jg.getXML(jobT, reserve=True)
+def get_xml(jobT):
+    """Takes JobTemplate object and returns its prettified job XML"""
+    jobG = JobGen()
+    xml = jobG.getXML(jobT, reserve=True)
     try:
         soup = BeautifulSoup(xml, "xml")
     except:
         raise Exception("Bad xml format or something is bad")
-    xml = soup.prettify()
+    return soup.prettify()
+
+
+def to_xml(request, id):
+    # TODO: rewrite to standard View Class
+    try:
+        jobT = JobTemplate.objects.get(id=id)
+    except JobTemplate.DoesNotExist:
+        raise Http404
+    xml = get_xml(jobT)
     return render(request, 'job_xml.html',
                   {'template': jobT, "xml": xml, "beaker": settings.BEAKER_SERVER})
 
@@ -960,6 +965,6 @@ class JobsDiffView(TemplateView):
         context = self.get_context_data(**kwargs)
 
         if self.forms['jobs'].is_valid():
-            context["diffs"] = self.forms['jobs'].compare()
+            context["diff"] = self.forms['jobs'].compare()
 
         return self.render_to_response(context)

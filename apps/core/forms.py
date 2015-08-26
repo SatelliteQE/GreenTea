@@ -1,8 +1,10 @@
 import logging
+import difflib
 
 from django import forms
 
 from models import GroupTemplate, GroupTestTemplate, JobTemplate, Test
+import apps.core.views
 
 logger = logging.getLogger(__name__)
 
@@ -65,23 +67,7 @@ class JobForm(forms.Form):
         is_enable=True).order_by("whiteboard"), empty_label=None)
 
     def compare(self):
-        def CompareRecipes(r1, r2):
-
-            task1 = [it.test for it in r1.tasks.order_by("id")]
-            task2 = [it.test for it in r2.tasks.order_by("id")]
-
-            data = {r1: [], r2: []}
-
-            for it in task1:
-                data[r1].append((it in task2, it))
-
-            for it in task2:
-                data[r2].append((it in task1, it))
-
-            return data
-
-        compares = []
-        for it1 in self.cleaned_data["jobs1"].trecipes.all():
-            for it2 in self.cleaned_data["jobs2"].trecipes.all():
-                compares.append(CompareRecipes(it1, it2))
-        return compares
+        d = difflib.HtmlDiff(wrapcolumn=90)
+        job1_xml = apps.core.views.get_xml(self.cleaned_data["jobs1"]).splitlines(1)
+        job2_xml = apps.core.views.get_xml(self.cleaned_data["jobs2"]).splitlines(1)
+        return d.make_table(job1_xml, job2_xml)
