@@ -236,7 +236,6 @@ BEAKER_DEFAULT_PACKAGES = (
     "vim", "gcc", "make", "nfs-utils", "wget", "libxml2-python",
 )
 
-
 BKR_SYSTEM_PASS = None
 BKR_SYSTEM_USER = None
 
@@ -251,8 +250,12 @@ REPOSITORIES_GIT = {
 
 PAGINATOR_OBJECTS_ONPAGE = 20
 PAGINATOR_OBJECTS_ONHOMEPAGE = 10
-PREVIOUS_DAYS = 9
 CHECK_COMMMITS_PREVIOUS_DAYS = 7
+
+# how many records is showen on frontend
+RANGE_PREVIOUS_RUNS = 9
+# how many previsou days use for frontend
+PREVIOUS_DAYS = 9  # warning: deprecated
 
 
 GRAPPELLI_ADMIN_TITLE = "<a href='/' >Green Tea</a>"

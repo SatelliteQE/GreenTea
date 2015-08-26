@@ -118,7 +118,7 @@ def statistic(request):
 
 
 class JobListObject:
-    range_size = 10
+    range_size = settings.RANGE_PREVIOUS_RUNS
     history_back = 0
 
     def __init__(self, **filters):
@@ -714,7 +714,8 @@ class TestsListView(TemplateView):
 
         # Load all the Test-s
         # TODO: Why are we ordering these?
-        # TODO: Cant we somehow lomit this query to return only count of items per paginator settings
+        # TODO: Cant we somehow lomit this query to return only count of items
+        # per paginator settings
         tests = Test.objects.filter(**testFilter) \
             .annotate(count_fail=Count('task__result'))\
             .annotate(Count('id')).order_by("-count_fail")
@@ -744,7 +745,8 @@ class TestsListView(TemplateView):
         for it in tasks:
             email = it["test__owner__email"]
 
-            # Skip Task-s owned by somebody else than we want and with unrelated name
+            # Skip Task-s owned by somebody else than we want and with
+            # unrelated name
             if email not in data or \
                it["test__name"] not in data[email]["tests"]:
                 continue
