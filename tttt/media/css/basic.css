@@ -246,3 +246,16 @@ table.dashboard .rTriangle > div, .pTriangle > div { position:relative; }
 }
 
 .slider .ui-slider-range { background: #729fcf; }
+
+.diff tr:hover {
+	background: gray;
+}
+.diff .diff_add {
+	background: green;
+}
+.diff .diff_sub {
+	background: red;
+}
+.diff .diff_chg {
+	background: blue;
+}
