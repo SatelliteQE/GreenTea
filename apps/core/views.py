@@ -83,10 +83,7 @@ def get_xml(jobT):
     """Takes JobTemplate object and returns its prettified job XML"""
     jobG = JobGen()
     xml = jobG.getXML(jobT, reserve=True)
-    try:
-        soup = BeautifulSoup(xml, "xml")
-    except:
-        raise Exception("Bad xml format or something is bad")
+    soup = BeautifulSoup(xml, "xml")
     return soup.prettify()
 
 
