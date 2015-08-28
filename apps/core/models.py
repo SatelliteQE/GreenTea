@@ -73,7 +73,7 @@ EVENT_FINISH_ENUM = (
 )
 
 
-def render_lable(data, rule):
+def render_label(data, rule):
     rule = "{%% load core_extras %%}%s" % rule
     template = Template(rule)
     context = Context(data)
@@ -1030,7 +1030,7 @@ class Recipe(models.Model):
         }
 
     def get_label(self):
-        return render_lable(self.get_dict(), self.job.template.grouprecipes)
+        return render_label(self.get_dict(), self.job.template.grouprecipes)
 
     def is_running(self):
         # this makes about 1000 requests into DB, I think it is not necessary here.

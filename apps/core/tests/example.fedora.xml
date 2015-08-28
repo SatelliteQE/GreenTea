@@ -1,0 +1,47 @@
+<job group="satellite" retention_tag="scratch">
+  <whiteboard>
+    Fedora 22
+  </whiteboard>
+  <recipeSet priority="Normal">
+    <recipe kernel_options="" kernel_options_post="" ks_meta="" role="RECIPE_MEMBERS" whiteboard="Client">
+      <autopick random="false"/>
+      <watchdog panic="None"/>
+      <packages>
+        <package name="gcc"/>
+        <package name="nfs-utils"/>
+        <package name="make"/>
+        <package name="vim"/>
+        <package name="libxml2-python"/>
+      </packages>
+      <ks_appends/>
+      <repos/>
+      <distroRequires>
+        <and>
+          <distro_family op="=" value="Fedora22"/>
+          <distro_variant op="=" value="Server"/>
+          <distro_name op="=" value="Fedora-22"/>
+          <distro_method op="=" value="nfs"/>
+          <distro_arch op="=" value="x86_64"/>
+        </and>
+      </distroRequires>
+      <hostRequires>
+        <and>
+          <system>
+            <and>
+              <arch op="=" value="x86_64"/>
+            </and>
+          </system>
+          <or/>
+        </and>
+        <system_type value="Machine"/>
+      </hostRequires>
+      <partitions/>
+      <task name="/distribution/install" role="STANDALONE"/>
+      <task name="/distribution/reservesys" role="STANDALONE">
+        <params>
+          <param name="RESERVETIME" value="86400"/>
+        </params>
+      </task>
+    </recipe>
+  </recipeSet>
+</job>

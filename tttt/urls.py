@@ -1,8 +1,8 @@
-from django.conf import settings
 from django.conf.urls import include, patterns, url
 from django.contrib import admin
 
 import apps.api.urls
+import settings
 from apps.core.views import (HomePageView, JobDetailView, JobsDiffView,
                              JobsListView, TestDetailView, TestsListView)
 from apps.kerberos.views import LoginView

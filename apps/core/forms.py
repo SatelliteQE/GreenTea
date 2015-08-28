@@ -1,10 +1,13 @@
-import logging
+# Author: Pavel Studenik <pstudeni@redhat.com>
+# Date: 24.9.2013
+
 import difflib
+import logging
 
 from django import forms
 
-from models import GroupTemplate, GroupTestTemplate, JobTemplate, Test
 import apps.core.views
+from models import GroupTemplate, GroupTestTemplate, JobTemplate, Test
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +71,8 @@ class JobForm(forms.Form):
 
     def compare(self):
         d = difflib.HtmlDiff(wrapcolumn=90)
-        job1_xml = apps.core.views.get_xml(self.cleaned_data["jobs1"]).splitlines(1)
-        job2_xml = apps.core.views.get_xml(self.cleaned_data["jobs2"]).splitlines(1)
+        job1_xml = apps.core.views.get_xml(
+            self.cleaned_data["jobs1"]).splitlines(1)
+        job2_xml = apps.core.views.get_xml(
+            self.cleaned_data["jobs2"]).splitlines(1)
         return d.make_table(job1_xml, job2_xml)
