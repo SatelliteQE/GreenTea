@@ -1,5 +1,8 @@
 # GreenTea
 
+Green Tea is tools for automation testing (quality assurance). The service collects data from beaker's jobs, saves it to database and creates statistic for users.
+
+Documentation you can find on project's [github wiki](https://github.com/SatelliteQE/GreenTea/wiki)
 
 ## Quick start guide
 
