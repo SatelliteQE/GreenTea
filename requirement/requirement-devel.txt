@@ -1,5 +1,6 @@
 pylama
 pylint
+pyflakes
 isort
 
 -r requirement.txt
