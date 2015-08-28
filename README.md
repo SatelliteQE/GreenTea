@@ -41,10 +41,10 @@ Service runs on default port 80 (link on your system is http://localhost/)
 
 And system's root password is **GreenTea!**.
 
-## How to 
+## How to start with Green Tea
 
 Basic information for first use you can find on public wiki [wiki:start](https://github.com/SatelliteQE/GreenTea/wiki/Start)
 
-## Setup
+## How to setup project
 
 Information about setting you find on wiki page [wiki:setup](https://github.com/SatelliteQE/GreenTea/wiki/Setup)
