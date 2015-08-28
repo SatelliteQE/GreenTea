@@ -27,7 +27,6 @@ def verify():
     local(
         "find ./ -not -path \"./env/*\" -name \"*.py\" | xargs autopep8 -i --aggressive")
     local("python manage.py graph_models -a -g -o doc/images/erdiagram.png")
-    local("pylama .")
 
 
 def deploy():

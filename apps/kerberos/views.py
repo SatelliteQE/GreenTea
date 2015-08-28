@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # author: Pavel Studenik <pstudeni@redhat.com>
 
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect

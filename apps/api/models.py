@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.db import models
 
-from apps.core.utils.date_helpers import TZDateTimeField, currentDate, toUTC
+from apps.core.utils.date_helpers import TZDateTimeField, currentDate
 
 
 class Performance(models.Model):

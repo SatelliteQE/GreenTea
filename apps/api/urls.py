@@ -5,14 +5,10 @@
 # Email: pstudeni@redhat.com
 # Date: 1.3.2015
 
-from django.conf import settings
-from django.conf.urls import include, patterns, url
-from django.contrib import admin
 
-from apps.core.views import *
-from apps.kerberos.views import *
+from django.conf.urls import patterns, url
 
-admin.autodiscover()
+from apps.core.views import ApiView
 
 urlpatterns = patterns('',
                        url(r'^$', 'apps.api.views.performance',

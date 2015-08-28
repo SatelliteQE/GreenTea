@@ -14,13 +14,10 @@ import os
 import re
 import subprocess
 import sys
-import time
-import urllib2
 import xml.dom.minidom
 import xmlrpclib
 from datetime import datetime, timedelta
 
-import pxssh
 from django.conf import settings
 from django.template import Context, Template
 from django.template.defaultfilters import slugify
@@ -153,43 +150,9 @@ class Beaker:
         try:
             from returns import return_reservation
             status = return_reservation(int(recipe.uid))
-            import sdsdssdsd
             return (status == -1)
         except ImportError:
-            logger.info("No module named bkr.client")
-
-    def return2beaker_old(self, recipe):
-        # better way: use fabric
-        ssh = pxssh.pxssh()
-        ssh.force_password = True
-        result = False
-        try:
-            ssh.login(hostname, settings.BKR_SYSTEM_USER,
-                      settings.BKR_SYSTEM_PASS)
-            ssh.sendline('uptime')
-            ssh.prompt(timeout=20)
-            bash_comm = ("[ -e ~/reserved.lock ] || "
-                         "(return2beaker.sh 2> /dev/null && echo 'YAHOO' || "
-                         "echo 'NO')")
-            # bash_comm = ("[ -e ~/reserved.lock ] || return2beaker.sh || "
-            #    " (rhts-abort -t recipe -l $(grep RESULT_SERVER /etc/motd |"
-            #    " cut -d'=' -f2) -r $(cat /root/RECIPE.TXT) && halt)")
-            ssh.sendline(bash_comm)
-            ssh.prompt(timeout=20)
-            if ssh.before.find("YAHOO") == -1:
-                result = self.jobCancel(recipe.job, "Emergency solution of "
-                                        "return2beaker")
-        except Exception:
-            logger.exception("Problem with return2beaker of the recipe (%s|%s)"
-                             % (recipe.uid, recipe.job.uid))
-            result = self.jobCancel(recipe.job, "Emergency solution of "
-                                    "return2beaker")
-        finally:
-            try:
-                ssh.logout()
-            except:
-                pass
-        return result
+            logger.warning("No module named bkr.client")
 
     def scheduleFromContent(self, xmlcontent):
         logger.error("Method is not implemented")

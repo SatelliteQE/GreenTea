@@ -147,10 +147,6 @@ class JobTemplateAdmin(admin.ModelAdmin):
     make_disable.short_description = "Set selected templates to disabled"
     actions = [make_enable, make_disable]
 
-    class Media:
-        js = (
-            #'/media/js/admin_list_reorder.js',
-        )
     # 'position' is the name of the model field which holds the position of an element
     list_editable = ('position',)
     list_filter = ["period", "is_enable"]

@@ -4,16 +4,10 @@
 # Author: Pavel Studenik <pstudeni@redhat.com>
 # Date: 2013-2015
 
-from datetime import datetime
-
 from django.db import models
-from south.modelsinspector import add_introspection_rules
 
 from apps.core.models import Job, Recipe, Task
-from apps.core.utils.date_helpers import TZDateTimeField, currentDate2
-
-add_introspection_rules(
-    [], ["^apps\.core\.utils\.date_helpers\.TZDateTimeField"])
+from apps.core.utils.date_helpers import currentDate
 
 
 class Comment(models.Model):
@@ -32,8 +26,7 @@ class Comment(models.Model):
     task = models.ForeignKey(Task, blank=True, null=True)
     username = models.CharField(max_length=32)
     content = models.TextField()
-    #created_date = TZDateTimeField(default=currentDate())
-    created_date = models.DateTimeField(default=currentDate2())
+    created_date = models.DateTimeField(auto_now_add=True)
     action = models.SmallIntegerField(
         choices=ENUM_ACTION, default=ENUM_ACTION_NONE)
 
@@ -43,13 +36,15 @@ class Comment(models.Model):
     def get_action(self):
         return dict(self.ENUM_ACTION)[self.action]
 
-    def set_time(self):
-        self.created_date = currentDate2()
+    def set_time(self, tdate=None):
+        if not tdate:
+            tdate = currentDate()
+        self.created_date = tdate
         self.save()
 
     def to_json(self):
         return {
-            #'job': self.job.to_json() if self.job else None,
+            # 'job': self.job.to_json() if self.job else None,
             'username': self.username,
             'content': self.content,
             'created_date': self.created_date.strftime("%Y-%m-%d %H:%M:%S"),

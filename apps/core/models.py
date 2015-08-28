@@ -8,7 +8,6 @@
 import logging
 import os
 import re
-import sys
 import urllib2
 from datetime import datetime
 

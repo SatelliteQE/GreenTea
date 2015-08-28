@@ -7,7 +7,6 @@
 
 import logging
 import xml.dom.minidom
-from datetime import datetime, timedelta
 
 from apps.core.models import (Arch, DistroTemplate, JobTemplate,
                               RecipeTemplate, TaskTemplate, Test)

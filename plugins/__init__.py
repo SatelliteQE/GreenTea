@@ -2,7 +2,6 @@
 import sys
 
 # TODO
-# print sys.argv
-# print "load plugins..."
+print "load plugins... %s (temporary debug)" % sys.argv
 
 from plugins import irc

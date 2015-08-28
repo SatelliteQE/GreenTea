@@ -94,8 +94,8 @@ class BeakerTest(TestCase):
         pwd = os.path.dirname(__file__)
         xmlpath = os.path.join(pwd, "tests", "example.fedora.xml")
 
-        #xmlcontent = get_content_from_file(xmlpath)
-        #self.assertIsNotNone(xmlcontent, msg="file %s is not load" % xmlcontent)
+        # xmlcontent = get_content_from_file(xmlpath)
+        # self.assertIsNotNone(xmlcontent, msg="file %s is not load" % xmlcontent)
         jobids = bkr.scheduleFromXmlFile(xmlpath)
 
         for jobid in jobids:
