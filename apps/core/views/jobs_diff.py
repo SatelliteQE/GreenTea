@@ -14,7 +14,7 @@ from django.http import HttpResponse
 from django.views.generic import TemplateView
 from taggit.models import Tag
 
-from apps.core.forms import FilterForm
+from apps.core.forms import FilterForm, GroupsForm, JobForm
 from apps.core.models import (RESULT_CHOICES, Author, CheckProgress, Event,
                               JobTemplate, Recipe, render_label)
 from apps.taskomatic.models import TaskPeriodSchedule
