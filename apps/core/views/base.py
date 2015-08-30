@@ -1,28 +1,19 @@
 # Author: Pavel Studenik <pstudeni@redhat.com>
 # Date: 24.9.2013
 
-import json
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Paginator
-from django.db.models import Q, Count
 from django.http import Http404, HttpResponse
 from django.shortcuts import render
-from django.views.generic import TemplateView, View
 
-from apps.core.forms import GroupsForm, JobForm
-from apps.core.models import (FAIL, NEW, WAIVED, WARN, Author, CheckProgress,
-                              EnumResult, Job, JobTemplate, Recipe,
-                              RecipeTemplate, Task, Test, TestHistory)
+from apps.core.forms import GroupsForm
+from apps.core.models import (JobTemplate, RecipeTemplate)
 from apps.core.utils.beaker import JobGen
 from apps.core.utils.beaker_import import Parser
-from apps.core.utils.date_helpers import TZDatetime
-from apps.taskomatic.models import TaskPeriodSchedule
-from apps.waiver.models import Comment
 
 logger = logging.getLogger(__name__)
 

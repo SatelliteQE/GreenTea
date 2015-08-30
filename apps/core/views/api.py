@@ -1,29 +1,18 @@
 # Author: Pavel Studenik <pstudeni@redhat.com>
 # Date: 24.9.2013
 
-import hashlib
 import json
 import logging
-import sys
-from copy import copy
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-from django.conf import settings
-from django.db import connection
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.http import Http404, HttpResponse
-from django.views.generic import TemplateView, View
-from taggit.models import Tag
+from django.views.generic import View
 
-from apps.core.forms import FilterForm
-from apps.core.models import (FAIL, NEW, WAIVED, WARN, Author, CheckProgress,
-                              EnumResult, Job, JobTemplate, Recipe,
-                              RecipeTemplate, Task, Test, TestHistory)
+from apps.core.models import (FAIL, NEW, WAIVED, WARN, Author,
+                              Job, Recipe, Task, TestHistory)
 from apps.core.utils.date_helpers import TZDatetime
-from apps.taskomatic.models import TaskPeriodSchedule
-from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
-from base import create_matrix
 
 logger = logging.getLogger(__name__)
 

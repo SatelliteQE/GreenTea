@@ -1,28 +1,13 @@
 # Author: Pavel Studenik <pstudeni@redhat.com>
 # Date: 24.9.2013
 
-import hashlib
 import logging
-import sys
-from copy import copy
-from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.paginator import Paginator
-from django.db import connection
-from django.db.models import Count
-from django.http import HttpResponse
 from django.views.generic import TemplateView
-from taggit.models import Tag
 
-from apps.core.forms import FilterForm
-from apps.core.models import (FAIL, NEW, WAIVED, WARN, Author, CheckProgress,
-                              EnumResult, Job, JobTemplate, Recipe,
-                              RecipeTemplate, Task, Test, TestHistory)
-from apps.taskomatic.models import TaskPeriodSchedule
-from apps.waiver.forms import WaiverForm
-from apps.waiver.models import Comment
-from base import create_matrix
+from apps.core.models import (Job, JobTemplate)
 
 logger = logging.getLogger(__name__)
 
