@@ -27,7 +27,8 @@ class Parser:
                 self.status = True
 
         except xml.parsers.expat.ExpatError:
-            logger.error("%s isn't valid XML file" % file)
+            self.error = "%s isn't valid XML file" % file
+            logger.error(self.error)
             self.status = False
 
     def recipe(self, xmlrecipe, is_guestrecipe=None):
