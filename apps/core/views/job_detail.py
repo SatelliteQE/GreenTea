@@ -1,7 +1,7 @@
 # Author: Pavel Studenik <pstudeni@redhat.com>
 # Date: 24.9.2013
 
-import logging
+"""View for job detail page"""
 
 from django.conf import settings
 from django.core.paginator import Paginator
@@ -9,10 +9,9 @@ from django.views.generic import TemplateView
 
 from apps.core.models import (Job, JobTemplate)
 
-logger = logging.getLogger(__name__)
-
 
 class JobDetailView(TemplateView):
+    """Show all runs of the job"""
     template_name = 'detail.html'
 
     def get_context_data(self, **kwargs):

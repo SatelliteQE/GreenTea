@@ -1,13 +1,9 @@
 {% extends "basic.html" %}
 
 {% block content %}
-<h1>Test detail</h1>
+<h1>Test "{{ jobtemplate }}" detail</h1>
 
-
-<h2>{{ jobtemplate }}</h2>
-
-
-<h3>Jobs</h3>
+<h2>Task runs:</h2>
 
 <table class="dashboard-jobs" width="90%">
 	<tr bgcolor="#ffff99">
@@ -19,9 +15,9 @@
     </tr>
 {% for task in tasks.object_list %}
 <tr>
-	<td>{% ifchanged task.recipe.job.date %}{{ task.recipe.job.date|date }}{% endifchanged %}</td>
+	<td>{% ifchanged task.recipe.job.date %}{{ task.recipe.job.date|date:"Y-m-d" }}{% endifchanged %}</td>
 	<td><a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ task.recipe.uid }}#task{{ task.uid }}" >T:{{ task }}</a>
-	<td>{{task.recipe.whiteboard}} {{ task.recipe.arch }} | {{ task.recipe.distro}}</td>
+	<td>{{ task.recipe.whiteboard }} {{ task.recipe.arch }} | {{ task.recipe.distro}}</td>
 	<td>{{ task.get_status }}</td>
 	<td class="{% if not task.recipe.is_result_pass %} field-job{% endif %} status-{{task.get_result}}" >
 		{{ task.recipe.resultrate|floatformat:"1" }}
