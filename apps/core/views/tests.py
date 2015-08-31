@@ -106,9 +106,11 @@ class TestsListView(TemplateView):
 
     def __get_period_ids(self):
         """Determine TaskPeriodSchedule IDs we are interested in (7 newest)"""
-        start, end = 0, 7
-        periods = TaskPeriodSchedule.objects.all().values(
-            "title", "date_create", "id", "counter").order_by("title", "-date_create")
+        periods = reversed(
+            TaskPeriodSchedule.objects.all().values(
+                "title", "date_create", "id", "counter")
+                .order_by("-counter")[:settings.RANGE_PREVIOUS_RUNS]
+        )
         return map(lambda x: x["id"], periods)
 
     def __get_tasks_and_tests(self, period_ids):
