@@ -106,9 +106,11 @@ class TestsListView(TemplateView):
 
     def __get_period_ids(self):
         """Determine TaskPeriodSchedule IDs we are interested in (7 newest)"""
-        start, end = 0, 7
-        periods = TaskPeriodSchedule.objects.all().values(
-            "title", "date_create", "id", "counter").order_by("title", "-date_create")
+        periods = reversed(
+            TaskPeriodSchedule.objects.all().values(
+                "title", "date_create", "id", "counter")
+                .order_by("-counter")[:settings.RANGE_PREVIOUS_RUNS]
+        )
         return map(lambda x: x["id"], periods)
 
     def __get_tasks_and_tests(self, period_ids):
@@ -200,6 +202,36 @@ class TestsListView(TemplateView):
         }
         return render_label(tmp, task["recipe__job__template__grouprecipes"])
 
+    def __get_history(self, period_ids):
+        history = {}
+        period_oldest = TaskPeriodSchedule.objects.filter(
+            id__in=period_ids).order_by("counter")[0].date_create
+        changes = TestHistory.objects.filter(date__gt=period_oldest).select_related(
+            "test").annotate(dcount=Count("test"))
+# TODO: Fix this feaure, the dependence packages
+#        deptTests = dict()
+#        for test in Test.objects.filter(dependencies__in = [it.test for it in changes]):
+#            for depIt in test.dependencies.all():
+#                if depIt.id not in deptTests:
+#                    deptTests[depIt.id] = list()
+#                deptTests[depIt.id].append(depIt)
+        for change in changes:
+            period_id = TaskPeriodSchedule.objects.filter(
+                id__in=period_ids, date_create__gt=change.date).order_by("counter")[0].id
+            if change.test.id not in history:
+                history[change.test.id] = dict()
+            if period_id not in history[change.test.id]:
+                history[change.test.id][period_id] = list()
+            history[change.test.id][period_id].insert(0, change)
+# depList = list() # Test.objects.filter(dependencies=change.test).values("id")
+#            for depchange in depList:
+#                if not history.has_key(depchange['id']):
+#                    history[depchange['id']] = {}
+#                if not history[depchange['id']].has_key(day):
+#                    history[depchange['id']][day] = []
+#                history[depchange['id']][day].append(change)
+        return history
+
     def get_context_data(self, **kwargs):
         """Do all the work"""
         context = super(self.__class__, self).get_context_data(**kwargs)
@@ -211,44 +243,12 @@ class TestsListView(TemplateView):
         owners = dict([(it.id, it)
                        for it in Author.objects.filter(is_enabled=True) \
                          .annotate(dcount=Count('test'))])
-        # date Labels
-        dates_label = create_matrix(settings.PREVIOUS_DAYS + 1)
-###        # History
-###        history = dict()
-###        minDate = currentDate() - timedelta(days=settings.PREVIOUS_DAYS + 7)
-###        changes = TestHistory.objects.filter(date__gt=minDate).select_related(
-###            'test').annotate(dcount=Count('test'))
-#### TODO: Fix this feaure, the dependence packages
-####        deptTests = dict()
-####        for test in Test.objects.filter(dependencies__in = [it.test for it in changes]):
-####            for depIt in test.dependencies.all():
-####                if depIt.id not in deptTests:
-####                    deptTests[depIt.id] = list()
-####                deptTests[depIt.id].append(depIt)
-###        for change in changes:
-###            day = change.date.date()
-###            if change.date.hour > 20:
-###                day = day + timedelta(days=1)
-###            for lday in dates_label:
-###                if lday >= day:
-###                    day = lday
-###                    break
-###            if change.test.id not in history:
-###                history[change.test.id] = dict()
-###            if day not in history[change.test.id]:
-###                history[change.test.id][day] = list()
-###            history[change.test.id][day].insert(0, change)
-#### depList = list() # Test.objects.filter(dependencies=change.test).values("id")
-####            for depchange in depList:
-####                if not history.has_key(depchange['id']):
-####                    history[depchange['id']] = {}
-####                if not history[depchange['id']].has_key(day):
-####                    history[depchange['id']][day] = []
-####                history[depchange['id']][day].append(change)
-###        # apply filter
 
         # Determine TaskPeriodSchedule IDs we are interested in (~7 newest)
         period_ids = self.__get_period_ids()
+
+        # Load history we display for each test
+        history = self.__get_history(period_ids)
 
         # Determine filtered tests and tasks
         tasks, tests = self.__get_tasks_and_tests(period_ids)
@@ -321,7 +321,7 @@ class TestsListView(TemplateView):
             "tests": testlist,
             "paginator": paginator,
             "progress": progress,
-            "history": {},
+            "history": history,
             "urlstring": urllib.urlencode(dict(urllist)),
             "repos": Git.objects.all().order_by('name'),
             "groups": GroupOwner.objects.all().order_by('name'),
