@@ -204,8 +204,12 @@ class TestsListView(TemplateView):
 
     def __get_history(self, period_ids):
         history = {}
-        period_oldest = TaskPeriodSchedule.objects.filter(
-            id__in=period_ids).order_by("counter")[0].date_create
+        period_oldest_list = TaskPeriodSchedule.objects.filter(id__in=period_ids)\
+            .order_by("counter")
+        if len(period_oldest_list):
+            period_oldest = period_oldest_list[0].date_create
+        else:
+            period_oldest = date.today()
         changes = TestHistory.objects.filter(date__gt=period_oldest).select_related(
             "test").annotate(dcount=Count("test"))
 # TODO: Fix this feaure, the dependence packages
