@@ -35,6 +35,10 @@ def deploy():
         run("source env/bin/activate && python manage.py collectstatic --noinput")
         run("uwsgi-manager -R 1")
 
+def db_backup():
+    backup_file = "/tmp/tttt.backup.gz"
+    run("export PGPASSWORD="" pg_dump tttt -U tttt_user -h localhost | gzip > %s" % backup_file)
+    get("%s %s" % (backup_file, backup_file))
 
 def download():
     get("%s/db.sqlite3" % HOME_PATH, "db.sqlite3")
