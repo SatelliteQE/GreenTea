@@ -1,4 +1,4 @@
-<job group="satellite" retention_tag="scratch">
+<job group="" retention_tag="scratch">
   <whiteboard>
     Fedora 22
   </whiteboard>
@@ -6,13 +6,7 @@
     <recipe kernel_options="" kernel_options_post="" ks_meta="" role="RECIPE_MEMBERS" whiteboard="Client">
       <autopick random="false"/>
       <watchdog panic="None"/>
-      <packages>
-        <package name="gcc"/>
-        <package name="nfs-utils"/>
-        <package name="make"/>
-        <package name="vim"/>
-        <package name="libxml2-python"/>
-      </packages>
+      <packages/>
       <ks_appends/>
       <repos/>
       <distroRequires>
@@ -36,7 +30,10 @@
         <system_type value="Machine"/>
       </hostRequires>
       <partitions/>
-      <task name="/distribution/install" role="STANDALONE"/>
+      <task name="/distribution/install" role="STANDALONE">
+        <params>
+        </params>
+      </task>
       <task name="/distribution/reservesys" role="STANDALONE">
         <params>
           <param name="RESERVETIME" value="86400"/>
