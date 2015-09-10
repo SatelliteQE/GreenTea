@@ -72,6 +72,7 @@ class JobListObject:
         for key, it in self.plans.items():
             self.filters.update({
                 "job__schedule__counter__in": it["label"],
+                "job__schedule__id__in": it["data"],
                 "job__template__is_enable": True
             })
             recipes = Recipe.objects.filter(**self.filters)\
