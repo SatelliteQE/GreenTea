@@ -9,6 +9,7 @@ import difflib
 import glob
 import os
 
+from django.conf import settings
 from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.test.client import Client
@@ -39,6 +40,9 @@ class ImportTest(TestCase):
         self.assertEqual(
             len(recipes), num_recipes, msg="Number recipes is bad")
         self.assertEqual(s.job.position, 100, msg="job position is same")
+
+        # workaround: ignore default packages
+        settings.BEAKER_DEFAULT_PACKAGES = []
 
         job = JobGen()
         xml = job.getXML(s.job)
