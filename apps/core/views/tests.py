@@ -220,13 +220,17 @@ class TestsListView(TemplateView):
 #                    deptTests[depIt.id] = list()
 #                deptTests[depIt.id].append(depIt)
         for change in changes:
-            period_id = TaskPeriodSchedule.objects.filter(
-                id__in=period_ids, date_create__gt=change.date).order_by("counter")[0].id
-            if change.test.id not in history:
-                history[change.test.id] = dict()
-            if period_id not in history[change.test.id]:
-                history[change.test.id][period_id] = list()
+            try:
+                period_id = TaskPeriodSchedule.objects.filter(
+                    id__in=period_ids, date_create__gt=change.date).order_by("counter")[0].id
+                if period_id not in history[change.test.id]:
+                    history[change.test.id][period_id] = list()
+                if change.test.id not in history:
+                    history[change.test.id] = dict()
+            except IndexError:
+                return history
             history[change.test.id][period_id].insert(0, change)
+
 # depList = list() # Test.objects.filter(dependencies=change.test).values("id")
 #            for depchange in depList:
 #                if not history.has_key(depchange['id']):
