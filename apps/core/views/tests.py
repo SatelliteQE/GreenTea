@@ -223,10 +223,10 @@ class TestsListView(TemplateView):
             try:
                 period_id = TaskPeriodSchedule.objects.filter(
                     id__in=period_ids, date_create__gt=change.date).order_by("counter")[0].id
-                if period_id not in history[change.test.id]:
-                    history[change.test.id][period_id] = list()
                 if change.test.id not in history:
                     history[change.test.id] = dict()
+                if period_id not in history[change.test.id]:
+                    history[change.test.id][period_id] = list()
             except IndexError:
                 return history
             history[change.test.id][period_id].insert(0, change)
