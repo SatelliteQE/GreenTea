@@ -2,6 +2,7 @@
 # Date: 24.8.2015
 
 from jobs import JobsListView
+from recipe_history import RecipeHistoryView
 from tests import TestsListView
 from api import ApiView
 from homepage import HomePageView

@@ -1,0 +1,35 @@
+{% extends "basic.html" %}
+{% load core_extras %}
+
+{% block title %}Recipe history{% endblock %}
+
+{% block content %}
+
+<h1>Recipe history</h1>
+<p>Job template: {{ recipetemplate.jobtemplate.whiteboard }} (ID: {{ recipetemplate.jobtemplate.id }})</p>
+<p>Recipe template: {{ recipetemplate.name }} (ID: {{ recipetemplate.id }})</p>
+
+<table class="dashboard dashboard-tests">
+  <thead>
+    <tr>
+      <th>Test</th>
+      {% for period in period_ids %}
+      <th>{{ period }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for name, results in tasks.items %}
+    <tr>
+      <td>{{ name }}</td>
+      {% for period, run in results.items %}
+      <td id="T:{{ run.uid }}" class="field-value status-{{ run.get_result }}">
+        <a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ run.recipe.uid }}#task{{ run.uid }}" class="glyphicon glyphicon-tripledot" title="Link to the task in Beaker">...</a>
+      </td>
+      {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
