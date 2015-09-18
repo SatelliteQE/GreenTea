@@ -195,7 +195,7 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
     search_fields = ["name", "jobtemplate__whiteboard"]
 
     def render_change_form(self, request, context, *args, **kwargs):
-        if "obj" in kwargs:
+        if kwargs.get("obj", None):
             context['adminform'].form.fields['virtualhost'].queryset = RecipeTemplate.objects\
                 .filter(jobtemplate=kwargs["obj"].jobtemplate, is_virtualguest=False)\
                 .exclude(id=kwargs["obj"].id)

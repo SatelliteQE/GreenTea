@@ -234,7 +234,7 @@ class Command(AdvancedCommand):
         elif action == 'cancel':
             self.__cancelActions(args, kwargs)
         else:
-            assert("Action %s is not supported" % action)
+            logger.error("Action %s is not supported" % action)
 
     # --------------------------------------------------------------------------
     # SCHEDULE
@@ -294,6 +294,11 @@ class Command(AdvancedCommand):
             table = Texttable()
             table.set_deco(Texttable.HEADER)
             table.header(["Job", "Whiteboard", "Tags"])
+
+        # do not create TaskPeriodSchedule when there are no jobs to schedule
+        if len(jobTs) == 0:
+            logger.info("No jobs for TaskPeriod %s" % label)
+            return
 
         period = TaskPeriod.objects.get(label=label)
         count = TaskPeriodSchedule.objects.filter(period=period).count()

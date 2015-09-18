@@ -79,6 +79,11 @@ class JobListObject:
                 .select_related("job", "job__template", "arch", "distro", "job__schedule")\
                 .order_by("job__template__position", "job_id")
 
+            # remove task period from view when there are no recipes
+            if len(recipes) == 0:
+                del self.plans[key]
+                continue
+
             # Initial object schedule plan
             if "object" not in it.keys():
                 it["object"] = recipes[0].job.schedule.period
