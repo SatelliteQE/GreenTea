@@ -8,7 +8,6 @@ django-filter
 pygraphviz
 django_extensions
 GitPython
-south
 python-dateutil
 pytz
 lxml
