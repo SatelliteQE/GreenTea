@@ -11,7 +11,7 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import render
 
 from apps.core.forms import GroupsForm
-from apps.core.models import (JobTemplate, RecipeTemplate)
+from apps.core.models import JobTemplate, RecipeTemplate
 from apps.core.utils.beaker import JobGen
 from apps.core.utils.beaker_import import Parser
 

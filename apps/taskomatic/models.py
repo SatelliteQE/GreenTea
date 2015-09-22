@@ -16,13 +16,13 @@ from datetime import datetime, timedelta
 
 from croniter import croniter
 from django.conf import settings
-# from django.contrib.auth.models import User
 from django.core.management.base import BaseCommand, handle_default_options
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from single_process import single_process
 
-from apps.core.utils.date_helpers import TZDateTimeField, toLocalZone
+from apps.core.utils.date_helpers import toLocalZone
 
 logger = logging.getLogger(__name__)
 
@@ -30,18 +30,35 @@ logger = logging.getLogger(__name__)
 class TaskPeriodSchedule(models.Model):
     title = models.CharField(max_length=64)
     period = models.ForeignKey("TaskPeriod", blank=True, null=True)
-    date_create = TZDateTimeField(_('Date of create'), default=datetime.now)
+    date_create = models.DateTimeField(
+        _('Date of create'),
+        default=timezone.now)
     counter = models.BigIntegerField(default=0)
 
     def __unicode__(self):
         return "[%d] %s" % (self.counter, self.title)
+
+    def recount_all(self):
+        tps = TaskPeriodSchedule.objects.filter(
+            period=self.period).order_by("date_create")
+        for key, it in enumerate(tps):
+            it.counter = key
+            it.save()
+
+    def recount(self):
+        it.counter = TaskPeriodSchedule.object.filter(
+            period=self.period).count()
+        it.save()
 
 
 class TaskPeriod(models.Model):
     title = models.CharField(max_length=64)
     label = models.SlugField(max_length=64, unique=True)
     common = models.CharField(max_length=128)
-    date_last = TZDateTimeField(_('Date of last run'), null=True, blank=True)
+    date_last = models.DateTimeField(
+        _('Date of last run'),
+        null=True,
+        blank=True)
     is_enable = models.BooleanField(default=False)
     cron = models.CharField(max_length=64, default="*  *  *  *  *")
 
@@ -84,8 +101,13 @@ class Task(models.Model):
     common_params = models.TextField(_('Parameters'), blank=True)
     status = models.IntegerField(default=0, choices=STATUS_ENUM)
     exit_result = models.TextField(_('Result log'), blank=True)
-    date_create = TZDateTimeField(_('Date of create'), default=datetime.now)
-    date_run = TZDateTimeField(_('Date of pick up'), blank=True, null=True)
+    date_create = models.DateTimeField(
+        _('Date of create'),
+        default=timezone.now)
+    date_run = models.DateTimeField(
+        _('Date of pick up'),
+        blank=True,
+        null=True)
     time_long = models.FloatField(default=0.0)  # better set to NULL
     period = models.ForeignKey(TaskPeriod, blank=True, null=True)
 

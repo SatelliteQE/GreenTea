@@ -20,10 +20,11 @@ from apps.core.utils.date_helpers import currentDate
 from apps.taskomatic.models import TaskPeriodSchedule
 from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
+
 from .base import create_matrix
 
 if sys.version_info < (2, 7):
-    from ordereddict import OrderedDict   #pylint: disable=import-error
+    from ordereddict import OrderedDict  # pylint: disable=import-error
 else:
     from collections import OrderedDict
 
@@ -31,6 +32,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TestsListView(TemplateView):
+
     """Show all of the tests"""
     template_name = 'tests-list.html'
 
@@ -100,7 +102,7 @@ class TestsListView(TemplateView):
         context['detailPanelHidden'] = self.request.COOKIES.get('detailHidden')
         context['detailPanelHeight'] = int(
             self.request.COOKIES.get('detailHeight', 0))
-        context['detailActions'] = [ Comment.ENUM_ACTION_WAIVED, ]
+        context['detailActions'] = [Comment.ENUM_ACTION_WAIVED, ]
         context['waiveClass'] = Comment
         return context
 
@@ -109,7 +111,7 @@ class TestsListView(TemplateView):
         periods = reversed(
             TaskPeriodSchedule.objects.all().values(
                 "title", "date_create", "id", "counter")
-                .order_by("-counter")[:settings.RANGE_PREVIOUS_RUNS]
+            .order_by("-counter")[:settings.RANGE_PREVIOUS_RUNS]
         )
         return map(lambda x: x["id"], periods)
 
@@ -249,8 +251,8 @@ class TestsListView(TemplateView):
         context['GITWEB_URL'] = settings.GITWEB_URL
         # Owners
         owners = dict([(it.id, it)
-                       for it in Author.objects.filter(is_enabled=True) \
-                         .annotate(dcount=Count('test'))])
+                       for it in Author.objects.filter(is_enabled=True)
+                       .annotate(dcount=Count('test'))])
 
         # Determine TaskPeriodSchedule IDs we are interested in (~7 newest)
         period_ids = self.__get_period_ids()
@@ -291,7 +293,8 @@ class TestsListView(TemplateView):
             # Period we are working on now
             period_id = it["recipe__job__schedule__id"]
 
-            # Skip Task-s which were run in different periods than what we are displaying
+            # Skip Task-s which were run in different periods than what we are
+            # displaying
             if period_id not in test.labels[test_label]:
                 continue
 
@@ -307,8 +310,10 @@ class TestsListView(TemplateView):
                 result=it["result"],
                 statusbyuser=it["statusbyuser"],
             )
-            test.labels[test_label][period_id].resultrate = it["recipe__resultrate"]
-            test.labels[test_label][period_id].recipe_uid = "%s" % it["recipe__uid"]
+            test.labels[test_label][period_id].resultrate = it[
+                "recipe__resultrate"]
+            test.labels[test_label][
+                period_id].recipe_uid = "%s" % it["recipe__uid"]
             test.labels[test_label][period_id].reschedule = reschedule
 
         try:

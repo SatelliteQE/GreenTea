@@ -1,8 +1,8 @@
-Django < 1.8
-django-grappelli < 2.7
+Django < 1.9
+django-grappelli < 2.8
 django-debug-toolbar
 django-taggit
-django-reversion < 1.9
+django-reversion
 django-widget-tweaks
 django-filter
 pygraphviz
@@ -13,6 +13,7 @@ python-dateutil
 pytz
 lxml
 pexpect
+fabric
 importlib
 feedparser
 docutils

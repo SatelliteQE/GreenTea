@@ -24,7 +24,7 @@ from django.utils import timezone
 from taggit.managers import TaggableManager
 
 from apps.core.signals import recipe_changed, recipe_finished
-from apps.core.utils.date_helpers import TZDateTimeField, currentDate, toUTC
+from apps.core.utils.date_helpers import currentDate, toUTC
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 
 logger = logging.getLogger(__name__)
@@ -459,7 +459,7 @@ class Author(models.Model):
 
 class GroupOwner(models.Model):
     name = models.CharField(max_length=255, unique=True)
-    owners = models.ManyToManyField(Author, null=True)
+    owners = models.ManyToManyField(Author, blank=True)
     email_notification = models.BooleanField(default=True)
 
     def __unicode__(self):
@@ -517,7 +517,7 @@ class Test(models.Model):
 class TestHistory(models.Model):
     test = models.ForeignKey(Test)
     version = models.CharField(max_length=24, null=True)
-    date = TZDateTimeField()
+    date = models.DateTimeField()
     author = models.ForeignKey(Author, null=True)
     commit = models.CharField(max_length=64, null=True)
 
@@ -843,7 +843,7 @@ class TaskTemplate(ObjParams, models.Model):
 class Job(models.Model):
     template = models.ForeignKey(JobTemplate)
     uid = models.CharField("Job ID", max_length=12, unique=True)
-    date = TZDateTimeField(default=datetime.now)
+    date = models.DateTimeField(default=timezone.now)
     schedule = models.ForeignKey(TaskPeriodSchedule, null=True, blank=True)
     is_running = models.BooleanField(default=False)
     # this is for checking (no used for data from beaker)
@@ -1059,7 +1059,7 @@ class Task(models.Model):
     status = models.SmallIntegerField(
         choices=Recipe.STATUS_CHOICES, default=UNKNOW)
     duration = models.FloatField(default=-1.)
-    datestart = TZDateTimeField(null=True, blank=True)
+    datestart = models.DateTimeField(null=True, blank=True)
     statusbyuser = models.SmallIntegerField(
         choices=USERSTATUS_CHOICES, default=NONE)
     alias = models.CharField(max_length=32, blank=True, null=True)
@@ -1163,7 +1163,7 @@ class SkippedPhase(models.Model):
 
 
 class CheckProgress(models.Model):
-    datestart = models.DateTimeField(default=currentDate())
+    datestart = models.DateTimeField(default=timezone.now)
     dateend = models.DateTimeField(null=True, blank=True)
     totalsum = models.IntegerField()
     actual = models.IntegerField(default=0)

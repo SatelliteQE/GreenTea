@@ -1,15 +1,10 @@
 #!/usr/bin/python
 # author: Pavel Studenik
 
-
-from fabric import tasks
 from fabric.api import env, get, local, run
 from fabric.context_managers import cd
-from fabric.network import disconnect_all
 
-env.hosts = [
-    ""
-]
+env.hosts = [""]
 
 HOME_PATH = ""
 
@@ -35,10 +30,13 @@ def deploy():
         run("source env/bin/activate && python manage.py collectstatic --noinput")
         run("uwsgi-manager -R 1")
 
+
 def db_backup():
     backup_file = "/tmp/tttt.backup.gz"
-    run("export PGPASSWORD="" pg_dump tttt -U tttt_user -h localhost | gzip > %s" % backup_file)
+    run("export PGPASSWORD='' "
+        "pg_dump tttt -U tttt_user -h localhost | gzip > %s" % backup_file)
     get("%s %s" % (backup_file, backup_file))
+
 
 def download():
     get("%s/db.sqlite3" % HOME_PATH, "db.sqlite3")
@@ -46,6 +44,7 @@ def download():
 
 def main():
     pass
+
 
 if __name__ == '__main__':
     main()

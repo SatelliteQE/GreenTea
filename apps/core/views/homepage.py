@@ -9,8 +9,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from django.views.generic import TemplateView
 
-from apps.core.models import (CheckProgress, EnumResult,
-                              Task, TestHistory)
+from apps.core.models import CheckProgress, EnumResult, Task, TestHistory
 from apps.taskomatic.models import TaskPeriodSchedule
 from apps.waiver.models import Comment
 

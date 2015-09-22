@@ -11,6 +11,9 @@ class TaskPeriodAdmin(admin.ModelAdmin):
     list_display = ("title", "common", "cron", "get_previous_run", "is_enable")
 
 
+class TaskPeriodScheduleAdmin(admin.ModelAdmin):
+    list_display = ("title", "period", "counter", "date_create")
+
 admin.site.register(Task, TaskAdmin)
-admin.site.register(TaskPeriodSchedule)
+admin.site.register(TaskPeriodSchedule, TaskPeriodScheduleAdmin)
 admin.site.register(TaskPeriod, TaskPeriodAdmin)

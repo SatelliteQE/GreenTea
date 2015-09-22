@@ -9,8 +9,8 @@ from django.db.models import Q
 from django.http import Http404, HttpResponse
 from django.views.generic import View
 
-from apps.core.models import (FAIL, NEW, WAIVED, WARN, Author,
-                              Job, Recipe, Task, TestHistory)
+from apps.core.models import (FAIL, NEW, WAIVED, WARN, Author, Job, Recipe,
+                              Task, TestHistory)
 from apps.core.utils.date_helpers import TZDatetime
 from apps.waiver.models import Comment
 
@@ -171,4 +171,3 @@ class ApiView(View):
 
     def post(self, request, action, *args, **kwargs):
         return self.apiEvent(action, request.POST)
-

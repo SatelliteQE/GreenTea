@@ -9,10 +9,6 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.timezone import utc
-from south.modelsinspector import add_introspection_rules
-
-add_introspection_rules(
-    [], ["^apps\.core\.utils\.date_helpers\.TZDateTimeField"])
 
 TZ_OFFSET = re.compile(r'^(.*?)\s?([-\+])(\d\d):?(\d\d)$')
 

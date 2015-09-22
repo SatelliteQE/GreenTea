@@ -7,10 +7,11 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.views.generic import TemplateView
 
-from apps.core.models import (Task, Test)
+from apps.core.models import Task, Test
 
 
 class TestDetailView(TemplateView):
+
     """Show all runs of the test"""
     template_name = 'test-detail.html'
 
