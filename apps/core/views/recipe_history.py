@@ -1,7 +1,9 @@
 from django.conf import settings
+from django.http import Http404
 from django.views.generic import TemplateView
 from apps.taskomatic.models import TaskPeriodSchedule
 from apps.core.models import (JobTemplate, RecipeTemplate, Recipe, Task)
+
 
 class RecipeHistoryView(TemplateView):
     """Shows history of individual tasks from a recipe given in URL"""
@@ -25,7 +27,10 @@ class RecipeHistoryView(TemplateView):
     def get_context_data(self, **kwargs):
         """Load required data"""
         recipe_template_id = int(kwargs['id'])
-        recipe_template = RecipeTemplate.objects.get(id=recipe_template_id)
+        try:
+            recipe_template = RecipeTemplate.objects.get(id=recipe_template_id)
+        except RecipeTemplate.DoesNotExist:
+            raise Http404
         ###print ">>> recipe_template:", recipe_template, dir(recipe_template)
         job_template = JobTemplate.objects.get(id=recipe_template.jobtemplate_id)
         job_template_id = job_template.id
