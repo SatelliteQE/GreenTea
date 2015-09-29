@@ -80,5 +80,5 @@ class HomePageView(TemplateView):
             int(self.request.GET.get('hpage', 1)))
         context['hpaginator'] = paginator
 
-        context['networking'] = self.get_network_stas()
+        #context['networking'] = self.get_network_stas()
         return context

@@ -162,12 +162,19 @@ INSTALLED_APPS = (
     'apps.taskomatic',
     'apps.kerberos',
     'apps.api',
-    'django_extensions',
     'taggit',
     'reversion',
     'rest_framework',
     'plugins',
 )
+
+try:
+    import django_extensions
+    INSTALLED_APPS += (
+        "django_extensions",
+    )
+except ImportError:
+    pass
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
