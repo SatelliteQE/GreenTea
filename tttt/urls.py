@@ -4,7 +4,8 @@ from django.contrib import admin
 import apps.api.urls
 import settings
 from apps.core.views import (HomePageView, JobDetailView, JobsDiffView,
-                             JobsListView, TestDetailView, TestsListView)
+                             JobsListView, TestDetailView, TestsListView,
+                             RecipeHistoryView)
 from apps.kerberos.views import LoginView
 
 admin.autodiscover()
@@ -24,6 +25,8 @@ urlpatterns = patterns('',
                            LoginView.as_view(), name="login"),
                        url(r'^job/(?P<id>[0-9]+)$',
                            JobDetailView.as_view(), name='job-detail'),
+                       url(r'^recipe_history/(?P<id>[0-9]+)$',
+                           RecipeHistoryView.as_view(), name='recipe-history'),
                        url(r'^test/(?P<id>[0-9]+)$',
                            TestDetailView.as_view(), name='test-detail'),
                        url(r'^(Automation/)?[tT]ests.html$',
