@@ -1,65 +1,55 @@
 # -*- coding: utf-8 -*-
-from django.db import models
+from __future__ import unicode_literals
 
-from south.db import db
-from south.utils import datetime_utils as datetime
-from south.v2 import SchemaMigration
+from django.db import models, migrations
+import django.utils.timezone
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Task'
-        db.create_table(u'taskomatic_task', (
-            (u'id', self.gf('django.db.models.fields.AutoField')
-             (primary_key=True)),
-            ('title', self.gf('django.db.models.fields.CharField')
-             (max_length=64)),
-            ('common', self.gf('django.db.models.fields.CharField')
-             (max_length=128)),
-            ('common_params', self.gf(
-                'django.db.models.fields.TextField')(blank=True)),
-            ('status', self.gf(
-                'django.db.models.fields.IntegerField')(default=0)),
-            ('exit_result', self.gf(
-                'django.db.models.fields.TextField')(blank=True)),
-            ('date_create', self.gf('django.db.models.fields.DateTimeField')
-             (default=datetime.datetime(2014, 1, 24, 0, 0))),
-            ('date_run', self.gf('django.db.models.fields.DateTimeField')
-             (null=True, blank=True)),
-            ('time_long', self.gf(
-                'django.db.models.fields.FloatField')(default=0.0)),
-        ))
-        db.send_create_signal(u'taskomatic', ['Task'])
+    dependencies = [
+    ]
 
-    def backwards(self, orm):
-        # Deleting model 'Task'
-        db.delete_table(u'taskomatic_task')
-
-    models = {
-        u'taskomatic.task': {
-            'Meta': {'object_name': 'Task'},
-            'common':
-                ('django.db.models.fields.CharField',
-                 [], {'max_length': '128'}),
-            'common_params':
-                ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'date_create':
-                ('django.db.models.fields.DateTimeField', [], {
-                 'default': 'datetime.datetime(2014, 1, 24, 0, 0)'}),
-            'date_run':
-                ('django.db.models.fields.DateTimeField',
-                 [], {'null': 'True', 'blank': 'True'}),
-            'exit_result':
-                ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'status':
-                ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'time_long':
-                ('django.db.models.fields.FloatField', [], {'default': '0.0'}),
-            'title':
-                ('django.db.models.fields.CharField', [], {'max_length': '64'})
-        }
-    }
-
-    complete_apps = ['taskomatic']
+    operations = [
+        migrations.CreateModel(
+            name='Task',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(max_length=64)),
+                ('common', models.CharField(max_length=128)),
+                ('common_params', models.TextField(verbose_name='Parameters', blank=True)),
+                ('status', models.IntegerField(default=0, choices=[(0, b'Waiting'), (1, b'In progress'), (2, b'Done'), (3, b'Error')])),
+                ('exit_result', models.TextField(verbose_name='Result log', blank=True)),
+                ('date_create', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Date of create')),
+                ('date_run', models.DateTimeField(null=True, verbose_name='Date of pick up', blank=True)),
+                ('time_long', models.FloatField(default=0.0)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='TaskPeriod',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(max_length=64)),
+                ('label', models.SlugField(unique=True, max_length=64)),
+                ('common', models.CharField(max_length=128)),
+                ('date_last', models.DateTimeField(null=True, verbose_name='Date of last run', blank=True)),
+                ('is_enable', models.BooleanField(default=False)),
+                ('cron', models.CharField(default=b'*  *  *  *  *', max_length=64)),
+            ],
+        ),
+        migrations.CreateModel(
+            name='TaskPeriodSchedule',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('title', models.CharField(max_length=64)),
+                ('date_create', models.DateTimeField(default=django.utils.timezone.now, verbose_name='Date of create')),
+                ('counter', models.BigIntegerField(default=0)),
+                ('period', models.ForeignKey(blank=True, to='taskomatic.TaskPeriod', null=True)),
+            ],
+        ),
+        migrations.AddField(
+            model_name='task',
+            name='period',
+            field=models.ForeignKey(blank=True, to='taskomatic.TaskPeriod', null=True),
+        ),
+    ]

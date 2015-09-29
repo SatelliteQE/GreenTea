@@ -38,13 +38,6 @@ class TaskPeriodSchedule(models.Model):
     def __unicode__(self):
         return "[%d] %s" % (self.counter, self.title)
 
-    def recount_all(self):
-        tps = TaskPeriodSchedule.objects.filter(
-            period=self.period).order_by("date_create")
-        for key, it in enumerate(tps):
-            it.counter = key
-            it.save()
-
     def recount(self):
         it.counter = TaskPeriodSchedule.object.filter(
             period=self.period).count()
@@ -82,6 +75,21 @@ class TaskPeriod(models.Model):
                                    status=Task.STATUS_ENUM_WAIT,
                                    period=self)
         return task
+
+    def recount_all(self):
+        tps = TaskPeriodSchedule.objects.filter(
+            period=self).order_by("date_create")
+        for key, it in enumerate(tps):
+            it.counter = key
+            it.save()
+
+    def clean_empty(self):
+        tps = TaskPeriodSchedule.objects.filter(
+            period=self).order_by("date_create")
+        for it in tps:
+            count = it.job_set.all().count()
+            if count == 0:
+                it.delete()
 
 
 class Task(models.Model):

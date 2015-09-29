@@ -5,8 +5,6 @@ django-taggit
 django-reversion
 django-widget-tweaks
 django-filter
-pygraphviz
-django_extensions
 GitPython
 python-dateutil
 pytz

@@ -2,5 +2,7 @@ pylama
 pylint
 pyflakes
 isort
+pygraphviz
+django_extensions
 
 -r requirement.txt
