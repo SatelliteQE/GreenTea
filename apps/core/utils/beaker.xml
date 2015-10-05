@@ -69,6 +69,7 @@
       </distroRequires>
       <hostRequires>
         <and>
+          {% if r.hvm %}<key_value key="HVM" op="=" value="1"/>{% endif %}
 {% if r.hvm %}<cpu>
 	<or>
 		<flag op="=" value="vmx"/>
