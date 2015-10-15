@@ -97,7 +97,7 @@ class JobListObject:
                 id_counter = recipe.job.schedule.counter
                 if template not in objects:
                     label = OrderedDict([(k, None) for k in it["label"]])
-                    recipetemplate_id = RecipeTemplate.objects.filter(jobtemplate__id=recipe.job.template.id, name=template_label).values('id')   # FIXME: matching recipetemplate to recipe by its whiteboard? C'mon man!
+                    recipetemplate_id = RecipeTemplate.objects.filter(jobtemplate__id=recipe.job.template.id, name=recipe.whiteboard).values('id')   # FIXME: matching recipetemplate to recipe by its whiteboard? C'mon man!
                     assert len(recipetemplate_id) == 1
                     recipetemplate_id = recipetemplate_id[0]['id']
                     objects[template] = {
