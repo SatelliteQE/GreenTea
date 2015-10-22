@@ -146,6 +146,12 @@ class Task(models.Model):
             obj = hook()
             parser = obj.create_parser('./manage.py', self.common)
             options, args = parser.parse_args(params)
+
+            # workaround - since django 1.8 settings and pythonpath is not
+            # set by parse_args
+            options.settings = None
+            options.pythonpath = None
+
             handle_default_options(options)
             obj.execute(*args, **options.__dict__)
             self.status = self.STATUS_ENUM_DONE  # set status "done"

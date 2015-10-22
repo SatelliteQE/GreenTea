@@ -12,7 +12,7 @@ import urllib2
 from datetime import datetime
 
 import git
-import gitconfig
+from lib import gitconfig
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
