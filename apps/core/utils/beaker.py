@@ -75,7 +75,6 @@ class Beaker:
             auth = "--username='%s' --password='%s'" % (self.username,
                                                         self.password)
         command = "bkr %s %s %s --hub=%s" % (command, param, auth, self.hub)
-        print command
         logger.debug(command)
         p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
         return p.communicate()
@@ -182,6 +181,9 @@ class Beaker:
             if sys.version_info >= (2, 7, 9):
                 client = xmlrpclib.Server(self.server_url, verbose=0,
                                           context=ssl._create_unverified_context())
+
+        if self.username and self.password:
+            client.auth.login_password(self.username, self.password)
         return client
 
     def parse_job(self, jobid, running=True, date_created=None):
@@ -218,6 +220,10 @@ class Beaker:
         if not job.is_running:
             job.is_finished = True
         job.save()
+
+    def listLogs(self, recipe):
+        client = self._getXMLRPCClient()
+        return client.recipes.files(int(recipe))
 
     def listJobs(self, filter={}):
         """List and filter beaker jobs."""
@@ -303,7 +309,6 @@ def parse_task(taskxml, recipe):
     #   stat = dict()
     #    for result in taskxml.childNodes:
     #        for it in result.childNodes:
-    # print it.getAttribute("id"), it.getAttribute("result")
     #            res = it.getAttribute("result")
     #            if not res: continue
     #            if stat.has_key(res):
@@ -351,11 +356,6 @@ def parse_task(taskxml, recipe):
     )
     task.set_result(result)
     task.set_status(status_str)
-
-    # journal = otask.load_journal()
-    # if journal:
-    #    print "journal: ", journal
-    #    print parseJournals(journal)
 
     if task.is_completed():
         task.duration = float(strToSec(taskxml.getAttribute("duration")))
