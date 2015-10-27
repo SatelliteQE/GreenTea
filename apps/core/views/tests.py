@@ -158,7 +158,7 @@ class TestsListView(TemplateView):
             "result", "id", "uid", "recipe", "statusbyuser",
             "recipe__job__template__grouprecipes", "recipe__arch__name",
             "recipe__job__template__schedule__id",
-            "recipe__whiteboard", "recipe__distro__name", "alias", "recipe__job__schedule__id")\
+            "recipe__whiteboard", "recipe__distro__name", "alias", "recipe__job__schedule__counter")\
             .order_by("test__owner__name", "recipe__job__template__position") \
             .annotate(Count('id'))
 
@@ -299,7 +299,7 @@ class TestsListView(TemplateView):
                 test["labels"][test_label] = OrderedDict()
 
             # Period we are working on now
-            period_id = it["recipe__job__schedule__id"]
+            period_id = it["recipe__job__schedule__counter"]
 
             if period_id not in test["labels"][test_label].keys():
                 test["labels"][test_label][period_id] = None

@@ -17,20 +17,16 @@ def migrate_chedule(label, period):
         it.schedule = tp
         it.save()
 
-    s = set([it.date_create.date() for it in TaskPeriodSchedule.objects.filter(period=tp)])
-
-    for it in Job.objects.filter(template__period=0).order_by("date"):
-        date = it.date.date()
-        if date not in s:
+    for it in Job.objects.filter(template__period=period).order_by("date"):
+        try:
+            tps = TaskPeriodSchedule.objects.get(period=tp, date_create__year=it.date.year, date_create__month=it.date.month, date_create__day=it.date.day)
+        except TaskPeriodSchedule.DoesNotExist:
             tps = TaskPeriodSchedule(title=label, date_create=it.date, period=tp)
             it.counter = TaskPeriodSchedule.objects.filter().count()
             tps.save()
-        else:
-            tps = TaskPeriodSchedule.objects.get(period=tp, date_create__year=it.date.year, date_create__month=it.date.month, date_create__day=it.date.day)
         
         it.schedule = tps
         it.save()
-        s.add(date)
 
     tp.recount_all()
     
