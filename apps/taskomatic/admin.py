@@ -13,6 +13,9 @@ class TaskPeriodAdmin(admin.ModelAdmin):
 
 class TaskPeriodScheduleAdmin(admin.ModelAdmin):
     list_display = ("title", "period", "counter", "date_create")
+    search_fields = ("title", "id")
+    list_filter = ("period", )
+
 
 admin.site.register(Task, TaskAdmin)
 admin.site.register(TaskPeriodSchedule, TaskPeriodScheduleAdmin)
