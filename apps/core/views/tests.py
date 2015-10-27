@@ -17,7 +17,7 @@ from apps.core.forms import FilterForm
 from apps.core.models import (FAIL, Author, CheckProgress, Git, GroupOwner,
                               Task, Test, TestHistory, render_label)
 from apps.core.utils.date_helpers import currentDate
-from apps.taskomatic.models import TaskPeriodSchedule
+from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriod
 from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
 
@@ -108,12 +108,15 @@ class TestsListView(TemplateView):
 
     def __get_period_ids(self):
         """Determine TaskPeriodSchedule IDs we are interested in (7 newest)"""
-        periods = reversed(
-            TaskPeriodSchedule.objects.all().values(
-                "title", "date_create", "id", "counter")
-            .order_by("-counter")[:settings.RANGE_PREVIOUS_RUNS]
-        )
-        return map(lambda x: x["id"], periods)
+        data = []
+        for it in TaskPeriod.objects.all():
+            periods = reversed(
+                TaskPeriodSchedule.objects.filter(period=it).values(
+                    "title", "date_create", "id", "counter")
+                .order_by("-period", "-counter")[:settings.RANGE_PREVIOUS_RUNS]
+            )
+            data += map(lambda x: x["id"], periods)
+        return data
 
     def __get_tasks_and_tests(self, period_ids):
         """Return filtered tests and tasks (i.e. test runs) to be shown on tests.html"""
@@ -154,8 +157,9 @@ class TestsListView(TemplateView):
             "recipe__arch__name", "test__owner__email", "recipe__uid", "recipe__job__date",
             "result", "id", "uid", "recipe", "statusbyuser",
             "recipe__job__template__grouprecipes", "recipe__arch__name",
+            "recipe__job__template__schedule__id",
             "recipe__whiteboard", "recipe__distro__name", "alias", "recipe__job__schedule__id")\
-            .order_by("test__owner__name", "recipe__job__template__whiteboard") \
+            .order_by("test__owner__name", "recipe__job__template__position") \
             .annotate(Count('id'))
 
         # Load all the Test-s
@@ -163,8 +167,9 @@ class TestsListView(TemplateView):
         # TODO: Cant we somehow limit this query to return only count of items
         #       per paginator settings
         tests = Test.objects.filter(**testFilter) \
-            .annotate(count_fail=Count('task__result'))\
-            .annotate(Count('id')).order_by("-count_fail")
+            .annotate(count_fail=Count('task__result')) \
+            .annotate(Count('id')).order_by("-count_fail") \
+            .prefetch_related("groups", "git")
 
         return tasks, tests
 
@@ -189,7 +194,7 @@ class TestsListView(TemplateView):
                     'owner': owners[it.owner_id]
                 }
             data[email]["tests"][it.name] = it
-            data[email]["tests"][it.name].labels = OrderedDict()
+            data[email]["tests"][it.name].period = OrderedDict()
         return data
 
     def __expand_task_grouprecipes_template(self, task):
@@ -276,7 +281,12 @@ class TestsListView(TemplateView):
         # Process all the Task-s
         for it in tasks:
             # Using reference just make a shortcut to "data..." structure
-            test = data[it["test__owner__email"]]["tests"][it["test__name"]]
+            period = it["recipe__job__template__schedule__id"]
+            test_link = data[it["test__owner__email"]]["tests"][it["test__name"]]
+
+            if period not in test_link.period.keys():
+                test_link.period.update({period: {"labels": OrderedDict(), "keys": set()}})
+            test = data[it["test__owner__email"]]["tests"][it["test__name"]].period[period]
 
             # Get label we will use for this task
             test_label = (
@@ -285,36 +295,39 @@ class TestsListView(TemplateView):
             )
 
             # Create empty matrix
-            if test_label not in test.labels:
-                test.labels[test_label] = OrderedDict()
-                for period_id in period_ids:
-                    test.labels[test_label][period_id] = None
+            if test_label not in test["labels"]:
+                test["labels"][test_label] = OrderedDict()
 
             # Period we are working on now
             period_id = it["recipe__job__schedule__id"]
 
+            if period_id not in test["labels"][test_label].keys():
+                test["labels"][test_label][period_id] = None
+                test["keys"].add(period_id)
+
+
             # Skip Task-s which were run in different periods than what we are
             # displaying
-            if period_id not in test.labels[test_label]:
+            if period_id not in test["labels"][test_label]:
                 continue
 
             # Check if we were rescheduled
             reschedule = 0
-            if test.labels[test_label][period_id]:
-                reschedule = test.labels[test_label][period_id].reschedule + 1
+            if test["labels"][test_label][period_id]:
+                reschedule = test["labels"][test_label][period_id].reschedule + 1
 
             # Fill matrix with actual data (i.e. info about Task)
-            test.labels[test_label][period_id] = Task(
+            test["labels"][test_label][period_id] = Task(
                 id=it["id"],
                 uid=it["uid"],
                 result=it["result"],
                 statusbyuser=it["statusbyuser"],
             )
-            test.labels[test_label][period_id].resultrate = it[
+            test["labels"][test_label][period_id].resultrate = it[
                 "recipe__resultrate"]
-            test.labels[test_label][
+            test["labels"][test_label][
                 period_id].recipe_uid = "%s" % it["recipe__uid"]
-            test.labels[test_label][period_id].reschedule = reschedule
+            test["labels"][test_label][period_id].reschedule = reschedule
 
         try:
             progress = CheckProgress.objects.order_by("-datestart")[0]

@@ -1,4 +1,4 @@
-from subprocess import PIPE, Popen, STDOUT
+from subprocess import PIPE, STDOUT, Popen
 
 
 def shell(command):

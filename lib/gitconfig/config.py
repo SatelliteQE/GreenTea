@@ -1,6 +1,7 @@
 import os
-from shell import shell
+
 from section import section
+from shell import shell
 
 
 class config(object):

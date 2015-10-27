@@ -64,56 +64,67 @@ Last check: {{ progress.datestart }}
 <h2>{{ item.owner.name }} &lsaquo;{{ item.owner.email }}&rsaquo;</h2>
 
 {% for key, test in item.tests.items %}
-{% with changes=history|keyvalue:test.id %}
-<table class="dashboard dashboard-tests">
-  <thead>
-	<tr >
-		<th colspan="12"><a name="{{test}}"></a><a href="{{test.get_absolute_url}}" class="testLink" >{{ test.name }}</a>
-		{% if test.get_reposituory_url %}<a href="{{ test.get_reposituory_url }}" class="gitLink" >git</a>{% endif %} <a href="{{ test.get_detail_url }}" class="gitLink" >detail</a>
-        <span class="float-right" title="Groups">{% for group in test.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
-        </th>
-	</tr>
-	<tr >
-	<th colspan="2">&nbsp;</th>
-	    {% for labelone in label %}
-	    {% with change=changes|keyvalue:labelone %}
-	    <th {% if change %} data-container="body" data-toggle="popover" data-params="{% for chit in change %}{{chit.id}}|{% endfor %}"{% endif %}
-	        class="{% if change %}{% if change.0.test.id == test.id %}rTriangle rBorder {% else %}pTriangle pBorder {% endif %}{% endif %}date">
-	        {{labelone}}</th>
-	    {% endwith %}
-	    {% endfor %}
-	</tr>
-  </thead>
-  <tbody>
-	{% for key, days in test.labels.items %}
-	    <tr >
-	      <td>{% ifchanged key.0 %}{{key.0}}{% else %}&nbsp;{% endifchanged %}</td>
-	      <td>{{key.1}}</td>
-	      {% for day, it in days.items %}
-	      {% with change=changes|keyvalue:day %}
-		  <td {% if it.uid %}id="T:{{it.uid}}" class="field-value status-{{it.get_result}}{% if change %} {% if change.0.test.id == test.id %}r{% else %}p{% endif %}Border{% endif %}" {% endif %}>
-		    {% if it %}
-		      <div class="rWrapper">
-		        <div class="icons-tr"><span class="glyphicon glyphicon-eye-open" title="System is selected."></span></div>
-		        <div class="icons-mr">
-		          {% if atom.recipe.is_running %}<span class="glyphicon glyphicon-star" title="System is still runnig."></span>{% endif %}
-		          {% if it.reschedule > 1 %}<span class="glyphicon glyphicon-refresh" title="Rescheduled {{it.reschedule}} time(s)"></span>{% endif %}
-		        </div>
-			    <div class="icons-br">{% if it.recipe_uid %}<a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ it.recipe_uid|join:"" }}#task{{it.uid}}" class="glyphicon glyphicon-tripledot" title="Link to Beaker.">...</a>{% endif %}</div>
-			    <span class="perc">{{ it.resultrate|floatformat:"1" }}&nbsp;%</span>
-			  </div>
-			{% endif %}
-		  </td>
-	    {% endwith %}
-	    {% endfor %}
-	   </tr>
-	{% endfor %}
-  </tbody>
-</table>
-{% endwith %}
-<br>
+  {% with changes=history|keyvalue:test.id %}
+      <table class="dashboard dashboard-tests">
+      <thead>
+      <tr >
+        <th colspan="12"><a name="{{test}}"></a><a href="{{test.get_absolute_url}}" class="testLink" >{{ test.name }}</a>
+        {% if test.get_reposituory_url %}<a href="{{ test.get_reposituory_url }}" class="gitLink" >git</a>{% endif %} <a href="{{ test.get_detail_url }}" class="gitLink" >detail</a>
+            <span class="float-right" title="Groups">{% for group in test.groups.all %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+            </th>
+      </tr>
+      </thead>
+      </table>
+
+    {% for pkey, period in test.period.items %}
+    <table class="dashboard dashboard-tests">
+      <thead>
+      <tr >
+      <th colspan="2">&nbsp;</th>
+          {% for labelone in period.keys %}
+          {% with change=changes|keyvalue:labelone %}
+          <th {% if change %} data-container="body" data-toggle="popover" data-params="{% for chit in change %}{{chit.id}}|{% endfor %}"{% endif %}
+              class="{% if change %}{% if change.0.test.id == test.id %}rTriangle rBorder {% else %}pTriangle pBorder {% endif %}{% endif %}date">
+              {{labelone}}</th>
+          {% endwith %}
+          {% endfor %}
+      </tr>
+      </thead>
+      <tbody>
+      <!-- start jobs -->
+      {% for job, days in period.labels.items %}
+          <tr >
+            <td>{% ifchanged job.0 %}{{job.0}}{% else %}&nbsp;{% endifchanged %}</td>
+            <td>{{job.1}}</td>
+            <!-- start days -->
+            {% for day, it in days.items %}
+            {% with change=changes|keyvalue:day %}
+              <td {% if it.uid %}id="T:{{it.uid}}" class="field-value status-{{it.get_result}}{% if change %} {% if change.0.test.id == test.id %}r{% else %}p{% endif %}Border{% endif %}" {% endif %}>
+                {% if it %}
+                  <div class="rWrapper">
+                    <div class="icons-tr"><span class="glyphicon glyphicon-eye-open" title="System is selected."></span></div>
+                    <div class="icons-mr">
+                      {% if atom.recipe.is_running %}<span class="glyphicon glyphicon-star" title="System is still runnig."></span>{% endif %}
+                      {% if it.reschedule > 1 %}<span class="glyphicon glyphicon-refresh" title="Rescheduled {{it.reschedule}} time(s)"></span>{% endif %}
+                    </div>
+                  <div class="icons-br">{% if it.recipe_uid %}<a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ it.recipe_uid|join:"" }}#task{{it.uid}}" class="glyphicon glyphicon-tripledot" title="Link to Beaker.">...</a>{% endif %}</div>
+                  <span class="perc">{{ it.resultrate|floatformat:"1" }}&nbsp;%</span>
+                </div>
+              {% endif %}
+              </td>
+           {% endwith %}
+           {% endfor %}
+           <!-- end days -->
+         </tr>
+      {% endfor %}
+      <!-- end jobs -->
+      </tbody>
+    </table>
+    {% endfor %}
+    <br>
+  {% endwith %}
+  <br>
 {% endfor %}
-<br>
 {% endfor %}
 
 <ul class="pagination">

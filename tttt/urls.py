@@ -4,8 +4,8 @@ from django.contrib import admin
 import apps.api.urls
 import settings
 from apps.core.views import (HomePageView, JobDetailView, JobsDiffView,
-                             JobsListView, TestDetailView, TestsListView,
-                             RecipeHistoryView)
+                             JobsListView, RecipeHistoryView, TestDetailView,
+                             TestsListView)
 from apps.kerberos.views import LoginView
 
 admin.autodiscover()
