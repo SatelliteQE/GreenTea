@@ -222,8 +222,10 @@ class Beaker:
         job.save()
 
     def listLogs(self, recipe):
-        client = self._getXMLRPCClient()
-        return client.recipes.files(int(recipe))
+        #client = self._getXMLRPCClient()
+        #return client.recipes.files(int(recipe))
+        raw, status = self.execute("job-logs", "R:2291259")
+        return raw.split()
 
     def listJobs(self, filter={}):
         """List and filter beaker jobs."""
