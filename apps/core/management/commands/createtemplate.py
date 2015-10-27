@@ -16,7 +16,7 @@ from apps.core.utils.beaker_import import Parser
 
 class Command(BaseCommand):
     help = ("Schedule jobs to beaker")
-    requires_model_validation = True
+    requires_system_checks = True
     can_import_settings = True
 
     option_list = BaseCommand.option_list + (

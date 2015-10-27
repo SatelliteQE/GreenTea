@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
     args = '[reponame ...]'
     help = ("Load/refresh data from gits.")
-    requires_model_validation = True
+    requires_system_checks = True
     can_import_settings = True
 
     def handle(self, *args, **kwargs):

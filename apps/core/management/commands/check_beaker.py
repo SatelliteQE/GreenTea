@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = ("Load data from beaker and save to db")
-    requires_model_validation = True
+    requires_system_checks = True
     can_import_settings = True
 
     option_list = BaseCommand.option_list + (
