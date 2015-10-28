@@ -24,17 +24,17 @@ def migrate_chedule(label, period):
             tps = TaskPeriodSchedule(title=label, date_create=it.date, period=tp)
             it.counter = TaskPeriodSchedule.objects.filter().count()
             tps.save()
-        
         it.schedule = tps
         it.save()
 
     tp.recount_all()
-    
 
 def migrate_data(apps, schema_editor):
-    migrate_chedule("daily-automation", JobTemplate.DAILY)
-    migrate_chedule("weekly-automation", JobTemplate.WEEKLY)
-
+    for taskperiod in TaskPeriod.objects.all():
+        if taskperiod.label == "daily-automation":
+            migrate_chedule(taskperiod.label, JobTemplate.DAILY)
+        elif taskperiod.label == "weekly-automation":
+            migrate_chedule(taskperiod.label, JobTemplate.WEEKLY)
 
 def unmigrate_data(apps, schema_editor):
     pass
