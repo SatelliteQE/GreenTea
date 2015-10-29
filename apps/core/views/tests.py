@@ -211,14 +211,17 @@ class TestsListView(TemplateView):
 
     def __get_history(self, period_ids):
         history = {}
-        periods_age_list = TaskPeriodSchedule.objects.filter(id__in=period_ids)
+        # We are interested in one period before as well, because we want to
+        # catch changes which happened right before our first period
+        period_ids_one_prev_added = [min(period_ids)-1] + period_ids
+        # Get time/date limits we will use when getting list of changes
+        periods_age_list = TaskPeriodSchedule.objects.filter(id__in=period_ids_one_prev_added)
         if len(periods_age_list):
             period_oldest_date = periods_age_list.earliest('counter').date_create
             period_newest_date = periods_age_list.latest('counter').date_create
         else:
             period_oldest_date = date.today()
             period_newest_date = date.today()
-        # TODO: We should check for changes from date of something like period_oldest.previous()
         # TODO: 'change' gets assigned to following (i.e. wrong) period
         changes = TestHistory.objects.filter(date__gt=period_oldest_date, date__lt=period_newest_date)\
             .annotate(dcount=Count("test"))
