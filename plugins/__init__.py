@@ -5,9 +5,9 @@ from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-path = os.path.join(settings.ROOT_PATH, "plugins")
+pathplugin = os.path.join(settings.ROOT_PATH, "plugins")
 
-plugins = [ f for f in os.listdir("plugins") if os.path.isdir(os.path.join("plugins", f)) ]
+plugins = [ f for f in os.listdir(pathplugin) if os.path.isdir(os.path.join(pathplugin, f)) ]
 loaded_plugins = []
 
 for it in plugins:
