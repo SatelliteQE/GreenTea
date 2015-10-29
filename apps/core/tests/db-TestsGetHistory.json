@@ -1,0 +1,686 @@
+[
+{
+    "fields": {
+        "name": "x86_64"
+    },
+    "model": "core.arch",
+    "pk": 1
+},
+{
+    "fields": {
+        "name": "RHEL-6.7"
+    },
+    "model": "core.distro",
+    "pk": 1
+},
+{
+    "fields": {
+        "url": "test",
+        "localurl": "test",
+        "name": "test"
+    },
+    "model": "core.git",
+    "pk": 1
+},
+{
+    "fields": {
+        "is_enabled": true,
+        "name": "Unknown",
+        "email": "unknow@exmple.com"
+    },
+    "model": "core.author",
+    "pk": 1
+},
+{
+    "fields": {
+        "groups": [],
+        "git": 1,
+        "name": "/Some/test",
+        "is_enable": true,
+        "dependencies": [],
+        "time": "",
+        "owner": 1,
+        "folder": "",
+        "type": "",
+        "description": ""
+    },
+    "model": "core.test",
+    "pk": 5
+},
+{
+    "fields": {
+        "test": 5,
+        "date": "2015-10-01T22:00:00Z",
+        "version": "123",
+        "commit": "First commit long time ago",
+        "author": 1
+    },
+    "model": "core.testhistory",
+    "pk": 1
+},
+{
+    "fields": {
+        "test": 5,
+        "date": "2015-10-25T22:00:00Z",
+        "version": "124",
+        "commit": "Second commit right before our range",
+        "author": 1
+    },
+    "model": "core.testhistory",
+    "pk": 2
+},
+{
+    "fields": {
+        "test": 5,
+        "date": "2015-10-26T11:00:00Z",
+        "version": "125",
+        "commit": "Third commit which fits into our range",
+        "author": 1
+    },
+    "model": "core.testhistory",
+    "pk": 3
+},
+{
+    "fields": {
+        "test": 5,
+        "date": "2015-10-27T11:00:00Z",
+        "version": "126",
+        "commit": "Fourth commit, in our range",
+        "author": 1
+    },
+    "model": "core.testhistory",
+    "pk": 4
+},
+{
+    "fields": {
+        "test": 5,
+        "date": "2015-10-28T11:00:00Z",
+        "version": "128",
+        "commit": "Fifth commit which is behind our range",
+        "author": 1
+    },
+    "model": "core.testhistory",
+    "pk": 5
+},
+{
+    "fields": {
+        "test": 5,
+        "date": "2015-10-27T11:01:00Z",
+        "version": "127",
+        "commit": "Fourth commit again",
+        "author": 1
+    },
+    "model": "core.testhistory",
+    "pk": 6
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system1.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 1
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system2.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 2
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system3.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 3
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system4.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 4
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system5.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 5
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system6.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 6
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system7.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 7
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system8.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 8
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system9.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 9
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system10.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 10
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system11.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 11
+},
+{
+    "fields": {
+        "ram": null,
+        "group": null,
+        "parent": null,
+        "hostname": "system12.example.com",
+        "hdd": "",
+        "cpu": ""
+    },
+    "model": "core.system",
+    "pk": 12
+},
+{
+    "fields": {
+        "schedule": null,
+        "event_finish": 0,
+        "whiteboard": "Mine job",
+        "period": 0,
+        "grouprecipes": "{{whiteboard}}",
+        "is_enable": true,
+        "position": 0
+    },
+    "model": "core.jobtemplate",
+    "pk": 1
+},
+{
+    "fields": {
+        "distroname": "RHEL-6.7",
+        "variant": "Server",
+        "name": "RHEL-6.7",
+        "family": "RedHatEnterpriseLinux6"
+    },
+    "model": "core.distrotemplate",
+    "pk": 1
+},
+{
+    "fields": {
+        "hvm": false,
+        "name": "Postgresql",
+        "kernel_options_post": "",
+        "schedule": "",
+        "virtualhost": null,
+        "kernel_options": "",
+        "jobtemplate": 1,
+        "is_virtualguest": false,
+        "role": 0,
+        "distro": 1,
+        "memory": "",
+        "params": "",
+        "disk": "",
+        "arch": [
+            1
+        ],
+        "ks_meta": ""
+    },
+    "model": "core.recipetemplate",
+    "pk": 2
+},
+{
+    "fields": {
+        "name": "STANDALONE"
+    },
+    "model": "core.taskroleenum",
+    "pk": 1
+},
+{
+    "fields": {
+        "test": 5,
+        "params": "TEST_PARAM_CONFIG=http://storage.example.com/something.conf\n",
+        "role": 1,
+        "recipe": 2,
+        "priority": 4
+    },
+    "model": "core.tasktemplate",
+    "pk": 50
+},
+{
+    "fields": {
+        "uid": "J:1128767",
+        "schedule": null,
+        "is_running": true,
+        "template": 1,
+        "date": "2015-10-29T08:43:43.045Z",
+        "is_finished": false
+    },
+    "model": "core.job",
+    "pk": 3
+},
+{
+    "fields": {
+        "uid": "J:1127510",
+        "schedule": 3,
+        "is_running": true,
+        "template": 1,
+        "date": "2015-10-29T08:44:32Z",
+        "is_finished": false
+    },
+    "model": "core.job",
+    "pk": 4
+},
+{
+    "fields": {
+        "uid": "J:1126156",
+        "schedule": 4,
+        "is_running": false,
+        "template": 1,
+        "date": "2015-10-29T08:44:52Z",
+        "is_finished": true
+    },
+    "model": "core.job",
+    "pk": 5
+},
+{
+    "fields": {
+        "uid": "J:1124924",
+        "schedule": 5,
+        "is_running": false,
+        "template": 1,
+        "date": "2015-10-29T08:45:12Z",
+        "is_finished": true
+    },
+    "model": "core.job",
+    "pk": 6
+},
+{
+    "fields": {
+        "uid": "J:1123573",
+        "schedule": 6,
+        "is_running": false,
+        "template": 1,
+        "date": "2015-10-29T08:45:32Z",
+        "is_finished": true
+    },
+    "model": "core.job",
+    "pk": 7
+},
+{
+    "fields": {
+        "status": 10,
+        "uid": "2296545",
+        "parentrecipe": null,
+        "whiteboard": "Postgresql",
+        "system": 2,
+        "job": 3,
+        "resultrate": 95.55555555555556,
+        "statusbyuser": 0,
+        "result": 4,
+        "arch": 1,
+        "distro": 1
+    },
+    "model": "core.recipe",
+    "pk": 6
+},
+{
+    "fields": {
+        "status": 10,
+        "uid": "2294122",
+        "parentrecipe": null,
+        "whiteboard": "Postgresql",
+        "system": 7,
+        "job": 4,
+        "resultrate": 97.77777777777777,
+        "statusbyuser": 0,
+        "result": 4,
+        "arch": 1,
+        "distro": 1
+    },
+    "model": "core.recipe",
+    "pk": 8
+},
+{
+    "fields": {
+        "status": 2,
+        "uid": "2291861",
+        "parentrecipe": null,
+        "whiteboard": "Postgresql",
+        "system": 9,
+        "job": 5,
+        "resultrate": 95.55555555555556,
+        "statusbyuser": 0,
+        "result": 3,
+        "arch": 1,
+        "distro": 1
+    },
+    "model": "core.recipe",
+    "pk": 10
+},
+{
+    "fields": {
+        "status": 2,
+        "uid": "2289679",
+        "parentrecipe": null,
+        "whiteboard": "Postgresql",
+        "system": 10,
+        "job": 6,
+        "resultrate": 97.77777777777777,
+        "statusbyuser": 0,
+        "result": 4,
+        "arch": 1,
+        "distro": 1
+    },
+    "model": "core.recipe",
+    "pk": 12
+},
+{
+    "fields": {
+        "status": 2,
+        "uid": "2286485",
+        "parentrecipe": null,
+        "whiteboard": "Postgresql",
+        "system": 12,
+        "job": 7,
+        "resultrate": 97.77777777777777,
+        "statusbyuser": 0,
+        "result": 4,
+        "arch": 1,
+        "distro": 1
+    },
+    "model": "core.recipe",
+    "pk": 14
+},
+{
+    "fields": {
+        "status": 2,
+        "datestart": null,
+        "uid": "35571018",
+        "alias": null,
+        "recipe": 6,
+        "duration": 56.0,
+        "statusbyuser": 0,
+        "result": 5,
+        "test": 5
+    },
+    "model": "core.task",
+    "pk": 230
+},
+{
+    "fields": {
+        "status": 2,
+        "datestart": null,
+        "uid": "35542499",
+        "alias": null,
+        "recipe": 8,
+        "duration": 55.0,
+        "statusbyuser": 0,
+        "result": 5,
+        "test": 5
+    },
+    "model": "core.task",
+    "pk": 320
+},
+{
+    "fields": {
+        "status": 2,
+        "datestart": null,
+        "uid": "35520433",
+        "alias": null,
+        "recipe": 10,
+        "duration": 34.0,
+        "statusbyuser": 0,
+        "result": 5,
+        "test": 5
+    },
+    "model": "core.task",
+    "pk": 410
+},
+{
+    "fields": {
+        "status": 2,
+        "datestart": null,
+        "uid": "35499310",
+        "alias": null,
+        "recipe": 12,
+        "duration": 33.0,
+        "statusbyuser": 0,
+        "result": 5,
+        "test": 5
+    },
+    "model": "core.task",
+    "pk": 500
+},
+{
+    "fields": {
+        "status": 2,
+        "datestart": null,
+        "uid": "35456299",
+        "alias": null,
+        "recipe": 14,
+        "duration": 114.0,
+        "statusbyuser": 0,
+        "result": 5,
+        "test": 5
+    },
+    "model": "core.task",
+    "pk": 590
+},
+{
+    "fields": {
+        "datestart": "2015-08-25T15:44:13.749Z",
+        "dateend": null,
+        "actual": 0,
+        "totalsum": 1
+    },
+    "model": "core.checkprogress",
+    "pk": 1
+},
+{
+    "fields": {
+        "datestart": "2015-08-25T15:45:04.357Z",
+        "dateend": "2015-08-25T15:45:24.011Z",
+        "actual": 1,
+        "totalsum": 1
+    },
+    "model": "core.checkprogress",
+    "pk": 2
+},
+{
+    "fields": {
+        "datestart": "2015-08-31T08:53:04.404Z",
+        "dateend": "2015-08-31T08:53:28.197Z",
+        "actual": 1,
+        "totalsum": 1
+    },
+    "model": "core.checkprogress",
+    "pk": 3
+},
+{
+    "fields": {
+        "datestart": "2015-10-29T08:43:35.490Z",
+        "dateend": null,
+        "actual": 0,
+        "totalsum": 1
+    },
+    "model": "core.checkprogress",
+    "pk": 4
+},
+{
+    "fields": {
+        "datestart": "2015-10-29T08:43:42.317Z",
+        "dateend": "2015-10-29T08:44:01.541Z",
+        "actual": 1,
+        "totalsum": 1
+    },
+    "model": "core.checkprogress",
+    "pk": 5
+},
+{
+    "fields": {
+        "datestart": "2015-10-29T08:44:31.405Z",
+        "dateend": "2015-10-29T08:44:51.104Z",
+        "actual": 1,
+        "totalsum": 1
+    },
+    "model": "core.checkprogress",
+    "pk": 6
+},
+{
+    "fields": {
+        "datestart": "2015-10-29T08:44:51.509Z",
+        "dateend": "2015-10-29T08:45:11.305Z",
+        "actual": 1,
+        "totalsum": 1
+    },
+    "model": "core.checkprogress",
+    "pk": 7
+},
+{
+    "fields": {
+        "datestart": "2015-10-29T08:45:11.753Z",
+        "dateend": "2015-10-29T08:45:31.157Z",
+        "actual": 1,
+        "totalsum": 1
+    },
+    "model": "core.checkprogress",
+    "pk": 8
+},
+{
+    "fields": {
+        "datestart": "2015-10-29T08:45:31.595Z",
+        "dateend": "2015-10-29T08:45:51.784Z",
+        "actual": 1,
+        "totalsum": 1
+    },
+    "model": "core.checkprogress",
+    "pk": 9
+},
+{
+    "fields": {
+        "date_create": "2015-10-26T08:46:58Z",
+        "counter": 10,
+        "period": 1,
+        "title": "2015-10-26"
+    },
+    "model": "taskomatic.taskperiodschedule",
+    "pk": 3
+},
+{
+    "fields": {
+        "date_create": "2015-10-27T08:47:34Z",
+        "counter": 11,
+        "period": 1,
+        "title": "2015-10-27"
+    },
+    "model": "taskomatic.taskperiodschedule",
+    "pk": 4
+},
+{
+    "fields": {
+        "date_create": "2015-10-28T08:47:54Z",
+        "counter": 12,
+        "period": 1,
+        "title": "2015-10-28"
+    },
+    "model": "taskomatic.taskperiodschedule",
+    "pk": 5
+},
+{
+    "fields": {
+        "date_create": "2015-10-29T08:48:11Z",
+        "counter": 13,
+        "period": 1,
+        "title": "2015-10-29"
+    },
+    "model": "taskomatic.taskperiodschedule",
+    "pk": 6
+},
+{
+    "fields": {
+        "title": "daily",
+        "label": "daily",
+        "cron": "*  *  *  *  *",
+        "is_enable": true,
+        "common": "daily",
+        "date_last": null
+    },
+    "model": "taskomatic.taskperiod",
+    "pk": 1
+}
+]
