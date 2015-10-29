@@ -214,14 +214,14 @@ class TestsListView(TemplateView):
         period_oldest_list = TaskPeriodSchedule.objects.filter(id__in=period_ids)\
             .order_by("counter")
         if len(period_oldest_list):
-            period_oldest = period_oldest_list[0].date_create
+            period_oldest_date = period_oldest_list[0].date_create
         else:
-            period_oldest = date.today()
+            period_oldest_date = date.today()
         # TODO: Also add upper limit date
         # TODO: Possibly remove ...select_related('test') as it might not be required
         # TODO: We should check for changes from date of something like period_oldest.previous()
         # TODO: 'change' gets assigned to following (i.e. wrong) period
-        changes = TestHistory.objects.filter(date__gt=period_oldest).select_related(
+        changes = TestHistory.objects.filter(date__gt=period_oldest_date).select_related(
             "test").annotate(dcount=Count("test"))
 # TODO: Fix this feaure, the dependence packages
 #        deptTests = dict()
@@ -232,7 +232,7 @@ class TestsListView(TemplateView):
 #                deptTests[depIt.id].append(depIt)
         try:
             period_id = TaskPeriodSchedule.objects.filter(
-                id__in=period_ids).order_by("counter")[0].id
+                id__in=period_ids).order_by("counter")[0].counter
         except IndexError:
             return history
         for change in changes:
