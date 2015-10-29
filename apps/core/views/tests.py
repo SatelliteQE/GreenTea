@@ -40,7 +40,8 @@ def get_matching_period_for_change(periods, change):
        an input for this function, make sure to include one period before
        oldest one."""
     periods = periods.order_by('counter')
-    if periods.earliest('counter').date_create >= change.date >= periods.latest('counter').date_create:
+    if change.date <= periods.earliest('counter').date_create \
+        or change.date >= periods.latest('counter').date_create:
         raise Exception("Change %s do not fit among %s periods" % (change, periods))
     for i in range(len(periods) - 1):
         if periods[i].date_create < change.date < periods[i+1].date_create:
