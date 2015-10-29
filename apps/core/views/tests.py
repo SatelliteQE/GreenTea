@@ -218,11 +218,10 @@ class TestsListView(TemplateView):
         else:
             period_oldest_date = date.today()
             period_newest_date = date.today()
-        # TODO: Possibly remove ...select_related('test') as it might not be required
         # TODO: We should check for changes from date of something like period_oldest.previous()
         # TODO: 'change' gets assigned to following (i.e. wrong) period
-        changes = TestHistory.objects.filter(date__gt=period_oldest_date, date__lt=period_newest_date).select_related(
-            "test").annotate(dcount=Count("test"))
+        changes = TestHistory.objects.filter(date__gt=period_oldest_date, date__lt=period_newest_date)\
+            .annotate(dcount=Count("test"))
 # TODO: Fix this feaure, the dependence packages
 #        deptTests = dict()
 #        for test in Test.objects.filter(dependencies__in = [it.test for it in changes]):
@@ -236,11 +235,11 @@ class TestsListView(TemplateView):
         except IndexError:
             return history
         for change in changes:
-            if change.test.id not in history:
-                history[change.test.id] = dict()
-            if period_id not in history[change.test.id]:
-                history[change.test.id][period_id] = list()
-            history[change.test.id][period_id].insert(0, change)
+            if change.test_id not in history:
+                history[change.test_id] = dict()
+            if period_id not in history[change.test_id]:
+                history[change.test_id][period_id] = list()
+            history[change.test_id][period_id].insert(0, change)
 
 # depList = list() # Test.objects.filter(dependencies=change.test).values("id")
 #            for depchange in depList:
