@@ -124,14 +124,16 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-CACHES = {
-    'default': {
+# Cache only for production deployment
+#CACHES = {
+#    'default': {
         #'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'gt_cache_table',
         #'LOCATION': 'unique-snowflake'
-    }
-}
+# If following code will be set, you need run ./manage.py createcachetable gt_cache_table
+        #'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        #'LOCATION': 'gt_cache_table',
+#    }
+#}
 
 TEMPLATE_CONTEXT_PROCESSORS = global_settings.TEMPLATE_CONTEXT_PROCESSORS + (
     "django.contrib.auth.context_processors.auth",
