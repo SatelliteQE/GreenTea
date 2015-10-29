@@ -227,7 +227,9 @@ class TestsListView(TemplateView):
         history = {}
         # We are interested in one period before as well, because we want to
         # catch changes which happened right before our first period
-        period_ids_one_prev_added = [min(period_ids)-1] + period_ids
+        period_ids_one_prev_added = period_ids
+        if period_ids:
+            period_ids_one_prev_added += [min(period_ids)-1]
         # Get time/date limits we will use when getting list of changes
         periods_age_list = TaskPeriodSchedule.objects.filter(id__in=period_ids_one_prev_added)
         if len(periods_age_list):
