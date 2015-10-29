@@ -1,0 +1,19 @@
+<tttt>
+	<uwsgi id="1">
+		<pythonpath>/data/greentea/web/env</pythonpath>
+		<master/>
+		<processes>4</processes>
+		<enable-threads/>
+		<home>/data/greentea/web/env</home>
+		<limit-as>512</limit-as>
+		<chmod-socket>660</chmod-socket>
+		<uid>greentea</uid>
+		<gid>greentea</gid>
+		<pidfile>/data/greentea/tttt.pid</pidfile>
+		<socket>localhost:8080</socket>
+		<wsgi-file>/data/greentea/web/tttt/wsgi.py</wsgi-file>
+		<daemonize>/data/greentea/log/uwsgi.log</daemonize>
+		<chdir>/data/greentea/web</chdir>
+		<buffer-size>4373</buffer-size>
+	</uwsgi>
+</tttt>
