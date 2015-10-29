@@ -209,6 +209,20 @@ class TestsListView(TemplateView):
         }
         return render_label(tmp, task["recipe__job__template__grouprecipes"])
 
+    def __get_matching_period_for_change(self, periods, change):
+        """Takes a list of period objects and a change object and based on
+           period.date_create and change.date returns period directly
+           following the change. If the change happened before first period
+           (this is an exception) of after last period ("including" for both),
+           exception is raised. So when you are generating list of periods as
+           an input for this function, make sure to include one period before
+           oldest one."""
+        if periods[0].date_create >= change.date >= periods[-1].date_create:
+            raise Exception("Change %s do not fit among %s periods" % (change, periods))
+        for i in range(len(periods) - 1):
+            if periods[i].date_create < change.date < periods[i+1].date_create:
+                return periods[i+1]
+
     def __get_history(self, period_ids):
         history = {}
         # We are interested in one period before as well, because we want to
@@ -222,7 +236,9 @@ class TestsListView(TemplateView):
         else:
             period_oldest_date = date.today()
             period_newest_date = date.today()
-        # TODO: 'change' gets assigned to following (i.e. wrong) period
+        # FIXME: We should be checking for tags and not commits. Tags are
+        #        closer to the test build&submission date than commits
+        #        (you can commit and not build the test)
         changes = TestHistory.objects.filter(date__gt=period_oldest_date, date__lt=period_newest_date)\
             .annotate(dcount=Count("test"))
 # TODO: Fix this feaure, the dependence packages
@@ -232,14 +248,10 @@ class TestsListView(TemplateView):
 #                if depIt.id not in deptTests:
 #                    deptTests[depIt.id] = list()
 #                deptTests[depIt.id].append(depIt)
-        try:
-            period_id = TaskPeriodSchedule.objects.filter(
-                id__in=period_ids).order_by("counter")[0].counter
-        except IndexError:
-            return history
         for change in changes:
             if change.test_id not in history:
                 history[change.test_id] = dict()
+            period_id = self.__get_matching_period_for_change(periods_age_list, change).counter
             if period_id not in history[change.test_id]:
                 history[change.test_id][period_id] = list()
             history[change.test_id][period_id].insert(0, change)
@@ -251,6 +263,7 @@ class TestsListView(TemplateView):
 #                if not history[depchange['id']].has_key(day):
 #                    history[depchange['id']][day] = []
 #                history[depchange['id']][day].append(change)
+        print ">>> history", history
         return history
 
     def get_context_data(self, **kwargs):
