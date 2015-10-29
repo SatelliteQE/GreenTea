@@ -16,7 +16,9 @@ import subprocess
 import sys
 import xml.dom.minidom
 import xmlrpclib
+import urllib2
 from datetime import datetime, timedelta
+from urlparse import urlparse
 
 from django.conf import settings
 from django.template import Context, Template
@@ -224,8 +226,20 @@ class Beaker:
     def listLogs(self, recipe):
         #client = self._getXMLRPCClient()
         #return client.recipes.files(int(recipe))
-        raw, status = self.execute("job-logs", "R:2291259")
+        raw, status = self.execute("job-logs", recipe)
         return raw.split()
+
+    def downloadLog(self, logurl):
+        logparse = urlparse(logurl)
+        logpath = os.path.join(settings.MEDIA_ROOT, *(urlparse(logurl).path.split("/")))
+        logdir = os.path.dirname(logpath)
+        if not os.path.exists(logdir):
+            os.makedirs(logdir)
+        rawfile = urllib2.urlopen(logurl)
+        logger.debug("download logfile: %s" % logurl)
+        of = open(logpath,'wb')
+        of.write(rawfile.read())
+        of.close()
 
     def listJobs(self, filter={}):
         """List and filter beaker jobs."""

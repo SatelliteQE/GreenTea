@@ -189,6 +189,11 @@ try:
 except ImportError:
     pass
 
+ENABLE_PLUGINS = (
+        "irc",
+        "backuplogs",
+    )
+
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 # A sample logging configuration. The only tangible logging
