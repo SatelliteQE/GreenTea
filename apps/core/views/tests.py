@@ -31,6 +31,67 @@ else:
 LOGGER = logging.getLogger(__name__)
 
 
+def get_matching_period_for_change(periods, change):
+    """Takes a list of period objects and a change object and based on
+       period.date_create and change.date returns period directly
+       following the change. If the change happened before first period
+       (this is an exception) of after last period ("including" for both),
+       exception is raised. So when you are generating list of periods as
+       an input for this function, make sure to include one period before
+       oldest one."""
+    periods = periods.order_by('counter')
+    if change.date <= periods.earliest('counter').date_create \
+        or change.date >= periods.latest('counter').date_create:
+        raise Exception("Change %s do not fit among %s periods" % (change, periods))
+    for i in range(len(periods) - 1):
+        if periods[i].date_create < change.date < periods[i+1].date_create:
+            return periods[i+1]
+
+
+def get_history(period_ids):
+    history = {}
+    # We are interested in one period before as well, because we want to
+    # catch changes which happened right before our first period
+    period_ids_one_prev_added = period_ids
+    if period_ids:
+        period_ids_one_prev_added += [min(period_ids)-1]
+    # Get time/date limits we will use when getting list of changes
+    periods_age_list = TaskPeriodSchedule.objects.filter(id__in=period_ids_one_prev_added)
+    if len(periods_age_list):
+        period_oldest_date = periods_age_list.earliest('counter').date_create
+        period_newest_date = periods_age_list.latest('counter').date_create
+    else:
+        period_oldest_date = date.today()
+        period_newest_date = date.today()
+    # FIXME: We should be checking for tags and not commits. Tags are
+    #        closer to the test build&submission date than commits
+    #        (you can commit and not build the test)
+    changes = TestHistory.objects.filter(date__gt=period_oldest_date, date__lt=period_newest_date)\
+        .annotate(dcount=Count("test"))
+# TODO: Fix this feaure, the dependence packages
+#    deptTests = dict()
+#    for test in Test.objects.filter(dependencies__in = [it.test for it in changes]):
+#        for depIt in test.dependencies.all():
+#            if depIt.id not in deptTests:
+#                deptTests[depIt.id] = list()
+#            deptTests[depIt.id].append(depIt)
+    for change in changes:
+        if change.test_id not in history:
+            history[change.test_id] = dict()
+        period_id = get_matching_period_for_change(periods_age_list, change).counter
+        if period_id not in history[change.test_id]:
+            history[change.test_id][period_id] = list()
+        history[change.test_id][period_id].insert(0, change)
+# depList = list() # Test.objects.filter(dependencies=change.test).values("id")
+#        for depchange in depList:
+#            if not history.has_key(depchange['id']):
+#                history[depchange['id']] = {}
+#            if not history[depchange['id']].has_key(day):
+#                history[depchange['id']][day] = []
+#            history[depchange['id']][day].append(change)
+    return history
+
+
 class TestsListView(TemplateView):
 
     """Show all of the tests"""
@@ -209,44 +270,6 @@ class TestsListView(TemplateView):
         }
         return render_label(tmp, task["recipe__job__template__grouprecipes"])
 
-    def __get_history(self, period_ids):
-        history = {}
-        period_oldest_list = TaskPeriodSchedule.objects.filter(id__in=period_ids)\
-            .order_by("counter")
-        if len(period_oldest_list):
-            period_oldest = period_oldest_list[0].date_create
-        else:
-            period_oldest = date.today()
-        changes = TestHistory.objects.filter(date__gt=period_oldest).select_related(
-            "test").annotate(dcount=Count("test"))
-# TODO: Fix this feaure, the dependence packages
-#        deptTests = dict()
-#        for test in Test.objects.filter(dependencies__in = [it.test for it in changes]):
-#            for depIt in test.dependencies.all():
-#                if depIt.id not in deptTests:
-#                    deptTests[depIt.id] = list()
-#                deptTests[depIt.id].append(depIt)
-        for change in changes:
-            try:
-                period_id = TaskPeriodSchedule.objects.filter(
-                    id__in=period_ids, date_create__gt=change.date).order_by("counter")[0].id
-                if change.test.id not in history:
-                    history[change.test.id] = dict()
-                if period_id not in history[change.test.id]:
-                    history[change.test.id][period_id] = list()
-            except IndexError:
-                return history
-            history[change.test.id][period_id].insert(0, change)
-
-# depList = list() # Test.objects.filter(dependencies=change.test).values("id")
-#            for depchange in depList:
-#                if not history.has_key(depchange['id']):
-#                    history[depchange['id']] = {}
-#                if not history[depchange['id']].has_key(day):
-#                    history[depchange['id']][day] = []
-#                history[depchange['id']][day].append(change)
-        return history
-
     def get_context_data(self, **kwargs):
         """Do all the work"""
         context = super(self.__class__, self).get_context_data(**kwargs)
@@ -263,7 +286,7 @@ class TestsListView(TemplateView):
         period_ids = self.__get_period_ids()
 
         # Load history we display for each test
-        history = self.__get_history(period_ids)
+        history = get_history(period_ids)
 
         # Determine filtered tests and tasks
         tasks, tests = self.__get_tasks_and_tests(period_ids)

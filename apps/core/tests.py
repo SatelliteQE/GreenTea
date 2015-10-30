@@ -112,3 +112,47 @@ class BeakerTest(TestCase):
 
             # cancel created job
             bkr.jobCancel(job)
+
+import apps.core.views.tests
+from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriod
+from apps.core.models import TestHistory
+
+class TestsGetHistory(TestCase):
+    fixtures = ['apps/core/tests/db-TestsGetHistory.json']
+
+    def test_get_history(self):
+        period_schedule_ids = [4, 5]   # IDs required period schedules have in DB
+        exp_period_ids = [11, 12]   # Counts required period schedule IDs should have
+        exp_changes_ids = [3, 4, 6]   # These changes should be relevant for given period_schedule_ids
+        exp_changes = TestHistory.objects.filter(id__in=exp_changes_ids).order_by('id')
+        self.assertEqual(3, len(exp_changes))
+        exp_test_id = 5
+        expected = {
+            exp_test_id: {
+                exp_period_ids[0]: [exp_changes[0]],
+                exp_period_ids[1]: [exp_changes[1], exp_changes[2]]
+            }
+        }
+        out = apps.core.views.tests.get_history(period_schedule_ids)
+        self.assertItemsEqual(expected, out)
+
+    def test_get_matching_period_for_change(self):
+        changes = TestHistory.objects.all().order_by('id')
+        periods = TaskPeriodSchedule.objects.filter(counter__in=[12, 13])
+        # Far before range
+        periods = TaskPeriodSchedule.objects.filter(counter__in=[12, 13])
+        with self.assertRaises(Exception):
+            out = apps.core.views.tests.get_matching_period_for_change(periods, changes[0])
+        # Just before range (first part of range is somewhat special, see
+        # docs string on the function in test)
+        periods = TaskPeriodSchedule.objects.filter(counter__in=[10, 11, 12])
+        out = apps.core.views.tests.get_matching_period_for_change(periods, changes[2])
+        self.assertEqual(periods.order_by('counter')[1], out)
+        # In range
+        periods = TaskPeriodSchedule.objects.filter(counter__in=[10, 11, 12])
+        out = apps.core.views.tests.get_matching_period_for_change(periods, changes[3])
+        self.assertEqual(periods.order_by('counter')[2], out)
+        # After range
+        periods = TaskPeriodSchedule.objects.filter(counter__in=[10, 11, 12])
+        with self.assertRaises(Exception):
+            out = apps.core.views.tests.get_matching_period_for_change(periods, changes[4])
