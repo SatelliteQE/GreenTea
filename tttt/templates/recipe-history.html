@@ -9,6 +9,8 @@
 <p>Job template: {{ recipetemplate.jobtemplate.whiteboard }} (ID: {{ recipetemplate.jobtemplate.id }})</p>
 <p>Recipe template: {{ recipetemplate.name }} (ID: {{ recipetemplate.id }})</p>
 
+{% for recipe, tasks in recipes.items %}
+<h2>{{ recipe }}</h2>
 <table class="dashboard dashboard-tests">
   <thead>
     <tr>
@@ -31,5 +33,6 @@
     {% endfor %}
   </tbody>
 </table>
+{% endfor %}
 
 {% endblock %}
