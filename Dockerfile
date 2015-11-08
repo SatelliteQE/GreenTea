@@ -7,6 +7,7 @@ RUN dnf install git wget findutils -y \
     && wget https://beaker-project.org/yum/beaker-client-Fedora.repo -O /etc/yum.repos.d/beaker-client-Fedora.repo \
     && git clone https://github.com/SatelliteQE/GreenTea.git \
     && cat GreenTea/requirement/rpms-*.txt | xargs dnf install -y \
+    && dnf clean all \
     && chmod 755 /data/ -R
 
 # create enviroment
