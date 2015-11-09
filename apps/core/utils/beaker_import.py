@@ -39,9 +39,11 @@ class Parser:
             rt.is_virtualguest = True
             rt.virtualhost = is_guestrecipe
 
-        distro_family = None
+        distro_family = ""
         distro_variant = ""
+        distro_name = ""
         tests = []
+
         for item in xmlrecipe.childNodes:
             if item.nodeName == "guestrecipe":
                 self.recipe(item, is_guestrecipe=rt)
@@ -101,10 +103,7 @@ class Parser:
 
         rt.distro, status = DistroTemplate.objects.get_or_create(
             name=distro_name, distroname=distro_name,
-            variant=distro_variant)
-        if distro_family:
-            rt.distro.family = distro_family
-            rt.distro.save()
+            variant=distro_variant, family = distro_family)
         rt.kernel_options = xmlrecipe.getAttribute("kernel_options")
         rt.kernel_options_post = xmlrecipe.getAttribute("kernel_options_post")
         rt.ks_meta = xmlrecipe.getAttribute("ks_meta")
