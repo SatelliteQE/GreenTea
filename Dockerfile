@@ -2,10 +2,12 @@ FROM fedora:22
 
 WORKDIR /data/
 
+RUN mkdir -p /data/GreenTea
+ADD . /data/GreenTea/
+
 # install packages
 RUN dnf install git findutils -y \
     && curl https://beaker-project.org/yum/beaker-client-Fedora.repo -o /etc/yum.repos.d/beaker-client-Fedora.repo \
-    && git clone https://github.com/SatelliteQE/GreenTea.git \
     && cat GreenTea/requirement/rpms-*.txt | xargs dnf install -y \
     && dnf clean all \
     && chmod 755 /data/ -R
@@ -26,8 +28,7 @@ ENV HOME /data/GreenTea
 RUN virtualenv $HOME/env \
     && cd $HOME \
     && . env/bin/activate \
-    && pip install -r $HOME/requirement/requirement.txt \
-    && git reset --hard && git pull
+    && pip install -r $HOME/requirement/requirement.txt
 
 # create default value for running service
 RUN python -c 'import random; print "import os\nfrom basic import *\nDEBUG=True\nSECRET_KEY=\"" + "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]) + "\"" ' > GreenTea/tttt/settings/production.py 
