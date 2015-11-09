@@ -1,6 +1,11 @@
+{% for key, item in plan.objects.items %}
 <tr>
-    <td>{% ifchanged %}<a href="{{item.object.get_absolute_url}}" >{{ item.object.whiteboard }}</a>{% endifchanged %}</td>
-    <td>{{ item.label }} <a href="recipe_history/{{item.recipetemplate_id}}" class="glyphicon glyphicon-tripledot" title="Show how tasks in recipe behaved in time">...</a></td>
+    <td>{% ifchanged %}
+            <a href="{{item.object.get_absolute_url}}" >{{ item.object.whiteboard }}</a>
+            <a href="recipe_history/{{ item.object.id }}" class="glyphicon glyphicon-tripledot" title="Show how tasks in recipe behaved in time">...</a>
+        {% endifchanged %}
+    </td>
+    <td>{{ item.label }} </td>
     {% for k, recipe in item.data.items %}
     <td {% if recipe.uid %}id="R:{{recipe.uid}}"{% endif %} class="field-value {% if not recipe.is_result_pass %} field-job{% endif %} status-{{recipe.get_result}}">
        <div class="rWrapper">
@@ -15,3 +20,4 @@
     </td>
     {% endfor %}
 </tr>
+{% endfor %}

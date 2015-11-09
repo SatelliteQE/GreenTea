@@ -97,17 +97,11 @@ class JobListObject:
                 id_counter = recipe.job.schedule.counter
                 if template not in objects:
                     label = OrderedDict([(k, None) for k in it["label"]])
-                    # all RecipeTemplates of recipe.job.template
-                    rtemplates = recipe.job.template.trecipes.all()
-                    # find RecipeTemplate of recipe using rank of recipe in Job 
-                    recipe_template_index = list(
-                        recipe.job.recipes.all()).index(recipe)
-                    recipetemplate_id = rtemplates[recipe_template_index].id
+
                     objects[template] = {
                         "object": recipe.job.template,
                         "label": template_label,
                         "data": label,
-                        "recipetemplate_id": recipetemplate_id,
                     }
                 objects[template]["data"].update({
                     id_counter: recipe
