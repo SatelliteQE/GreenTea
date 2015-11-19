@@ -1,7 +1,6 @@
 # Django settings for tttt project.
 
 import os
-
 from django.conf import global_settings
 
 ROOT_PATH = os.path.abspath("%s/%s/" %
@@ -79,6 +78,8 @@ MEDIA_URL = '/media/'
 # in apps' "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
 STATIC_ROOT = "%s/tttt/%s/" % (ROOT_PATH, 'static')
+
+STORAGE_ROOT = "%s/%s/" % (ROOT_PATH, 'storage')
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -210,12 +211,22 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse'
         }
     },
+  'formatters': {
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'log_to_stdout': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
     },
     'loggers': {
         'django.request': {
@@ -223,6 +234,11 @@ LOGGING = {
             'level': 'ERROR',
             'propagate': True,
         },
+        'main': {
+            'handlers': ['log_to_stdout'],
+            'level': 'DEBUG',
+            'propagate': True,
+        }
     }
 }
 
@@ -269,7 +285,7 @@ RESERVE_TEST = "/distribution/reservesys"
 # If you want to change directory with repositories,
 # don't forget changed it in /var/www/gitweb/gitweb_config.perl
 REPOSITORIES_GIT = {
-    "~":
+    "%s/git" % STORAGE_ROOT:
         ("/tests",),
 }
 

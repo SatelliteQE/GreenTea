@@ -17,7 +17,7 @@ from apps.core.utils.advance_command import AdvancedCommand, make_option_group
 from apps.core.utils.beaker import Beaker
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("main")
 
 
 class Command(AdvancedCommand):

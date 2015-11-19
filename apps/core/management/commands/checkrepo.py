@@ -10,13 +10,14 @@
 # Date: 20.07.2014
 
 import logging
+import os
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from apps.core.models import Git
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("main")
 
 
 class Command(BaseCommand):
@@ -37,6 +38,9 @@ class Command(BaseCommand):
         for path in settings.REPOSITORIES_GIT:
             for repo in settings.REPOSITORIES_GIT[path]:
                 if len(repos) > 0 and repo not in repos:
+                    continue
+                if not os.path.exists("%s%s" % (path, repo)):
+                    logger.error("repo %s doesn't exists in %s" % (repo, path))
                     continue
                 git = Git.getGitFromFolder("%s%s" % (path, repo))
                 git.log = logger

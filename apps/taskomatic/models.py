@@ -39,9 +39,9 @@ class TaskPeriodSchedule(models.Model):
         return "[%d] %s" % (self.counter, self.title)
 
     def recount(self):
-        it.counter = TaskPeriodSchedule.object.filter(
+        self.counter = TaskPeriodSchedule.object.filter(
             period=self.period).count()
-        it.save()
+        self.save()
 
 
 class TaskPeriod(models.Model):

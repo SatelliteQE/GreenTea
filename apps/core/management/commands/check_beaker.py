@@ -16,7 +16,7 @@ from apps.core.models import CheckProgress, Job
 from apps.core.utils.beaker import Beaker
 from apps.core.utils.date_helpers import currentDate
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("main")
 
 
 class Command(BaseCommand):

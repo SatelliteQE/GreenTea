@@ -3,7 +3,6 @@
 
 import hashlib
 import logging
-import sys
 from copy import copy
 from datetime import datetime, timedelta
 
@@ -16,16 +15,13 @@ from taggit.models import Tag
 
 from apps.core.forms import FilterForm
 from apps.core.models import (RESULT_CHOICES, Author, CheckProgress, Event,
-                              JobTemplate, Recipe, RecipeTemplate, render_label)
+                              JobTemplate, Recipe, render_label)
 from apps.taskomatic.models import TaskPeriodSchedule
 from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
 from base import create_matrix
 
-if sys.version_info < (2, 7):
-    from ordereddict import OrderedDict
-else:
-    from collections import OrderedDict
+from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
 
@@ -233,7 +229,7 @@ class JobsListView(TemplateView):
             context, **response_kwargs)
 
     def prepare_matrix(self, jobs, recipes, label=None):
-        data, reschedule = OrderedDict(), 0
+        data = OrderedDict()
         if not label:
             label = create_matrix(settings.PREVIOUS_DAYS)
         for job in jobs:

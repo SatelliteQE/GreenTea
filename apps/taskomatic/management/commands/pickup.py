@@ -13,7 +13,7 @@ from apps.taskomatic.models import Taskomatic
 
 class Command(BaseCommand):
     help = ('Automatization for running task')
-    requires_model_validation = True
+    requires_system_checks = True
     can_import_settings = True
 
     def handle(self, *args, **kwargs):

@@ -131,7 +131,7 @@ class Beaker:
         if filename.startswith('/'):
             tmp_path = filename
         else:
-            tmp_path = "%s/data/xmls/%s" % (settings.ROOT_PATH, filename)
+            tmp_path = "%s/xmls/%s" % (settings.STORAGE_ROOT, filename)
             tmp_path = re.sub(r'//+', '/', tmp_path)
             tmp_dir = os.path.dirname(tmp_path)
             if not os.path.exists(tmp_dir):
@@ -225,19 +225,20 @@ class Beaker:
 
     def listLogs(self, recipe):
         #client = self._getXMLRPCClient()
-        #return client.recipes.files(int(recipe))
+        # return client.recipes.files(int(recipe))
         raw, status = self.execute("job-logs", recipe)
         return raw.split()
 
     def downloadLog(self, logurl):
         logparse = urlparse(logurl)
-        logpath = os.path.join(settings.MEDIA_ROOT, *(urlparse(logurl).path.split("/")))
+        logpath = os.path.join(
+            settings.STORAGE_ROOT, *(urlparse(logurl).path.split("/")))
         logdir = os.path.dirname(logpath)
         if not os.path.exists(logdir):
             os.makedirs(logdir)
         rawfile = urllib2.urlopen(logurl)
         logger.debug("download logfile: %s" % logurl)
-        of = open(logpath,'wb')
+        of = open(logpath, 'wb')
         of.write(rawfile.read())
         of.close()
 
