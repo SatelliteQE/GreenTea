@@ -399,7 +399,7 @@ class Git(models.Model):
 
 class Author(models.Model):
     DEFAULT_AUTHOR = ("Unknown", "unknow@redhat.com")
-    name = models.CharField(max_length=255, unique=False)
+    name = models.CharField(max_length=255, unique=False, default=DEFAULT_AUTHOR[0])
     email = models.EmailField(default=DEFAULT_AUTHOR[1])
     is_enabled = models.BooleanField(default=True)
 
@@ -472,7 +472,7 @@ class GroupOwner(models.Model):
 class Test(models.Model):
     name = models.CharField(max_length=255, unique=True)
     git = models.ForeignKey(Git, blank=True, null=True)
-    owner = models.ForeignKey(Author, null=True)
+    owner = models.ForeignKey(Author)
     description = models.TextField(blank=True, null=True)
     dependencies = models.ManyToManyField("Test", blank=True)
     time = models.CharField(max_length=6, blank=True, null=True)
