@@ -2,28 +2,27 @@ FROM fedora:22
 
 WORKDIR /data/
 
-RUN mkdir -p /data/GreenTea
-ADD . /data/GreenTea/
+RUN mkdir -p /data/greentea
+ADD . /data/greentea/
 
 # install packages
 RUN dnf install git findutils -y \
     && curl https://beaker-project.org/yum/beaker-client-Fedora.repo -o /etc/yum.repos.d/beaker-client-Fedora.repo \
-    && cat GreenTea/requirement/rpms-*.txt | xargs dnf install -y \
+    && cat greentea/requirement/rpms-*.txt | xargs dnf install -y \
     && dnf clean all \
     && chmod 755 /data/ -R
 
 # create enviroment
 RUN useradd -ms /bin/bash greentea \
-    && chown greentea:greentea -R GreenTea
+    && chown greentea:greentea -R greentea
 
 RUN echo "root:GreenTea!" | chpasswd
 
-# fixed CA for Red Hat
-# ADD /.bin/redhat-update-ca.sh $HOME/bin/docker-run.sh
-# RUN sh $HOME/bin/redhat-update-ca.sh
+# TODO: install and enable uwsgi for running project on production
+# RUN dnf install uwsgi-plugin-common mod_proxy_uwsgi -y
 
 USER greentea
-ENV HOME /data/GreenTea
+ENV HOME /data/greentea
 
 RUN virtualenv $HOME/env \
     && cd $HOME \
@@ -31,11 +30,10 @@ RUN virtualenv $HOME/env \
     && pip install -r $HOME/requirement/requirement.txt
 
 # create default value for running service
-RUN python -c 'import random; print "import os\nfrom basic import *\nDEBUG=True\nSECRET_KEY=\"" + "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]) + "\"" ' > GreenTea/tttt/settings/production.py 
+RUN python -c 'import random; print "import os\nfrom basic import *\nDEBUG=True\nSECRET_KEY=\"" + "".join([random.choice("abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)") for i in range(50)]) + "\"" ' > greentea/tttt/settings/production.py
 
 RUN mkdir -p $HOME/tttt/static \
     && . $HOME/env/bin/activate \
-    && python $HOME/manage.py syncdb --noinput \
     && python $HOME/manage.py migrate \
     && python $HOME/manage.py collectstatic -c --noinput
 
