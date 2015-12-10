@@ -8,6 +8,8 @@ env.hosts = [""]
 
 HOME_PATH = ""
 
+def devel():
+    env.hosts = "localhost"
 
 def trans():
     local("svn update || git pull")
@@ -37,6 +39,9 @@ def db_backup():
         "pg_dump tttt -U tttt_user -h localhost | gzip > %s" % backup_file)
     get("%s %s" % (backup_file, backup_file))
 
+def db_restore(db_file):
+    local("echo 'DROP DATABASE tttt; CREATE DATABASE tttt;' | psql -h localhost -U postgres")
+    local("gunzip -c %s | psql -h localhost -U tttt_user tttt" % db_file)
 
 def download():
     get("%s/db.sqlite3" % HOME_PATH, "db.sqlite3")
