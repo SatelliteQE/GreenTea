@@ -11,6 +11,8 @@ from django.views.decorators.cache import cache_page
 
 admin.autodiscover()
 
+CACHE = 0
+
 urlpatterns = patterns('',
                        url(r'^xml/(?P<id>[0-9]+)$',
                            'apps.core.views.to_xml', name='beaker-xml'),
@@ -21,19 +23,19 @@ urlpatterns = patterns('',
                        url(r'^api/', include(apps.api.urls)),
                        #   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
                        url(r'^tests/(?P<email>.+)$',
-                           cache_page(60 * 5)(TestsListView.as_view()), name='tests-email'),
+                           TestsListView.as_view(), name='tests-email'),
                        url(r'^accounts/login',
                            LoginView.as_view(), name="login"),
                        url(r'^job/(?P<id>[0-9]+)$',
-                           cache_page(60 * 5)(JobDetailView.as_view()), name='job-detail'),
+                           cache_page(60 * CACHE)(JobDetailView.as_view()), name='job-detail'),
                        url(r'^recipe_history/(?P<id>[0-9]+)$',
                            RecipeHistoryView.as_view(), name='recipe-history'),
                        url(r'^test/(?P<id>[0-9]+)$',
                            TestDetailView.as_view(), name='test-detail'),
                        url(r'^(Automation/)?[tT]ests.html$',
-                           cache_page(60 * 5)(TestsListView.as_view()), name='tests-list'),
+                           cache_page(60 * CACHE)(TestsListView.as_view()), name='tests-list'),
                        url(r'^(Automation/)?[jJ]obs.html$',
-                           cache_page(60 * 5)(JobsListView.as_view()), name='jobs-list'),
+                           cache_page(60 * CACHE)(JobsListView.as_view()), name='jobs-list'),
                        url(r'^(Automation/)?[dD]iffs.html$',
                            JobsDiffView.as_view(), name='jobs-diff'),
                        url(r'^(Automation/?)?$',
