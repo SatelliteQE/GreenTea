@@ -27,8 +27,19 @@ class BeakerCommand():
     def __init__(self):
         self.beaker = Beaker()
 
-    def cancel(self, *argvs, **kwargs):
-        logger.warning("not implemented")
+    def reschedule(self, reschedule_job, *argvs, **kwargs):
+        for it in reschedule_job:
+            print it
+
+    def cancel(self, cancel_job, message="", *argvs, **kwargs):
+        for uid in cancel_job:
+            job = Job.objects.get(uid=uid)
+            res = self.beaker.jobCancel(job, message)
+            if res:
+                logger.info("%s job was cancled." % job.uid)
+            else:
+                logger.info("Problem with canceling of job (%s)." % job.uid)
+
 
     def schedule(self, label="default", *argvs, **kwargs):
         simulate = kwargs.get("simulate")
@@ -130,16 +141,19 @@ class Command(BaseCommand):
         group.add_argument('--list', action='store_true', default=False)
 
         group = parser.add_argument_group("cancel")
-        group.add_argument('--job_id', nargs='+', type=str,)
+        group.add_argument('--cancel-job', nargs='+', type=str)
+        group.add_argument('--cancel-message', nargs=None, type=str)
 
-#        group = parser.add_argument_group("reschedule")
-#        group.add_argument('--job_id', nargs='+', type=str, )
+        group = parser.add_argument_group("reschedule")
+        group.add_argument('--reschedule-job', nargs='+', type=str)
+        group.add_argument('--reschedule-message', nargs=None, type=str)
 
 #        group = parser.add_argument_group("return2beaker")
 #        group.add_argument('--job_id', nargs='+', type=str,)
 
         parser.add_argument('action', choices=("schedule", "reschedule", "cancel"),
                             help='Action for beaker client')
+
 
     def handle(self, *args, **options):
         action = options["action"]

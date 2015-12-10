@@ -1,15 +1,18 @@
 #!/usr/bin/python
 # author: Pavel Studenik
 
-from fabric.api import env, get, local, run
+from fabric.api import env, get, local, run, sudo
 from fabric.context_managers import cd
 
 env.hosts = [""]
 
-HOME_PATH = ""
+HOME_PATH = "/data/greentea/web"
 
 def devel():
     env.hosts = "localhost"
+
+def prod():
+    env.hosts = "root@tttt.eng.rdu2.redhat.com"
 
 def trans():
     local("svn update || git pull")
@@ -25,12 +28,25 @@ def verify():
         "find ./ -not -path \"./env/*\" -name \"*.py\" | xargs autopep8 -i --aggressive")
     local("python manage.py graph_models -a -g -o doc/images/erdiagram.png")
 
+def stop():
+    with cd("%s" % HOME_PATH):
+        run("ls -l ../tttt.pid")
+        run("uwsgi --stop ../tttt.pid")
+
+def start():
+    with cd("%s" % HOME_PATH):
+        run("uwsgi tttt/conf/config.xml")
+        run("ps aux | grep uwsgi")
 
 def deploy():
     with cd("%s" % HOME_PATH):
-        run("svn update")
-        run("source env/bin/activate && python manage.py collectstatic --noinput")
-        run("uwsgi-manager -R 1")
+        run("chown greentea:greentea . -R")
+        sudo("git diff", user="greentea")
+        sudo("git reset --hard", user="greentea")
+        sudo("git pull", user="greentea")
+        sudo("source env/bin/activate && python manage.py collectstatic --noinput", user="greentea")
+        stop()
+        start()
 
 
 def db_backup():

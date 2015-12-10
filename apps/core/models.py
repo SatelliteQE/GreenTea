@@ -472,7 +472,7 @@ class GroupOwner(models.Model):
 class Test(models.Model):
     name = models.CharField(max_length=255, unique=True)
     git = models.ForeignKey(Git, blank=True, null=True)
-    owner = models.ForeignKey(Author)
+    owner = models.ForeignKey(Author, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     dependencies = models.ManyToManyField("Test", blank=True)
     time = models.CharField(max_length=6, blank=True, null=True)
@@ -512,6 +512,13 @@ class Test(models.Model):
         if not self.git:
             return None
         return "%s/tree/HEAD:/%s" % (self.git.localurl, self.folder)
+
+    def save(self, *args, **kwargs):
+        model = self.__class__
+
+        if not self.owner:
+            self.owner = Author.parseAuthor("")
+        return super(model, self).save(*args, **kwargs)
 
 
 class TestHistory(models.Model):
