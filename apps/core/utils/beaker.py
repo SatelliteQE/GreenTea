@@ -322,17 +322,6 @@ class JobGen:
 
 
 def parse_task(taskxml, recipe):
-
-    #   stat = dict()
-    #    for result in taskxml.childNodes:
-    #        for it in result.childNodes:
-    #            res = it.getAttribute("result")
-    #            if not res: continue
-    #            if stat.has_key(res):
-    #                stat[res] += 1
-    #            else:
-    #                stat[res] = 1
-
     testname = taskxml.getAttribute("name")
     test, status = Test.objects.get_or_create(name=testname, defaults={
         "owner": Author.parseAuthor("")
@@ -347,21 +336,6 @@ def parse_task(taskxml, recipe):
         for param in params.getElementsByTagName("param"):
             if param.getAttribute("name") == "TASK_ALIAS":
                 task_alias = param.getAttribute("value")
-
-    # Download data from journal.xml
-    # task_full_xml = None
-    # response = None
-    # try:
-    #  response = urllib2.urlopen(settings.BEAKER_TASK_LOG+"%s+/%s/journal.xml")
-    #  task_full_xml = parse(response)
-    # except:
-    #  pass
-    # finally:
-    #  if response:
-    #    response.close()
-    #
-    # if task_full_xml:
-    #   task_full_xml.getElementsByTagName('starttime')[0].childNodes[0].nodeValue.strip()
 
     task, status = Task.objects.get_or_create(
         uid=uid,

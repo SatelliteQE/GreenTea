@@ -12,11 +12,14 @@ import logging
 import re
 import time
 import traceback
+from StringIO import StringIO
 from datetime import datetime, timedelta
 
 from croniter import croniter
 from django.conf import settings
 from django.core.management.base import BaseCommand, handle_default_options
+from django.core import management
+
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -133,28 +136,23 @@ class Task(models.Model):
             data[key] = value
         return data
 
-    def run(self, hook, errorHandler=None):
+    def run(self, errorHandler=None):
         t1 = datetime.now()
         self.status = self.STATUS_ENUM_INPROGRESS  # set status "in progress"
         self.save()
+        params = [it.strip() for it in self.common_params.split()]
 
         # --- RUN --- #
         if errorHandler:
             errorHandler.flush()
-        params = [it.strip() for it in self.common_params.split(' ')]
+
         try:
-            obj = hook()
-            parser = obj.create_parser('./manage.py', self.common)
-            options, args = parser.parse_args(params)
-
-            # workaround - since django 1.8 settings and pythonpath is not
-            # set by parse_args
-            options.settings = None
-            options.pythonpath = None
-
-            handle_default_options(options)
-            obj.execute(*args, **options.__dict__)
+            params = self.common_params.split()
+            out = StringIO()
+            s = management.call_command(self.common, *params, stdout=out, verbosity=3)
             self.status = self.STATUS_ENUM_DONE  # set status "done"
+            out.seek(0)
+            self.exit_result += out.read()
         except Exception as e:
             self.exit_result = traceback.format_exc()
             self.status = self.STATUS_ENUM_ERROR  # set status "error"
@@ -164,6 +162,7 @@ class Task(models.Model):
             for er in errorHandler.flush():
                 self.exit_result += er.getMessage() + "\n"
         # --- END RUN --- #
+
         t0 = datetime.now()
         t2 = t0 - t1
         self.time_long = t2.seconds + t2.microseconds / 1000000.0
@@ -172,7 +171,6 @@ class Task(models.Model):
 
 
 class Taskomatic:
-    hooks = None
     logHandler = None
 
     class ListBufferingHandler(logging.handlers.BufferingHandler):
@@ -185,34 +183,7 @@ class Taskomatic:
             self.buffer = list()
             return old
 
-    def __getHooksFromModule(self, module):
-        for name, obj in inspect.getmembers(module):
-            if inspect.ismodule(obj) and\
-               obj.__name__.startswith(module.__name__):
-                # Load and check submodules
-                self.__getHooksFromModule(getattr(module, name))
-            if inspect.isclass(obj) and obj.__module__ == module.__name__ and\
-               issubclass(obj, BaseCommand):
-                # Add class as hook
-                commnad_name = re.sub(r".*\.", '', obj.__module__)
-                if "COMMAND_NAME" in obj.__dict__:
-                    commnad_name = obj.COMMAND_NAME
-                self.hooks[commnad_name] = obj
-
-    def __importModule(self, name):
-        mod = __import__(name)
-        components = name.split('.')
-        for comp in components[1:]:
-            mod = getattr(mod, comp)
-        return mod
-
-    def getHooks(self):
-        self.hooks = dict()
-        for moduleName in settings.TASKOMATIC_HOOKS:
-            self.__getHooksFromModule(self.__importModule(moduleName))
-        return self.hooks
-
-    def __checkTaskPeriods(self):
+    def checkTaskPeriods(self):
         tPeriods = TaskPeriod.objects.filter(is_enable=True)
         for period in tPeriods:
             if not period.date_last:
@@ -226,25 +197,22 @@ class Taskomatic:
                 period.date_last = datetime.now()
                 period.save()
 
-    def __checkTasks(self):
+    def checkTasks(self):
         tasks = Task.objects.filter(status=Task.STATUS_ENUM_WAIT)
         self.logHandler = Taskomatic.ListBufferingHandler(0)
         self.logHandler.setLevel(logging.INFO)
         logger.addHandler(self.logHandler)
-        for task in tasks:
-            if task.common in self.hooks:
-                task.run(self.hooks[task.common], self.logHandler)
-            else:
-                logger.warning("operation '%s' is not supported" % task.common)
 
-    def __cleanOldTasks(self):
+        for task in tasks:
+            task.run(self.logHandler)
+
+    def cleanOldTasks(self):
         # delete old tasks with status DONE, keep only last 300 tasks
         [it.delete() for it in Task.objects
             .filter(status=Task.STATUS_ENUM_DONE).order_by("-date_run")[300:]]
 
     @single_process
     def run(self):
-        self.getHooks()
-        self.__checkTaskPeriods()
-        self.__checkTasks()
-        self.__cleanOldTasks()
+        self.checkTaskPeriods()
+        self.checkTasks()
+        self.cleanOldTasks()
