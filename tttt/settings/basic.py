@@ -298,6 +298,7 @@ RANGE_PREVIOUS_RUNS = 9
 # how many previsou days use for frontend
 PREVIOUS_DAYS = 9  # warning: deprecated
 
+MAX_TASKOMATIC_HISTORY = 300
 
 GRAPPELLI_ADMIN_TITLE = "<a href='/' >Green Tea</a>"
 

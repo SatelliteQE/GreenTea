@@ -5,7 +5,7 @@
 
 <h3>Job runs:</h3>
 
-<table class="dashboard-jobs">
+<table class="dashboard-jobs" width="100%">
 	<tr bgcolor="#ffff99">
         <th>Date</th>
         <th>UID</th>
@@ -14,6 +14,7 @@
         <th>Status</th>
         <th>Result</th>
     </tr>
+
 {% for job in jobs.object_list %}
 {% for recipe in job.recipes.all %}
 <tr>

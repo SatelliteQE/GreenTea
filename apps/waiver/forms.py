@@ -78,9 +78,9 @@ class WaiverForm(forms.ModelForm):
                isinstance(it, Recipe):
                 task = TaskomaticTask(title="WebUI: beaker return2beaker",
                                       common="beaker")
-                task.common_params = "beaker return2beaker "\
-                    "--return2beaker-recipe='R:%(recipe)s' "\
-                    "--reschedule-message='%(content)s'" % \
+                task.common_params = "return2beaker "\
+                    "--return2beaker-recipe=R:%(recipe)s "\
+                    "--return2beaker-message='%(content)s'" % \
                                      data
                 task.save()
             if data["action"] == Comment.ENUM_ACTION_RESCHEDULE:
@@ -91,8 +91,8 @@ class WaiverForm(forms.ModelForm):
                     uid = data["recipe"].job.uid
                 elif isinstance(it, Job):
                     uid = data["job"].uid
-                task.common_params = "beaker reschedule "\
-                                     "--reschedule-job='%s' "\
+                task.common_params = "reschedule "\
+                                     "--reschedule-job=%s "\
                                      "--reschedule-message='%s'" % \
                     (uid, self.__esc(self.cleaned_data
                                      .get("content", "")))

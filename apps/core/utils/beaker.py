@@ -87,6 +87,7 @@ class Beaker:
         result = self.execute("job-cancel", "--msg \"%s\" %s" % (message,
                                                                  job.uid))
         if re.search("Cancelled\s+%s" % job.uid, result[0]):
+            self.parse_job(job.uid)
             return True
         else:
             logger.error("Problem with canceling of the job (%s). output: '%s'"
@@ -121,7 +122,10 @@ class Beaker:
         xmlfile = self.generateXmlFile(job.template, path)
         jobNew = self.__jobSchedule(xmlfile, job.template)
         jobNew.date = job.date
+        jobNew.schedule = job.schedule
         jobNew.save()
+        self.parse_job(job.uid)
+        self.parse_job(jobNew.uid)
         return jobNew
 
     def generateXmlFile(self, jobT, filename, reserve=False):
@@ -151,6 +155,7 @@ class Beaker:
         try:
             from returns import return_reservation
             status = return_reservation(int(recipe.uid))
+            self.parse_job(recipe.job.uid)
             return (status == -1)
         except ImportError:
             logger.warning("No module named bkr.client")
@@ -224,15 +229,16 @@ class Beaker:
         job.save()
 
     def listLogs(self, recipe):
-        #client = self._getXMLRPCClient()
-        # return client.recipes.files(int(recipe))
+#       doesn't work, call shell command:
+#       client = self._getXMLRPCClient()
+#       return client.recipes.files(int(recipe))
         raw, status = self.execute("job-logs", recipe)
         return raw.split()
 
     def downloadLog(self, logurl):
         logparse = urlparse(logurl)
         logpath = os.path.join(
-            settings.STORAGE_ROOT, *(urlparse(logurl).path.split("/")))
+            settings.STORAGE_ROOT, *(logparse.path.split("/")))
         logdir = os.path.dirname(logpath)
         if not os.path.exists(logdir):
             os.makedirs(logdir)

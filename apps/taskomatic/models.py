@@ -7,9 +7,7 @@
 # Email: mkorbel@redhat.com
 # Date: 20.07.2014
 
-import inspect
 import logging
-import re
 import time
 import traceback
 from StringIO import StringIO
@@ -17,7 +15,6 @@ from datetime import datetime, timedelta
 
 from croniter import croniter
 from django.conf import settings
-from django.core.management.base import BaseCommand, handle_default_options
 from django.core import management
 
 from django.db import models
@@ -149,7 +146,7 @@ class Task(models.Model):
         try:
             params = self.common_params.split()
             out = StringIO()
-            s = management.call_command(self.common, *params, stdout=out, verbosity=3)
+            management.call_command(self.common, *params, stdout=out, verbosity=3)
             self.status = self.STATUS_ENUM_DONE  # set status "done"
             out.seek(0)
             self.exit_result += out.read()
@@ -209,7 +206,7 @@ class Taskomatic:
     def cleanOldTasks(self):
         # delete old tasks with status DONE, keep only last 300 tasks
         [it.delete() for it in Task.objects
-            .filter(status=Task.STATUS_ENUM_DONE).order_by("-date_run")[300:]]
+            .filter(status=Task.STATUS_ENUM_DONE).order_by("-date_run")[settings.MAX_TASKOMATIC_HISTORY:]]
 
     @single_process
     def run(self):

@@ -21,8 +21,7 @@ class JobDetailView(TemplateView):
         jobt_id = kwargs["id"]
         jobt = JobTemplate.objects.get(id=jobt_id)
         jobs_list = Job.objects.filter(
-            template=jobt).order_by("-job__schedule__counter")
-
+            template=jobt).order_by("-schedule__counter")
         paginator = Paginator(jobs_list, settings.PAGINATOR_OBJECTS_ONPAGE)
         jobs = paginator.page(int(self.request.GET.get('page', 1)))
 

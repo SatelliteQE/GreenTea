@@ -7,19 +7,14 @@
 
 import logging
 import time
-from datetime import datetime
-from optparse import make_option
-
 from texttable import Texttable
 
 from apps.core.models import Job, JobTemplate, Recipe
-from apps.core.utils.advance_command import AdvancedCommand, make_option_group
 from apps.core.utils.beaker import Beaker
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
+from django.core.management.base import BaseCommand, CommandError
 
 logger = logging.getLogger("main")
-
-from django.core.management.base import BaseCommand, CommandError
 
 
 class BeakerCommand():
@@ -27,11 +22,42 @@ class BeakerCommand():
     def __init__(self):
         self.beaker = Beaker()
 
-    def reschedule(self, reschedule_job, *argvs, **kwargs):
-        for it in reschedule_job:
-            print it
+    def return2beaker(self, return2beaker_recipe, *argvs, **kwargs):
+        if not return2beaker_recipe:
+            raise CommandError(
+                "return2beaker - parameter return2beaker_recipe cannot be empty")
 
-    def cancel(self, cancel_job, message="", *argvs, **kwargs):
+        for uid in return2beaker_recipe:
+            recipe = Recipe.objects.get(uid=uid[2:])
+            res = self.beaker.return2beaker(recipe)
+            if res:
+                logger.info("R:%s recipes was returned to beaker."
+                            % recipe.uid)
+            else:
+                logger.info("Problem with returning to beaker (R:%s)."
+                            % recipe.uid)
+
+    def reschedule(self, reschedule_job, *argvs, **kwargs):
+        if not reschedule_job:
+            raise CommandError(
+                "reschedule - parameter reschedule_job cannot be empty")
+
+        message = kwargs.get("reschedule-message")
+        for uid in reschedule_job:
+            job = Job.objects.get(uid=uid)
+            job_new = self.beaker.jobReschedule(job, message)
+            if job_new:
+                logger.info("%s job was rescheduled as %s."
+                            % (job.uid, job_new.uid))
+            else:
+                logger.info("Problem with rescheduling of job (%s)."
+                            % job.uid)
+
+    def cancel(self, cancel_job, *argvs, **kwargs):
+        if not cancel_job:
+            raise CommandError("cancel - parameter cancel_job cannot be empty")
+
+        message = kwargs.get("cancel-message")
         for uid in cancel_job:
             job = Job.objects.get(uid=uid)
             res = self.beaker.jobCancel(job, message)
@@ -39,7 +65,6 @@ class BeakerCommand():
                 logger.info("%s job was cancled." % job.uid)
             else:
                 logger.info("Problem with canceling of job (%s)." % job.uid)
-
 
     def schedule(self, label="default", *argvs, **kwargs):
         simulate = kwargs.get("simulate")
@@ -63,8 +88,8 @@ class BeakerCommand():
             self.scheduleByJobTemplates(
                 filter, label, fullInfo, simulate, reserver)
 
-        if kwargs.get("period_label"):
-            period_label = kwargs.get("period_label")
+        if kwargs.get("schedule_label"):
+            period_label = kwargs.get("schedule_label")
             filter = {"schedule__label__in": period_label, "is_enable": True}
             if not label:
                 label = period_label
@@ -141,19 +166,25 @@ class Command(BaseCommand):
         group.add_argument('--list', action='store_true', default=False)
 
         group = parser.add_argument_group("cancel")
-        group.add_argument('--cancel-job', nargs='+', type=str)
+        group.add_argument('--cancel-job', nargs='+', type=str,
+                           help='Cancel only jobs, which are scheduled from required'
+                           'job templates. We can use more values')
         group.add_argument('--cancel-message', nargs=None, type=str)
 
         group = parser.add_argument_group("reschedule")
-        group.add_argument('--reschedule-job', nargs='+', type=str)
+        group.add_argument('--reschedule-job', nargs='+', type=str,
+                           help='Reschedule only jobs, which are required. Use UID'
+                           '(J:12345) for identify of job. We can use more values.')
         group.add_argument('--reschedule-message', nargs=None, type=str)
 
-#        group = parser.add_argument_group("return2beaker")
-#        group.add_argument('--job_id', nargs='+', type=str,)
+        group = parser.add_argument_group("return2beaker")
+        group.add_argument('--return2beaker-recipe', nargs='+', type=str,
+                           help='Return2beaker only jobs, which are required. Use UID'
+                           '(J:12345) for identify of job. We can use more values')
+        group.add_argument('--return2beaker-message', nargs=None, type=str,)
 
-        parser.add_argument('action', choices=("schedule", "reschedule", "cancel"),
+        parser.add_argument('action', choices=("schedule", "reschedule", "return2beaker", "cancel"),
                             help='Action for beaker client')
-
 
     def handle(self, *args, **options):
         action = options["action"]
