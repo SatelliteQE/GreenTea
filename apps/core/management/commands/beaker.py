@@ -157,11 +157,11 @@ class Command(BaseCommand):
                             default=False)
 
         group = parser.add_argument_group("schedule")
-        group.add_argument('--template_id', nargs='+', type=int,
+        group.add_argument('--template-id', nargs='+', type=int,
                            help='Schedule only job templates, which are required. We '
                            'can use more values, which are separated by comma.')
-        group.add_argument('--template_file', nargs='+', type=str)
-        group.add_argument('--schedule_label', nargs='+', type=str)
+        group.add_argument('--template-file', nargs='+', type=str)
+        group.add_argument('--schedule-label', nargs='+', type=str)
         group.add_argument('--label', nargs=None, type=str)
         group.add_argument('--list', action='store_true', default=False)
 
