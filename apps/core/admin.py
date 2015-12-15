@@ -145,7 +145,13 @@ class JobTemplateAdmin(admin.ModelAdmin):
     def make_disable(modeladmin, request, queryset):
         queryset.update(is_enable=False)
     make_disable.short_description = "Set selected templates to disabled"
-    actions = [make_enable, make_disable]
+
+    def make_clone(modeladmin, request, queryset):
+        for it in queryset:
+            it.clone()
+    make_clone.short_description = "Clone selected jobs"
+
+    actions = [make_enable, make_disable, make_clone]
 
     # 'position' is the name of the model field which holds the position of an element
     list_editable = ('position',)
@@ -179,6 +185,13 @@ class GroupTaskInLine(admin.TabularInline):
 class GroupTemplateAdmin(admin.ModelAdmin):
     search_fields = ["name", ]
     inlines = [GroupTestInLine, ]
+
+    def make_clone(modeladmin, request, queryset):
+        for it in queryset:
+            it.clone()
+
+    make_clone.short_description = "Clone selected groups"
+    actions = [make_clone, ]
 
 
 class GroupOwnerAdmin(admin.ModelAdmin):

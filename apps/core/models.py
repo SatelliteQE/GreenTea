@@ -622,6 +622,22 @@ class JobTemplate(models.Model):
     def get_tags(self):
         return ", ".join([it.name for it in self.tags.all()])
 
+    def clone(self):
+        recipes = list(self.trecipes.all())
+        self.pk = None
+        label = "Clone %s" % self.whiteboard
+        tmp_label = "%s" % label
+        for it in range(100):
+            if len(JobTemplate.objects.filter(whiteboard=label)) > 0:
+                label = "%s v. %s" % (tmp_label, it)
+                continue
+            break
+
+        self.whiteboard = label
+        self.save()
+        for recipe in recipes:
+            recipe.clone(self)
+
 
 class DistroTemplate(models.Model):
     name = models.CharField(max_length=255, blank=True, help_text="Only alias")
@@ -762,6 +778,25 @@ class RecipeTemplate(models.Model, ObjParams):
     def is_enabled(self):
         return self.jobtemplate.is_enable
 
+    def clone(self, jobtemplate=None):
+        groups = self.grouptemplates.all()
+        tasks = self.tasks.all()
+        archs = self.arch.all()
+        self.pk = None
+        if jobtemplate:
+            self.jobtemplate = jobtemplate
+        self.save()
+        for arch in archs:
+            self.arch.add(arch)
+        for it in groups:
+            it.pk = None
+            it.recipe = self
+            it.save()
+        for it in tasks:
+            it.pk = None
+            it.recipe = self
+            it.save()
+
 
 class TaskRoleEnum(models.Model):
     name = models.CharField(max_length=255, blank=True)
@@ -782,6 +817,17 @@ class GroupTemplate(models.Model):
 
     class Meta:
         ordering = ('name',)
+
+    def clone(self):
+        tests = self.grouptests.all()
+        group = GroupTemplate(self.__dict__)
+        group.pk = None
+        group.name = "Clone %s" % self.name
+        group.save()
+        for test in tests:
+            test.pk = None
+            test.group = group
+            test.save()
 
 
 class GroupTaskTemplate(ObjParams, models.Model):
