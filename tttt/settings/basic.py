@@ -191,7 +191,7 @@ except ImportError:
     pass
 
 ENABLE_PLUGINS = (
-        "irc",
+#       "irc",
         "backuplogs",
     )
 

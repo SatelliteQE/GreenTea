@@ -6,7 +6,6 @@
 # Year: 2015
 
 from django.dispatch import receiver
-
 from apps.core.signals import recipe_changed, recipe_finished
 
 
@@ -21,4 +20,4 @@ def handle_recipe_finished(sender, **kwargs):
 def handle_recipe_update(sender, **kwargs):
     if sender:
         recipe = kwargs.get("recipe")
-        print "update:", sender, recipe, type(sender)
+        print "update:", sender, recipe
