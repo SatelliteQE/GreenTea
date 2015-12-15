@@ -112,6 +112,7 @@ class Beaker:
             logger.error("schedule file %s: %s %s" % (xmlfile, job, jobT))
         if job:
             os.rename(xmlfile, xmlfile.replace(tmp, slugify(job.uid)))
+            self.parse_job(job.uid)
         return job
 
     def jobReschedule(self, job, message):

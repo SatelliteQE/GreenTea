@@ -136,7 +136,7 @@ class GitAdmin(admin.ModelAdmin):
 
 class JobTemplateAdmin(admin.ModelAdmin):
     list_display = (
-        "whiteboard", "is_enable", "period", "get_tags", "position")
+        "whiteboard", "is_enable", "schedule", "get_tags", "position")
 
     def make_enable(modeladmin, request, queryset):
         queryset.update(is_enable=True)
@@ -155,9 +155,9 @@ class JobTemplateAdmin(admin.ModelAdmin):
 
     # 'position' is the name of the model field which holds the position of an element
     list_editable = ('position',)
-    list_filter = ["period", "is_enable"]
+    list_filter = ["schedule", "is_enable"]
     search_fields = ["whiteboard", ]
-    ordering = ["-is_enable", "period", "position"]
+    ordering = ["-is_enable", "schedule", "position"]
     inlines = [RecipeTemplateInLine]
 
 

@@ -21,6 +21,7 @@ from django.db import models
 from django.db.models import Count
 from django.template import Context, Template
 from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 from taggit.managers import TaggableManager
 
 from apps.core.signals import recipe_changed, recipe_finished
@@ -570,17 +571,10 @@ class System(models.Model):
 
 
 class JobTemplate(models.Model):
-    DAILY = 0
-    WEEKLY = 1
-    PERIOD_ENUM = (
-        (DAILY, "daily"),
-        (WEEKLY, "weekly")
-    )
     whiteboard = models.CharField(max_length=255, unique=True)
     is_enable = models.BooleanField(default=False)
     event_finish = models.SmallIntegerField(
         choices=EVENT_FINISH_ENUM, default=RETURN)
-    period = models.SmallIntegerField(choices=PERIOD_ENUM, default=DAILY)
     schedule = models.ForeignKey(TaskPeriod, null=True, blank=True)
     position = models.SmallIntegerField(default=0)
     grouprecipes = models.CharField(max_length=255, null=False, blank=True,
@@ -602,10 +596,10 @@ class JobTemplate(models.Model):
                 # First row
                 self.position = 0
 
-        return super(JobTemplate, self).save(*args, **kwargs)
+        return super(model, self).save(*args, **kwargs)
 
     class Meta:
-        ordering = ('period', 'position',)
+        ordering = ('schedule', 'position',)
 
     @models.permalink
     def get_absolute_url(self):
@@ -655,6 +649,11 @@ class DistroTemplate(models.Model):
     class Meta:
         ordering = ('name', 'distroname',)
 
+    def save(self, *args, **kwargs):
+        model = self.__class__
+        if not self.name.strip():
+            self.name = "%s %s %s" % (self.family, self.variant, self.distroname)
+        return super(model, self).save(*args, **kwargs)
 
 class RecipeTemplate(models.Model, ObjParams):
     NONE, RECIPE_MEMBERS, STANDALONE = 0, 1, 2
@@ -674,13 +673,13 @@ class RecipeTemplate(models.Model, ObjParams):
     memory = models.CharField(max_length=255, blank=True)
     disk = models.CharField(
         max_length=255, blank=True, help_text="Value is in GB")
-    hvm = models.BooleanField(default=False)
-    params = models.TextField(blank=True)
+    hvm = models.BooleanField(_("Support virtualizaion"), default=False)
+    params = models.TextField(_("Parameters"), blank=True)
     distro = models.ForeignKey(DistroTemplate)
     is_virtualguest = models.BooleanField(default=False)
     virtualhost = models.ForeignKey("RecipeTemplate", null=True, blank=True,
                                     related_name="virtualguests")
-    schedule = models.CharField("schedule period", max_length=255, blank=True)
+    schedule = models.CharField(_("Schedule period"), max_length=255, blank=True)
 
     def __unicode__(self):
         name = self.name
