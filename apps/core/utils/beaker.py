@@ -17,6 +17,7 @@ import sys
 import xml.dom.minidom
 import xmlrpclib
 import urllib2
+import random
 from datetime import datetime, timedelta
 from urlparse import urlparse
 
@@ -99,7 +100,7 @@ class Beaker:
             raise Exception("Parameter 'jobT' is not instance of class "
                             "JobTemplate")
         date = datetime.today().date().isoformat()
-        tmp = "__tmp__"
+        tmp = "beaker_tmp_%s.xml" % random.getrandbits(28)
         path = "%s/%s.xml" % (date, tmp)
         xmlfile, job = None, None
         try:
