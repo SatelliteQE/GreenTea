@@ -39,10 +39,10 @@ class Command(BaseCommand):
             for repo in settings.REPOSITORIES_GIT[path]:
                 if len(repos) > 0 and repo not in repos:
                     continue
-                if not os.path.exists("%s%s" % (path, repo)):
+                if not os.path.exists(os.path.join(path, repo)):
                     logger.error("repo %s doesn't exists in %s" % (repo, path))
                     continue
-                git = Git.getGitFromFolder("%s%s" % (path, repo))
+                git = Git.getGitFromFolder(os.path.join(path, repo))
                 git.log = logger
                 if git:
                     try:
