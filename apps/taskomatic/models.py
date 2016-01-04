@@ -10,6 +10,7 @@
 import logging
 import time
 import traceback
+import shlex
 from StringIO import StringIO
 from datetime import datetime, timedelta
 
@@ -143,7 +144,7 @@ class Task(models.Model):
             errorHandler.flush()
 
         try:
-            params = self.common_params.split()
+            params = shlex.split(self.common_params)
             out = StringIO()
             management.call_command(self.common, *params, stdout=out, verbosity=3)
             self.status = self.STATUS_ENUM_DONE  # set status "done"
