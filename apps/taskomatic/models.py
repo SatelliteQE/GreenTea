@@ -68,7 +68,6 @@ class TaskPeriod(models.Model):
         res = self.common.split(' ', 1)
         command = res.pop(0)
         params = "" if len(res) == 0 else res.pop()
-        params = "%s --label %s" % (params, self.label)
         task = Task.objects.create(title=self.title,
                                    common=command,
                                    common_params=params,

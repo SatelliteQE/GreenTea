@@ -254,13 +254,17 @@ class Git(models.Model):
                 self.__getLog().warning("The GIT folder for test '%s'"
                                         " is not declared." % test.name)
                 continue
+            path_dir = "%s/%s" % (self.path_absolute, test.folder)
+            if not os.path.exists(path_dir):
+                self.__getLog().warning("Test %s doesn't exists" % path_dir)
+                continue
             rows = git.log('--decorate=full',
                            '--since=%s.days' % checkDays,
                            '--simplify-by-decoration',
                            '--pretty=%H|%aN|%ae|%ai|%d',
                            '--follow',
                            'HEAD',
-                           "%s/%s" % (self.path_absolute, test.folder))\
+                           "%s" % path_dir)\
                 .split('\n')
             self.__saveCommits(test, rows)
 

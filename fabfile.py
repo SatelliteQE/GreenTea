@@ -29,14 +29,12 @@ def verify():
     local("python manage.py graph_models -a -g -o doc/images/erdiagram.png")
 
 def stop():
-    with cd("%s" % HOME_PATH):
-        run("ls -l ../tttt.pid")
-        run("uwsgi --stop ../tttt.pid")
+    run("ls -l %s/../tttt.pid" % HOME_PATH)
+    run("uwsgi --stop %s/../tttt.pid" % HOME_PATH)
 
 def start():
-    with cd("%s" % HOME_PATH):
-        run("uwsgi tttt/conf/config.xml")
-        run("ps aux | grep uwsgi")
+    run("uwsgi -x /etc/uwsgi.d/tttt.conf ")
+    run("ps aux | grep uwsgi")
 
 def deploy():
     with cd("%s" % HOME_PATH):
