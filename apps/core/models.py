@@ -404,8 +404,8 @@ class Git(models.Model):
 
 class Author(models.Model):
     DEFAULT_AUTHOR = ("Unknown", "unknow@redhat.com")
-    name = models.CharField(max_length=255, unique=False, default=DEFAULT_AUTHOR[0])
-    email = models.EmailField(default=DEFAULT_AUTHOR[1])
+    name = models.CharField(max_length=255, unique=False, default=DEFAULT_AUTHOR[0], db_index=True)
+    email = models.EmailField(default=DEFAULT_AUTHOR[1], db_index=True)
     is_enabled = models.BooleanField(default=True)
 
     def __unicode__(self):
@@ -475,15 +475,15 @@ class GroupOwner(models.Model):
 
 
 class Test(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    git = models.ForeignKey(Git, blank=True, null=True)
-    owner = models.ForeignKey(Author, blank=True, null=True)
+    name = models.CharField(max_length=255, unique=True, db_index=True)
+    git = models.ForeignKey(Git, blank=True, null=True, db_index=True)
+    owner = models.ForeignKey(Author, blank=True, null=True, db_index=True)
     description = models.TextField(blank=True, null=True)
     dependencies = models.ManyToManyField("Test", blank=True)
     time = models.CharField(max_length=6, blank=True, null=True)
     type = models.CharField(max_length=32, blank=True, null=True)
-    folder = models.CharField(max_length=256, blank=True, null=True)
-    is_enable = models.BooleanField("enable", default=True)
+    folder = models.CharField(max_length=256, blank=True, null=True, db_index=True)
+    is_enable = models.BooleanField("enable", default=True, db_index=True)
     groups = models.ManyToManyField(GroupOwner, blank=True)
 
     class Meta:
@@ -553,7 +553,7 @@ class TestHistory(models.Model):
 
 
 class System(models.Model):
-    hostname = models.CharField(max_length=255, blank=True)
+    hostname = models.CharField(max_length=255, blank=True, db_index=True)
     ram = models.IntegerField(null=True, blank=True)
     cpu = models.CharField(max_length=255, blank=True)
     hdd = models.CharField(max_length=255, blank=True)
@@ -899,7 +899,7 @@ class TaskTemplate(ObjParams, models.Model):
 class Job(models.Model):
     template = models.ForeignKey(JobTemplate)
     uid = models.CharField("Job ID", max_length=12, unique=True)
-    date = models.DateTimeField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now, db_index=True)
     schedule = models.ForeignKey(TaskPeriodSchedule, null=True, blank=True)
     is_running = models.BooleanField(default=False)
     # this is for checking (no used for data from beaker)
