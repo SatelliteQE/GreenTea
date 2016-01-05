@@ -55,6 +55,10 @@ class TaskPeriod(models.Model):
         blank=True)
     is_enable = models.BooleanField(default=False)
     cron = models.CharField(max_length=64, default="*  *  *  *  *")
+    position = models.SmallIntegerField(default=0)
+
+    class Meta:
+        ordering=["position", "title"]
 
     def get_previous_run(self):
         tasks = Task.objects.filter(period=self).order_by("-date_run")

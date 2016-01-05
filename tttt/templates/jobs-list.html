@@ -60,7 +60,7 @@
 <div id="slider"></div>
 </div>
 
-{% for key, plan in plans.items %}
+{% for plan in plans %}
 <table class="dashboard dashboard-jobs">
   <thead>
       <tr><th colspan="{{plan.count|add:2}}"><h4>{{plan.object}}</h4></th></tr>

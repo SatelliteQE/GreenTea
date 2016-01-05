@@ -16,7 +16,7 @@ from taggit.models import Tag
 from apps.core.forms import FilterForm
 from apps.core.models import (RESULT_CHOICES, Author, CheckProgress, Event,
                               JobTemplate, Recipe, render_label)
-from apps.taskomatic.models import TaskPeriodSchedule
+from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriod
 from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
 from base import create_matrix
@@ -64,7 +64,8 @@ class JobListObject:
             it["count"] = len(it["label"])
 
     def execute(self):
-
+        # ids of TaskPeriod, which are used in selected recipes
+        plans = set()
         for key, it in self.plans.items():
             self.filters.update({
                 "job__schedule__counter__in": it["label"],
@@ -83,6 +84,7 @@ class JobListObject:
             # Initial object schedule plan
             if "object" not in it.keys():
                 it["object"] = recipes[0].job.schedule.period
+                plans.add(it["object"].id)
 
             objects = OrderedDict()
             for recipe in recipes:
@@ -103,11 +105,18 @@ class JobListObject:
                     id_counter: recipe
                 })
             self.plans[key]["objects"] = objects
+        # load used plans for this select
+        self.taskperiod = TaskPeriod.objects.filter(id__in=plans)
 
     def get_data(self):
         self.create_matrix()
         self.execute()
-        return self.plans
+
+        # sort plan by postion og object, not by id
+        result = []
+        for it in self.taskperiod:
+            result.append(self.plans[it.id])
+        return result
 
 
 class JobsListView(TemplateView):
