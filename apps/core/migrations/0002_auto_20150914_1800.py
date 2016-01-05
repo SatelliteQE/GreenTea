@@ -44,6 +44,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('core', '0001_initial'),
+        ('taskomatic', '0002_taskperiod_position'),
     ]
 
     operations = [

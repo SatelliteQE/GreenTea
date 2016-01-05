@@ -27,6 +27,7 @@ class BeakerCommand():
             raise CommandError(
                 "return2beaker - parameter return2beaker_recipe cannot be empty")
 
+
         for uid in return2beaker_recipe:
             recipe = Recipe.objects.get(uid=uid[2:])
             res = self.beaker.return2beaker(recipe)
@@ -36,6 +37,7 @@ class BeakerCommand():
             else:
                 logger.info("Problem with returning to beaker (R:%s)."
                             % recipe.uid)
+            self.beaker.systemRelease(recipe)
 
     def reschedule(self, reschedule_job, *argvs, **kwargs):
         if not reschedule_job:

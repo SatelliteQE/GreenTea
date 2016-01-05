@@ -155,12 +155,19 @@ class Beaker:
             return True
         # if system status is reserved
         try:
-            from returns import return_reservation
-            status = return_reservation(int(recipe.uid))
+            #from returns import return_reservation
+            #status = return_reservation(int(recipe.uid))
+            status = self.systemRelease(recipe)
             self.parse_job(recipe.job.uid)
             return (status == -1)
         except ImportError:
             logger.warning("No module named bkr.client")
+
+    def systemRelease(self, recipe):
+        if not isinstance(recipe, Recipe):
+            msg = "This type is not supported: %s %s" % (recipe, type(recipe))
+            raise TypeError(msg)
+        return self.execute("system-release", recipe.system.hostname)
 
     def scheduleFromContent(self, xmlcontent):
         logger.error("Method is not implemented")
@@ -416,3 +423,4 @@ def parse_recipe(recipexml, job, guestrecipe=None):
         if recipe.result == PASS and job.template.event_finish == RETURNWHENGREEN:
             bk = Beaker()
             bk.return2beaker(recipe)
+            bk.systemRelease(recipe)
