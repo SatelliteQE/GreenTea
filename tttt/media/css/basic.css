@@ -73,7 +73,7 @@ table.dashboard .rTriangle > div, .pTriangle > div { position:relative; }
  font-weight: 700;
 }
 
-.cvsLink, .gitLink {
+.gitLink {
  font-size: .8em;
 }
 
