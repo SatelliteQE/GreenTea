@@ -212,7 +212,7 @@ class Taskomatic:
         [it.delete() for it in Task.objects
             .filter(status=Task.STATUS_ENUM_DONE).order_by("-date_run")[settings.MAX_TASKOMATIC_HISTORY:]]
 
-    @single_process
+    #@single_process
     def run(self):
         self.checkTaskPeriods()
         self.checkTasks()

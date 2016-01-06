@@ -238,9 +238,9 @@ class Beaker:
         job.save()
 
     def listLogs(self, recipe):
-#       doesn't work, call shell command:
-#       client = self._getXMLRPCClient()
-#       return client.recipes.files(int(recipe))
+        #       doesn't work, call shell command:
+        #       client = self._getXMLRPCClient()
+        #       return client.recipes.files(int(recipe))
         raw, status = self.execute("job-logs", recipe)
         return raw.split()
 
