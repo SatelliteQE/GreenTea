@@ -61,9 +61,9 @@
 </div>
 
 {% for plan in plans %}
-<table class="dashboard dashboard-jobs">
+<table class="dashboard dashboard-jobs" id="{{plan.object.label}}" >
   <thead>
-      <tr><th colspan="{{plan.count|add:2}}"><h4>{{plan.object}}</h4></th></tr>
+      <tr><th colspan="{{plan.count|add:2}}"><h4><a href="#{{plan.object.label}}">{{plan.object}}</a></h4></th></tr>
       <tr>
           <th>Job</th>
           <th width="50">Recipe</th>
