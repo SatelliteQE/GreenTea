@@ -62,6 +62,8 @@ def to_xml(request, id):
     except JobTemplate.DoesNotExist:
         raise Http404
     xml = get_xml(jobT)
+    if request.GET.get("output") == "plain":
+        return HttpResponse(xml, content_type="text/plain")
     return render(request, 'job_xml.html',
                   {'template': jobT, "xml": xml, "beaker": settings.BEAKER_SERVER})
 
