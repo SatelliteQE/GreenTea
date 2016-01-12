@@ -20,7 +20,7 @@ class TemplateTaskInLine(admin.TabularInline):
     model = TaskTemplate
     raw_id_fields = ("test", )
     sortable_field_name = "priority"
-    ordering = ["priority"]
+    ordering = ["position", "priority"]
     extra = 0
 
 
@@ -173,7 +173,7 @@ class GroupTaskInLine(admin.TabularInline):
     model = GroupTaskTemplate
     extra = 0
     sortable_field_name = "priority"
-    fields = ("get_group_link", "group", "params", "role", "priority")
+    fields = ("get_group_link", "group", "params", "role", "priority",)
     readonly_fields = ("get_group_link", )
 
     def get_group_link(self, obj):

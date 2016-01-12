@@ -866,20 +866,18 @@ class GroupTestTemplate(ObjParams, models.Model):
 
 
 class TaskTemplate(ObjParams, models.Model):
-    NONE, STANDALONE, CLIENTS, SERVERS, CLIENT, MASTER = 0, 1, 2, 3, 4, 5
-    ROLE_ENUM = (
-        (NONE, "None"),
-        (STANDALONE, "STANDALONE"),
-        (CLIENTS, "CLIENTS"),
-        (SERVERS, "SERVERS"),
-        (CLIENT, "CLIENT"),
-        (MASTER, "MASTER"),
-    )
+    BEGIN, PRE_GROUP, POST_GROUP, END = 0, 1, 2, 3
+    ENUM_POSTION = (
+        (BEGIN, "Begin"),
+        (PRE_GROUP, "Pre"),
+        (POST_GROUP, "Post"),
+        (END, "End"), )
     test = models.ForeignKey(Test)
     recipe = models.ForeignKey(RecipeTemplate, related_name="tasks")
     params = models.TextField(blank=True)
     priority = models.SmallIntegerField(default=0)
     role = models.ForeignKey(TaskRoleEnum, null=True, blank=True)
+    position = models.SmallIntegerField(default=POST_GROUP, choices=ENUM_POSTION)
 
     def __unicode__(self):
         return self.test.name
@@ -1110,7 +1108,6 @@ class Task(models.Model):
     uid = models.CharField("Task ID", max_length=12, unique=True)
     recipe = models.ForeignKey(Recipe)
     test = models.ForeignKey(Test)
-   # date = models.DateField(null=True, blank=True)
     result = models.SmallIntegerField(choices=RESULT_CHOICES, default=UNKNOW)
     status = models.SmallIntegerField(
         choices=Recipe.STATUS_CHOICES, default=UNKNOW)
@@ -1119,8 +1116,6 @@ class Task(models.Model):
     statusbyuser = models.SmallIntegerField(
         choices=USERSTATUS_CHOICES, default=NONE)
     alias = models.CharField(max_length=32, blank=True, null=True)
-    # def __init__(self, *args, **kwargs):
-    #    super(Task, self).__init__(*args, **kwargs)
 
     def __unicode__(self):
         return self.uid

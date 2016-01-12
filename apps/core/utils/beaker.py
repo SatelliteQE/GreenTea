@@ -307,6 +307,18 @@ class JobGen:
     def __generateRecipe(self, recipeT, jobT, reserve):
         cache_tasks = list()
         params = {}
+
+        # at first show tasks which have be before groups
+        # TaskTemplate.PRE_GROUP and TaskTemplate.BEGIN
+        tasksT = TaskTemplate.objects.filter(recipe=recipeT)\
+            .filter(position__in=(TaskTemplate.PRE_GROUP, TaskTemplate.BEGIN))\
+            .select_related("test").order_by("priority").distinct()
+        for taskT in tasksT:
+            if not taskT.test.is_enable:
+                continue
+            cache_tasks.append(self.__generateTask(taskT))
+
+        # show task from groups of task
         for taskG in recipeT.grouptemplates.order_by("priority"):
             params = taskG.get_params()
             for taskT in taskG.group.grouptests.order_by("priority"):
@@ -317,7 +329,10 @@ class JobGen:
                 taskT.parent_params = params2
                 cache_tasks.append(self.__generateTask(taskT))
 
+        # other tasks show after groups
+        # TaskTemplate.POST_GROUP and TaskTemplate.END
         tasksT = TaskTemplate.objects.filter(recipe=recipeT)\
+            .filter(position__in=(TaskTemplate.POST_GROUP, TaskTemplate.END))\
             .select_related("test").order_by("priority").distinct()
         for taskT in tasksT:
             if not taskT.test.is_enable:
