@@ -28,7 +28,7 @@ function check {
 }
 
 
-HOME=/data/GreenTea
+HOME=/data/greentea
 source $HOME/env/bin/activate && cd $HOME
 
 # Set local settings for running instance
