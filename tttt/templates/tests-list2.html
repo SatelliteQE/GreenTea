@@ -37,16 +37,16 @@
 <div id="byowner" class="hideme">
   <h3>By owner:</h3>
   <ul>
-    {%for it in owners %}
-    <li><a href="{{ it.email }}">{{ it.name }} &lsaquo;{{ it.email }}&rsaquo;({{ it.dcount }})</a></li>
+    {% for it in owners %}
+    {% if it.dcount > 0 %}
+      <li><a href="{% url 'tests-email' it.email %}">{{ it.name }} &lsaquo;{{ it.email }}&rsaquo;({{ it.dcount }})</a></li>
+    {% endif %}
     {% endfor %}
   </ul>
 </div>
 
-{%comment%}
 {% include 'search-box.html'  %}
 {% include 'detail-panel.html' %}
-{%endcomment%}
 
 {% for test_label, test_data in data.items %}
     <h2 id="{{ test_data.owner__email }}" title="Test's author">{{ test_data.owner__name }} &lt;{{ test_data.owner__email }}&gt;</h2>
