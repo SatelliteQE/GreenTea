@@ -13,8 +13,7 @@
         <packages>
           <package name="@Base"/>
         </packages>
-        <ks_appends/>
-        <repos/>
+        {{ guest.params|safe }}
         <distroRequires>
           <and>
             {% if guest.distro.family %}<distro_family op="=" value="{{ guest.distro.family|default:"" }}"/>{% endif %}
@@ -55,8 +54,7 @@
         <package name="@kvm"/>
         {% endif %}
       </packages>
-      <ks_appends/>
-      <repos/>
+      {{ r.params|safe }}
       <distroRequires>
         <and>
           {% if r.distro.family %}<distro_family op="=" value="{{ r.distro.family|default:"" }}"/>{% endif %}
