@@ -4,6 +4,7 @@
 from jobs import JobsListView
 from recipe_history import RecipeHistoryView
 from tests import TestsListView
+from tests2 import TestsListView2
 from api import ApiView
 from homepage import HomePageView
 from job_detail import JobDetailView

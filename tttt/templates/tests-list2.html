@@ -1,0 +1,126 @@
+{% extends "basic.html" %}
+{% load core_extras %}
+{% load gitweb %}
+{% load cache %}
+{% block header %}
+<script src="/media/js/core-tests.js"></script>
+{% endblock %}
+
+
+{% block title %}Test Trends{% endblock %}
+
+
+{% block content %}
+<h1>Test Trends</h1>
+<p>Last check: {{ progress }}</p>
+
+<div class="float-right">
+  <div id="byrepo" class="hideme">
+    <h3>By repos:</h3>
+    <ul>
+      {% for it in repos %}
+      <li><a href="?repo={{it.id}}" >{{ it.name }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div id="bygroup" class="hideme">
+    <h3>By group:</h3>
+    <ul>
+       {% for it in groups %}
+       <li><a href="?group={{it.id}}" >{{ it.name }}</a></li>
+       {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<div id="byowner" class="hideme">
+  <h3>By owner:</h3>
+  <ul>
+    {%for it in owners %}
+    <li><a href="{{ it.email }}">{{ it.name }} &lsaquo;{{ it.email }}&rsaquo;({{ it.dcount }})</a></li>
+    {% endfor %}
+  </ul>
+</div>
+
+{%comment%}
+{% include 'search-box.html'  %}
+{% include 'detail-panel.html' %}
+{%endcomment%}
+
+{% for test_label, test_data in data.items %}
+    <h2 id="{{ test_data.owner__email }}" title="Test's author">{{ test_data.owner__name }} &lt;{{ test_data.owner__email }}&gt;</h2>
+    <h3>
+        <a href="{{ test_data.get_absolute_url }}" class="testName" title="Test ID: {{ test_label }}" id="{{ test_data.name }}">
+            {{ test_data.name }}
+        </a>
+        {% if test_data.get_reposituory_url %}
+            <a href="{{ test_data.get_reposituory_url }}" class="testInfo">git</a>
+        {% endif %}
+        <a href="{{ test_data.get_detail_url }}" class=testInfo>detail</a>
+        {% if test_data.test__groups__name %}
+            <span class="testGroups" title="Groups">{{ test_data.test__groups__name|join:", " }}</span>
+        {% endif %}
+    </h3>
+    {% for periodschedule_id, periodschedule_data in test_data.data.items %}
+    <table class="dashboard dashboard-tests">
+        <caption id="{{ test_data.name }}">
+            {{ periodschedule_data.title }}
+        </caption>
+        <thead>
+            <tr>
+                <th></th>
+                <th></th>
+                {% for schedule in periodschedules|keyvalue:periodschedule_id|dictsort:"counter" %}
+                <th>{{ schedule.counter }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for job_label, job_data in periodschedule_data.data.items %}
+            {% for recipe_label, recipe_data in job_data.data.items %}
+                <tr>
+                    <th title="Job's tmplate ID: {{ job_label }}">{% ifchanged job_label %}{{ job_data.template__whiteboard }}{% endifchanged %}</th>
+                    <th>{{ recipe_label }}</th>
+                    {% for schedule in periodschedules|keyvalue:periodschedule_id|dictsort:"counter" %}
+                        {% if recipe_data.data|keyvalue:schedule.id %}
+                            {% with schedule_label=schedule.counter %}
+                            {% with schedule_data=recipe_data.data|keyvalue:schedule.id %}
+                            {% with t=schedule_data.data.values|dictsort:"uid"|last %}
+                            <td id="T:{{ t.uid|cut:"T:" }}" class="field-value status-{{ t.result }}{% if change %} {% if change.0.test.id == test.id %}r{% else %}p{% endif %}Border{% endif %}">
+                                <div class="icons-tr"><span class="glyphicon glyphicon-eye-open" title="System is selected."></span></div>
+                                <div class="icons-mr">
+                                {% if t.is_running %}
+                                    <span class="glyphicon glyphicon-star" title="System is still runnig."></span>
+                                {% endif %}
+                                {% if schedule_data.data.values|length > 1 %}
+                                    <span class="glyphicon glyphicon-refresh" title="Rescheduled {{ schedule_data.data.values|length }} time(s)"></span>
+                                {% endif %}
+                                </div>
+                                <div class="icons-br">{% if t.recipe__uid %}<a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ t.recipe__uid|join:"" }}#task{{ t.uid }}" class="glyphicon glyphicon-tripledot" title="Link to Beaker.">...</a>{% endif %}</div>
+                                {{ t.recipe__resultrate|floatformat:"1" }}&nbsp;%
+                            </td>
+                            {% endwith %}
+                            {% endwith %}
+                            {% endwith %}
+                        {% else %}
+                            <td></td>
+                        {% endif %}
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        {% endfor %}
+    </table>
+    {% endfor %}
+{% endfor %}
+
+<ul class="pagination">
+  {% if test_ids.has_previous %}<li><a href="?page={{ test_ids.previous_page_number }}&amp;{{ urlstring }}">&laquo;</a></li>{% else %}<li class="disabled" ><span>&laquo;</span></li>{%endif%}
+  {% for it in paginator.page_range %}
+  <li {% ifequal test_ids.number  it %}class="active"{% endifequal %}><a href="?page={{it}}&amp;{{ urlstring }}">{{it}} <span class="sr-only">(current)</span></a></li>
+  {% endfor %}
+  {% if test_ids.has_next %}<li><a href="?page={{ test_ids.next_page_number }}&amp;{{ urlstring }}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>{%endif%}
+</ul>
+
+{% include 'legends.html' %}
+{% endblock %}

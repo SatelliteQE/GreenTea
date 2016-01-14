@@ -221,9 +221,25 @@ function onHoverTask(){
                                                 .click(saveTaskPanel);
 }
 
+function setupAutoHeight(elm, h){
+  elm.css({ height: h });
+  elm.append("<a class='threedots'>show rest...</a>");
+  $('.threedots', elm).click(
+    function(){
+      //elm.animate({ height: "auto" }, 250);
+      elm.css({ height: "auto" });
+      $('.threedots', elm).css({ display: "none" })
+      return false;
+    }
+  )
+}
+
 function onLoad() {
   onChangeDetail();
   onHoverTask();
+  setupAutoHeight($("#byowner"), 300);
+  setupAutoHeight($("#byrepo"), 150);
+  setupAutoHeight($("#bygroup"), 150);
   initPage();
 }
 

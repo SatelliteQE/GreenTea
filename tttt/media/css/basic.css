@@ -35,7 +35,7 @@ h2 { font-size: 1.3em; }
 
 
 table.dashboard { width: 100%; border: 1px #666 solid; border-collapse: collapse; -moz-box-sizing: border-box; }
-table.dashboard thead { background-color: #ffff99; }
+table.dashboard thead { background-color: #ffff99; border-top: 0; }
 table.dashboard a { position:relative; z-index:24; color:#000; text-decoration:none; }
 table.dashboard thead h4 { text-align: center; }
 table.dashboard td { border: 1px #666 solid; text-align: left; min-height: 3em; padding: 5px; }
@@ -50,8 +50,8 @@ table.dashboard .icons-tr,
 table.dashboard .icons-mr,
 table.dashboard .icons-br { position: absolute; right: 4px; height: 33%; }
 table.dashboard .icons-tr { top: 0px; }
-table.dashboard .icons-mr {	top: 38%; }
-table.dashboard .icons-br {	bottom: 5px; }
+table.dashboard .icons-mr { top: 38%; }
+table.dashboard .icons-br { bottom: 5px; }
 table.dashboard-jobs tr td { height: 50px; }
 table.dashboard-tests tr td { height: 40px; }
 table.dashboard .glyphicon-eye-open { visibility: hidden; }
@@ -64,6 +64,11 @@ table.dashboard .pTriangle { background: url(/media/images/ptriangle.png) no-rep
 table.dashboard .pBorder { border-left: 3px #8f06b7 solid; }
 table.dashboard .rTriangle > div, .pTriangle > div { position:relative; }
 
+table.dashboard caption {
+ background-color: #ffff99;
+ border: 1px #666 solid;
+ border-bottom: 0;
+}
 
 .headTest {
  background-color: #ffff99;
@@ -73,8 +78,37 @@ table.dashboard .rTriangle > div, .pTriangle > div { position:relative; }
  font-weight: 700;
 }
 
-.gitLink {
- font-size: .8em;
+.testName {
+ font-size: 120%;
+}
+
+.testInfo {
+ font-size: 80%;
+}
+
+.testGroups {
+ font-size: 80%;
+ float: right;
+}
+
+.dashboard-tests td {
+ position: relative;
+ height: 100%;
+}
+
+.hideme {
+ position: relative;
+ overflow: hidden;
+}
+
+.threedots {
+ position: absolute;
+ bottom: 0;
+ left: 0;
+ background-color: #ffff99;
+ width: 100%;
+ margin: 0 1em;
+ padding: 3px;
 }
 
 .select {
