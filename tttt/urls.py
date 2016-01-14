@@ -5,7 +5,7 @@ import apps.api.urls
 import settings
 from apps.core.views import (HomePageView, JobDetailView, JobsDiffView,
                              JobsListView, RecipeHistoryView, TestDetailView,
-                             TestsListView)
+                             TestsListView, TestsListView2)
 from apps.kerberos.views import LoginView
 from django.views.decorators.cache import cache_page
 
@@ -34,6 +34,8 @@ urlpatterns = patterns('',
                            TestDetailView.as_view(), name='test-detail'),
                        url(r'^(Automation/)?[tT]ests.html$',
                            cache_page(60 * CACHE)(TestsListView.as_view()), name='tests-list'),
+                       url(r'^(Automation/)?[tT]ests2.html$',
+                           cache_page(60 * CACHE)(TestsListView2.as_view()), name='tests-list2'),
                        url(r'^(Automation/)?[jJ]obs.html$',
                            cache_page(60 * CACHE)(JobsListView.as_view()), name='jobs-list'),
                        url(r'^(Automation/)?[dD]iffs.html$',

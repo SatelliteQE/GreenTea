@@ -2,14 +2,6 @@
 <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" >
     <div class="navbar-form navbar-left" role="button"></div>
     <form class="navbar-form navbar-right" role="search">
-    {% if not onlysearch %}
-    {{ onlysearch }}
-      <div class="form-group">
-        Show only failed
-        {{ forms.onlyfail }}
-        <span>| Tasks: {{ stat.tasks }} | Tests: {{ stat.tests }}</span>
-      </div>
-    {% endif %}
       <div class="form-group">
         {{ forms.search }}
       </div>
