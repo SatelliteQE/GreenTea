@@ -314,7 +314,6 @@ class TestsListView(TemplateView):
                         'data': {},
                     }
                 # Popupate recipe (just general info common for more nightly runs)
-                recipe_matcher = render_label
                 tmp = {
                     "arch": i.recipe.arch.name,
                     "distro": i.recipe.distro.name,
