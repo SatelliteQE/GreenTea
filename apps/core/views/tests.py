@@ -338,7 +338,6 @@ class TestsListView(TemplateView):
                         'uid': i.uid,
                         'result': i.get_result(),
                         'status': i.recipe.get_status(),
-                        'status': i.recipe.get_status(),
                         'is_running': i.recipe.is_running(),
                         'recipe__id': i.recipe.id,
                         'recipe__uid': i.recipe.uid,
