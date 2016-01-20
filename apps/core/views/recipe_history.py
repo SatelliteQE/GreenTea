@@ -21,38 +21,22 @@ class RecipeHistoryView(TemplateView):
 
     def __get_period_ids(self, periodschedules):
         """Determine period schedule IDs we are interested in based on
-           object provided by __get_period_tree()"""
+           data provided by __get_period_tree()"""
         periodschedule_ids = []
         for periodschedule in periodschedules.values():
-            periodschedule_ids += [i['id'] for i in periodschedule]
-        logger.debug("TestsListView.__get_period_ids returns: %s" % periodschedule_ids)
+            periodschedule_ids += [i.id for i in periodschedule]
         return periodschedule_ids
 
 
     def __get_period_tree(self):
-        """Return dict of periods we are interested in:
-            {<period_id>:
-                [
-                    {'id': ..., 'counter': ..., 'period__title': ...},
-                    ...
-                ],
-             ...}"""
+        """Return dict of relevant period schedules by period. All is Django ORM objects:
+           {<period>: <period_schedule list>, ...}"""
         periodschedules = {}
-        for period in TaskPeriod.objects.only("id").all():
-            periodschedules[period.id] = []
-            for p in TaskPeriodSchedule.objects\
+        for period in TaskPeriod.objects.only("id", "title").all():
+            periodschedules[period] = TaskPeriodSchedule.objects\
                     .filter(period_id=period.id)\
-                    .values("id", "counter", "period__title", "date_create")\
-                    .order_by("-counter")[:settings.RANGE_PREVIOUS_RUNS]:
-                periodschedules[period.id].append({
-                    'id': p['id'],
-                    'counter': p['counter'],
-                    'period__title': p['period__title'],
-                    'date_create': p['date_create'],
-                })
-        logger.debug("TestsListView.__get_period_tree returns: %s" % periodschedules)
-        import pprint
-        pprint.pprint(periodschedules)
+                    .only("id", "counter", "date_create")\
+                    .order_by("-counter")[:settings.RANGE_PREVIOUS_RUNS]
         return periodschedules
 
 
@@ -82,58 +66,43 @@ class RecipeHistoryView(TemplateView):
         filters = {}
         filters['recipe__job__template__id'] = job_template.id
         filters['recipe__job__schedule__counter__in'] = periodschedule_ids
-        related = ['test', 'recipe', 'recipe__arch', 'recipe__distro', 'recipe__job__template', 'recipe__job__schedule']
+        related = ['test', 'test__git', 'recipe', 'recipe__arch', 'recipe__distro', 'recipe__job__template', 'recipe__job__schedule', 'recipe__job__schedule__period']
         only = [
             'id', 'uid', 'statusbyuser', 'result', 'alias',
-            'test__name',
+            'test__name', 'test__folder', 'test__git_id',
+            'test__git__name', 'test__git__url', 'test__git__localurl',
             'recipe__uid', 'recipe__whiteboard',
             'recipe__arch__name',
             'recipe__distro__name',
             'recipe__job__template__grouprecipes',
             'recipe__job__schedule__id', 'recipe__job__schedule__period_id',
+            'recipe__job__schedule__period__id',
         ]
-        tasks = Task.objects.filter(**filters).select_related(*related).only(*only)
+        out = Task.objects.filter(**filters).select_related(*related).only(*only)
 
-        # Reorder all tasks into template friendly structure
+        # Reorder data we got into template friendly structure
         out_dict = dict()
-        for task in tasks:
+        for task in out:
             # Populate period schedules (because one test can run in 'Daily automation' and 'Weekly automation' and...)
-            if task.recipe.job.schedule.period_id not in out_dict:
-                title = ''
-                for p in periodschedules[task.recipe.job.schedule.period_id]:
-                    if p['id'] == task.recipe.job.schedule.id:
-                        title = p['period__title']
-                        break
-                out_dict[task.recipe.job.schedule.period_id] = {
-                    'title': title,
-                    'data': {},
-                }
-            shortcut = out_dict[task.recipe.job.schedule.period_id]['data']
-
-            # Construct recipe name
-            tmp = {
-                "arch": task.recipe.arch.name,
-                "distro": task.recipe.distro.name,
-                "distro_label": task.recipe.distro.name,
-                "whiteboard": task.recipe.whiteboard,
-                "alias": task.alias,
-            }
-            recipe_name = render_label(tmp, task.recipe.job.template.grouprecipes)
+            if task.recipe.job.schedule.period not in out_dict:
+                out_dict[task.recipe.job.schedule.period] = dict()
 
             # Create new recipe if needed
-            if recipe_name not in shortcut:
-                shortcut[recipe_name] = dict()
+            task_recipe = task.recipe.get_label()
+            if task_recipe not in out_dict[task.recipe.job.schedule.period]:
+                out_dict[task.recipe.job.schedule.period][task_recipe] = dict()
+
             # Create new task if needed
-            if task.test.name not in shortcut[recipe_name]:
-                shortcut[recipe_name][task.test.name] = dict()
+            if task.test not in out_dict[task.recipe.job.schedule.period][task_recipe]:
+                out_dict[task.recipe.job.schedule.period][task_recipe][task.test] = dict()
 
             # Assign task to the right field in table
-            shortcut[recipe_name][task.test.name][task.recipe.job.schedule.id] = task
+            out_dict[task.recipe.job.schedule.period][task_recipe][task.test][task.recipe.job.schedule.id] = task
 
         # Return page
         context.update({
             'job_template': job_template,
             'periodschedules': periodschedules,
-            'recipes': out_dict,
+            'data': out_dict,
         })
         return context
