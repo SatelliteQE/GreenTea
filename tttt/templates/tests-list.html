@@ -84,7 +84,6 @@
                     <th>{{ recipe_label }}</th>
                     {% for schedule in periodschedules|keyvalue:periodschedule_id|dictsort:"counter" %}
                         {% if recipe_data.data|keyvalue:schedule.id %}
-                            {% with schedule_label=schedule.counter %}
                             {% with schedule_data=recipe_data.data|keyvalue:schedule.id %}
                             {% with t=schedule_data.data.values|dictsort:"uid"|last %}
                             <td id="T:{{ t.uid|cut:"T:" }}" class="field-value status-{{ t.result }}{% if change %} {% if change.0.test.id == test.id %}r{% else %}p{% endif %}Border{% endif %}">
@@ -100,7 +99,6 @@
                                 <div class="icons-br">{% if t.recipe__uid %}<a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ t.recipe__uid|join:"" }}#task{{ t.uid }}" class="glyphicon glyphicon-tripledot" title="Link to Beaker.">...</a>{% endif %}</div>
                                 {{ t.recipe__resultrate|floatformat:"1" }}&nbsp;%
                             </td>
-                            {% endwith %}
                             {% endwith %}
                             {% endwith %}
                         {% else %}
