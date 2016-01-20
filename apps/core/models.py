@@ -677,6 +677,8 @@ class RecipeTemplate(models.Model, ObjParams):
     memory = models.CharField(max_length=255, blank=True)
     disk = models.CharField(
         max_length=255, blank=True, help_text="Value is in GB")
+    hostname = models.CharField(
+        max_length=255, blank=True, help_text="Set to '= system42.beaker.example.com' if you want your recipe to run on exactly this system")
     hvm = models.BooleanField(_("Support virtualizaion"), default=False)
     params = models.TextField(_("Parameters"), blank=True)
     distro = models.ForeignKey(DistroTemplate)

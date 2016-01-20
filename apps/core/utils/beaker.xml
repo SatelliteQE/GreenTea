@@ -86,6 +86,7 @@
             {% comment %} https://bugzilla.redhat.com/show_bug.cgi?id=1187402 s390x is aborted with new xml construction{% endcomment %}
             {% if r.disk %}<key_value key="DISKSPACE" op="{{r.disk.split.0|htmlentities}}" value="{{ r.disk.split.1 }}000"/>{% endif %}
           </or>
+          {% if r.hostname %}<hostname op="{{r.hostname.split.0|htmlentities}}" value="{{ r.hostname.split.1 }}"/>{% endif %}
         </and>
         <system_type value="{% if r.is_virtualguest %}Virtual{% else %}Machine{% endif %}"/>
       </hostRequires>

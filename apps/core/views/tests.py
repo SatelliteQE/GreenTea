@@ -10,12 +10,13 @@ from datetime import date, timedelta
 
 from django.conf import settings
 from django.core.paginator import Paginator
-from django.db.models import Count
+from django.db.models import Count, Max
 from django.views.generic import TemplateView
 
 from apps.core.forms import FilterForm
 from apps.core.models import (FAIL, Author, CheckProgress, Git, GroupOwner,
-                              Task, Test, TestHistory, render_label)
+                              Task, Test, TestHistory, Recipe, Job, render_label)
+from apps.core.models import RESULT_CHOICES
 from apps.core.utils.date_helpers import currentDate
 from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriod
 from apps.waiver.forms import WaiverForm
@@ -28,7 +29,7 @@ if sys.version_info < (2, 7):
 else:
     from collections import OrderedDict
 
-LOGGER = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def get_matching_period_for_change(periods, change):
@@ -93,8 +94,8 @@ def get_history(period_ids):
 
 
 class TestsListView(TemplateView):
-
     """Show all of the tests"""
+
     template_name = 'tests-list.html'
 
     def dispatch(self, request, *args, **kwargs):
@@ -167,212 +168,183 @@ class TestsListView(TemplateView):
         context['waiveClass'] = Comment
         return context
 
-    def __get_period_ids(self):
-        """Determine TaskPeriodSchedule IDs we are interested in (7 newest)"""
-        data = []
-        for it in TaskPeriod.objects.all():
-            periods = reversed(
-                TaskPeriodSchedule.objects.filter(period=it).values(
-                    "title", "date_create", "id", "counter")
-                .order_by("-period", "-counter")[:settings.RANGE_PREVIOUS_RUNS]
-            )
-            data += map(lambda x: x["id"], periods)
-        return data
+    def __get_period_ids(self, periodschedules):
+        """Determine period schedule IDs we are interested in based on
+           object provided by __get_period_tree()"""
+        periodschedule_ids = []
+        for periodschedule in periodschedules.values():
+            periodschedule_ids += [i['id'] for i in periodschedule]
+        logger.debug("TestsListView.__get_period_ids returns: %s" % periodschedule_ids)
+        return periodschedule_ids
 
-    def __get_tasks_and_tests(self, period_ids):
-        """Return filtered tests and tasks (i.e. test runs) to be shown on tests.html"""
-        testFilter = dict()
-        taskFilter = dict()
-        # taskFilter['recipe__job__template__is_enable'] = True
+    def __get_period_tree(self):
+        """Return dict of periods we are interested in:
+            {<period_id>:
+                [
+                    {'id': ..., 'counter': ..., 'period__title': ...},
+                    ...
+                ],
+             ...}"""
+        periodschedules = {}
+        for period in TaskPeriod.objects.only("id").all():
+            periodschedules[period.id] = []
+            for p in TaskPeriodSchedule.objects\
+                    .filter(period_id=period.id)\
+                    .values("id", "counter", "period__title")\
+                    .order_by("-counter")[:settings.RANGE_PREVIOUS_RUNS]:
+                periodschedules[period.id].append({
+                    'id': p['id'],
+                    'counter': p['counter'],
+                    'period__title': p['period__title'],
+                })
+        logger.debug("TestsListView.__get_period_tree returns: %s" % periodschedules)
+        return periodschedules
+
+    def __get_test_ids(self):
+        """Return filtered tests to be shown on tests.html"""
+        testFilter = {}
         # testFilter['task__recipe__job__template__is_enable'] = True
         search = self.filters.get('search', False)
         if search and len(search) > 0:
             testFilter['name__icontains'] = search
-            # taskFilter['test__name__icontains'] = search
-        if self.filters.get('onlyfail', False):
-            testFilter['task__result__in'] = [FAIL, ]
-            # TODO: This is not good solution, it should be replaced
-            day = date.today() - timedelta(days=1)
-            testFilter['task__recipe__job__date__gt'] = day
         if 'email' in self.filters and self.filters["email"]:
             testFilter['owner__email'] = self.filters.get('email')
-            # taskFilter['test__owner__email'] = self.filters.get('email')
         if 'repo_id' in self.filters:
-            taskFilter['test__git__id'] = self.filters.get('repo_id')
             testFilter["git__id"] = self.filters.get('repo_id')
         if 'group_id' in self.filters:
-            taskFilter['test__groups__id'] = self.filters.get('group_id')
             testFilter["groups__id"] = self.filters.get('group_id')
-        # We are interested only in tests/tasks with enabled owner (TODO: why?)
-        testFilter['owner__is_enabled'] = True
-        taskFilter['test__owner__is_enabled'] = True
-        # Limit query to TaskPeriodSchedule-s we are interested in
-        # (i.e 7 newest or something like that)
-        taskFilter['recipe__job__schedule__id__in'] = period_ids
-
-        # Load all the interesting Task-s (Task == executed Test)
-        # TODO: Do we really need all these fields?
-        # Note: That `annotate()` is a workaround to make results unique
-        tasks = Task.objects.filter(**taskFilter).values(
-            "recipe__job__template__whiteboard", "test__name", "recipe__resultrate",
-            "recipe__arch__name", "test__owner__email", "recipe__uid", "recipe__job__date",
-            "result", "id", "uid", "recipe", "statusbyuser",
-            "recipe__job__template__grouprecipes", "recipe__arch__name",
-            "recipe__job__template__schedule__id",
-            "recipe__whiteboard", "recipe__distro__name", "alias", "recipe__job__schedule__counter")\
-            .order_by("test__owner__name", "recipe__job__template__position") \
-            .annotate(Count('id'))
-
         # Load all the Test-s
         # TODO: Why are we ordering these?
         # TODO: Cant we somehow limit this query to return only count of items
         #       per paginator settings
-        tests = Test.objects.filter(**testFilter) \
-            .annotate(count_fail=Count('task__result')) \
-            .annotate(Count('id')).order_by("-count_fail") \
-            .prefetch_related("groups", "git")
-
-        return tasks, tests
-
-    def __get_tests_ids(self, tests):
-        """Construct test IDs list on current page"""
-        ids = []
-        for it in tests.object_list:
-            ids.append(it.id)
-        return ids
-
-    def __get_tests_per_email(self, tests, owners):
-        """Construct list of tests per owner email for current page"""
-        data = dict()
-        for it in tests.object_list:
-            if it.owner_id:
-                email = owners[it.owner_id].email
-            else:
-                email = 'unknow@redhat.com'
-            if email not in data:
-                data[email] = {
-                    "tests": OrderedDict(),
-                    'owner': owners[it.owner_id]
-                }
-            data[email]["tests"][it.name] = it
-            data[email]["tests"][it.name].period = OrderedDict()
-        return data
-
-    def __expand_task_grouprecipes_template(self, task):
-        """If Task-s JobTemplate have "Grouprecipes" template set (e.g. "{{arch}}"),
-           render that template (i.e. get actual value for the template)"""
-        tmp = {
-            "arch": task["recipe__arch__name"],
-            "distro": task["recipe__distro__name"],
-            "distro_label": task["recipe__distro__name"],
-            "whiteboard": task["recipe__whiteboard"],
-            "alias": task["alias"],
-        }
-        return render_label(tmp, task["recipe__job__template__grouprecipes"])
+        tests = Test.objects.filter(**testFilter).only("id").values("id")
+        tests = sorted(set(it['id'] for it in tests))   # this just makes the list uniqe
+        logger.debug("TestsListView.__get_test_ids returns: %s" % tests)
+        return tests
 
     def get_context_data(self, **kwargs):
-        """Do all the work"""
+        # TODO: some table styling + changes in the tests
         context = super(self.__class__, self).get_context_data(**kwargs)
-        # Load detail panel setting
+        # Update context for details panel
         context = self.__update_context_detail_panel(context)
-        # Load URL to tests git storage
-        context['GITWEB_URL'] = settings.GITWEB_URL
-        # Owners
-        owners = dict([(it.id, it)
-                       for it in Author.objects.filter(is_enabled=True)
-                       .annotate(dcount=Count('test'))])
-
-        # Determine TaskPeriodSchedule IDs we are interested in (~7 newest)
-        period_ids = self.__get_period_ids()
-
-        # Load history we display for each test
-        history = get_history(period_ids)
-
-        # Determine filtered tests and tasks
-        tasks, tests = self.__get_tasks_and_tests(period_ids)
-
-        # Determine Test IDs we are interested in as per paginator
-        paginator = Paginator(tests, settings.PAGINATOR_OBJECTS_ONPAGE)
-        testlist = paginator.page(int(self.request.GET.get('page', 1)))
-
-        # Construct list of tests per owner email for current page
-        data = self.__get_tests_per_email(testlist, owners)
-
-        # Limit Task-s we are working with only to Test-s shown on current page
-        tasks = tasks.filter(test__in=self.__get_tests_ids(testlist))
-
-        # Process all the Task-s
-        for it in tasks:
-            # Using reference just make a shortcut to "data..." structure
-            period = it["recipe__job__template__schedule__id"]
-            test_link = data[it["test__owner__email"]]["tests"][it["test__name"]]
-
-            if period not in test_link.period.keys():
-                test_link.period.update({period: {"labels": OrderedDict(), "keys": set()}})
-            test = data[it["test__owner__email"]]["tests"][it["test__name"]].period[period]
-
-            # Get label we will use for this task
-            test_label = (
-                it["recipe__job__template__whiteboard"],
-                self.__expand_task_grouprecipes_template(it)
-            )
-
-            # Create empty matrix
-            if test_label not in test["labels"]:
-                test["labels"][test_label] = OrderedDict()
-
-            # Period we are working on now
-            period_id = it["recipe__job__schedule__counter"]
-
-            if period_id not in test["labels"][test_label].keys():
-                test["labels"][test_label][period_id] = None
-                test["keys"].add(period_id)
-
-
-            # Skip Task-s which were run in different periods than what we are
-            # displaying
-            if period_id not in test["labels"][test_label]:
-                continue
-
-            # Check if we were rescheduled
-            reschedule = 0
-            if test["labels"][test_label][period_id]:
-                reschedule = test["labels"][test_label][period_id].reschedule + 1
-
-            # Fill matrix with actual data (i.e. info about Task)
-            test["labels"][test_label][period_id] = Task(
-                id=it["id"],
-                uid=it["uid"],
-                result=it["result"],
-                statusbyuser=it["statusbyuser"],
-            )
-            test["labels"][test_label][period_id].resultrate = it[
-                "recipe__resultrate"]
-            test["labels"][test_label][
-                period_id].recipe_uid = "%s" % it["recipe__uid"]
-            test["labels"][test_label][period_id].reschedule = reschedule
-
-        try:
-            progress = CheckProgress.objects.order_by("-datestart")[0]
-        except IndexError:
-            progress = None
-
-        urllist = filter(
-            lambda x_y: x_y[0] != "page", self.request.GET.copy().items())
-
-        if self.filters.get('onlyfail', False):
-            context["tests_bad"] = tests[:10]
-
+        # Determine task period schedules we are going to use
+        periodschedules = self.__get_period_tree()
+        # Determine all available test IDs filtered by our filters
+        test_ids_all = self.__get_test_ids()
+        # Trim test IDs as per paginator
+        paginator = Paginator(test_ids_all, settings.PAGINATOR_OBJECTS_ONPAGE)
+        test_ids = paginator.page(int(self.request.GET.get('page', 1)))
+        # Load and reorder data about tests
+        data = self.prepare_matrix(test_ids=test_ids, periodschedules=periodschedules)
+        # Return page
         context.update({
-            "data": data,
-            "owners": owners,
-            "label": period_ids,
-            "tests": testlist,
-            "paginator": paginator,
-            "progress": progress,
-            "history": history,
-            "urlstring": urllib.urlencode(dict(urllist)),
-            "repos": Git.objects.all().order_by('name'),
-            "groups": GroupOwner.objects.all().order_by('name'),
+            'data': data,
+            'periodschedules': periodschedules,
+            'test_ids': test_ids,
+            'paginator': paginator,
+            'progress': CheckProgress.objects.all().aggregate(Max('datestart'))['datestart__max'],
+            'owners': Author.objects.filter(is_enabled=True).annotate(dcount=Count('test')).order_by("-dcount"),
+            'repos': Git.objects.all().order_by('name'),
+            'groups': GroupOwner.objects.all().order_by('name'),
         })
         return context
+
+    def prepare_matrix(self, test_ids=[], periodschedules=[]):
+        """Load info about  from DB and return it in template friendly object."""
+        out_dict = {}   # template friendly data structure
+        # Determine plain list of period schedule IDs
+        periodschedule_ids = self.__get_period_ids(periodschedules)
+        # Set list of tables and fields for the query and create initial
+        # version of the filter (filter by "test_id" will be added later
+        # in the loop below)
+        relations = ['test', 'test__owner', 'test__git', 'recipe',
+                     'recipe__arch', 'recipe__distro', 'recipe__job',
+                     'recipe__job__template', 'recipe__job__schedule']
+        fields = [
+            'test__id', 'test__name', 'test__folder',
+            'test__owner__id', 'test__owner__name', 'test__owner__email',
+            'test__git__id', 'test__git__localurl',
+            'test__groups__name',
+            'id', 'uid', 'result', 'status', 'statusbyuser', 'alias',
+            'recipe__id', 'recipe__uid', 'recipe__status', 'recipe__resultrate', 'recipe__whiteboard',
+            'recipe__arch__name',
+            'recipe__distro__name',
+            'recipe__job__id', 'recipe__job__uid',
+            'recipe__job__template__id', 'recipe__job__template__whiteboard', 'recipe__job__template__grouprecipes',
+            'recipe__job__schedule__id', 'recipe__job__schedule__counter', 'recipe__job__schedule__period_id',
+        ]
+        filters = {}
+        filters['recipe__job__schedule__id__in'] = periodschedule_ids
+        # Now process all the tests
+        for test_id in test_ids:
+            filters['test_id'] = test_id
+            data = Task.objects.filter(**filters).select_related(*relations).only(*fields)
+            # Reorder data into tempate friendly data structure
+            for i in data:
+                # Popupate tests
+                if i.test.id not in out_dict:
+                    out_dict[i.test.id] = {
+                        'name': i.test.name,
+                        'owner__name': i.test.owner.name,
+                        'owner__email': i.test.owner.email,
+                        'get_absolute_url': i.test.get_absolute_url(),
+                        'get_reposituory_url': i.test.get_reposituory_url(),
+                        'get_detail_url': i.test.get_detail_url(),
+                        'test__groups__name': [],
+                        'data': {},
+                    }
+                # Populate test's groups
+                if i.test.groups.name not in out_dict[i.test.id]['test__groups__name']:
+                    out_dict[i.test.id]['test__groups__name'].append(i.test.groups.name)
+                # Populate period schedules (because one test can run in 'Daily automation' and 'Weekly automation' and...)
+                if i.recipe.job.schedule.period_id not in out_dict[i.test.id]['data']:
+                    title = ''
+                    for p in periodschedules[i.recipe.job.schedule.period_id]:
+                        if p['id'] == i.recipe.job.schedule.id:
+                            title = p['period__title']
+                            break
+                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id] = {
+                        'title': title,
+                        'data': {},
+                    }
+                # Popupate job (just general info common for more nightly runs)
+                if i.recipe.job.template.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data']:
+                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id] = {
+                        'template__whiteboard': i.recipe.job.template.whiteboard,
+                        'data': {},
+                    }
+                # Popupate recipe (just general info common for more nightly runs)
+                recipe_matcher = render_label
+                tmp = {
+                    "arch": i.recipe.arch.name,
+                    "distro": i.recipe.distro.name,
+                    "distro_label": i.recipe.distro.name,
+                    "whiteboard": i.recipe.whiteboard,
+                    "alias": i.alias,
+                }
+                recipe_matcher = render_label(tmp, i.recipe.job.template.grouprecipes)
+                if recipe_matcher not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data']:
+                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher] = {
+                        'data': {},
+                    }
+                # Populate schedule
+                if i.recipe.job.schedule.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data']:
+                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id] = {
+                        'counter': i.recipe.job.schedule.counter,
+                        'data': {},
+                    }
+                # Populate task (i.e. test run)
+                if i.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data']:
+                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data'][i.id] = {
+                        'uid': i.uid,
+                        'result': i.get_result(),
+                        'status': i.recipe.get_status(),
+                        'status': i.recipe.get_status(),
+                        'is_running': i.recipe.is_running(),
+                        'recipe__id': i.recipe.id,
+                        'recipe__uid': i.recipe.uid,
+                        'recipe__status': i.recipe.status,
+                        'recipe__resultrate': i.recipe.resultrate,
+                        'recipe__job__uid': i.recipe.job.uid,
+                    }
+        return out_dict
