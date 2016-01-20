@@ -5,34 +5,41 @@
 
 {% block content %}
 
-<h1>Recipe history</h1>
-<p>Job template: {{ recipetemplate.jobtemplate.whiteboard }} (ID: {{ recipetemplate.jobtemplate.id }})</p>
-<p>Recipe template: {{ recipetemplate.name }} (ID: {{ recipetemplate.id }})</p>
+<h1>Job <a href='/admin/core/jobtemplate/{{ job_template.id }}/'>{{ job_template.whiteboard }}</a> history</h1>
 
-{% for recipe, tasks in recipes.items %}
-<h2>{{ recipe }}</h2>
-<table class="dashboard dashboard-tests">
-  <thead>
-    <tr>
-      <th>Test</th>
-      {% for period in period_ids %}
-      <th>{{ period }}</th>
-      {% endfor %}
-    </tr>
-  </thead>
-  <tbody>
-    {% for name, results in tasks.items %}
-    <tr>
-      <td>{{ name }}</td>
-      {% for period, run in results.items %}
-      <td id="T:{{ run.uid }}" class="field-value status-{{ run.get_result }}">
-        <a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ run.recipe.uid }}#task{{ run.uid }}" class="glyphicon glyphicon-tripledot" title="Link to the task in Beaker">...</a>
-      </td>
-      {% endfor %}
-    </tr>
+{% for periodschedule_id, periodschedule_data in recipes.items %}
+    {% for recipe, tasks in periodschedule_data.data.items %}
+    <h3>{{ recipe }}</h3>
+    <table class="dashboard dashboard-tests">
+        <caption>{{ periodschedule_data.title }}</caption>
+        <thead>
+            <tr>
+                <th>Test</th>
+                {% for schedule in periodschedules|keyvalue:periodschedule_id|dictsort:"counter" %}
+                    <th title="Scheduled at {{ schedule.date_create|date:"D Y-m-d" }} {{ schedule.date_create|time:"H:i" }}">{{ schedule.counter }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for name, results in tasks.items %}
+            <tr>
+                <th>{{ name }}</th>
+                {% for schedule in periodschedules|keyvalue:periodschedule_id|dictsort:"counter" %}
+                    {% if results|keyvalue:schedule.id %}
+                        {% with t=results|keyvalue:schedule.id %}
+                        <td id="T:{{ t.uid }}" class="status-{{ t.get_result }}">
+                            <a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ t.recipe.uid }}#task{{ t.uid }}" class="glyphicon glyphicon-tripledot" title="Link to the task in Beaker">...</a>
+                        </td>
+                        {% endwith %}
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% endfor %}
-  </tbody>
-</table>
 {% endfor %}
 
 {% endblock %}
