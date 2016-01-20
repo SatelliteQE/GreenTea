@@ -147,10 +147,14 @@ table.dashboard caption {
 .status-pass:hover,
 .status-pass.light { background-image: linear-gradient(to bottom, #8ad38a 0px, #5cb85c 100%); }
 .status-waived { background-color:  #5bc0de; background-image: linear-gradient(to bottom, #5bc0de 0px, #2aabd2 100%); background-repeat: repeat-x; }
+.status-waived-warn { background: repeating-linear-gradient(45deg, #5bc0de, #5bc0de 5px, transparent 5px, transparent 20px), linear-gradient(to bottom, #f0ad4e 0px, #eb9316 100%); }
+.status-waived-fail { background: repeating-linear-gradient(45deg, #5bc0de, #5bc0de 5px, transparent 5px, transparent 20px), linear-gradient(to bottom, #d9534f 0px, #c12e2a 100%); }
 .status-waived:hover,
 .status-waived.light { background-image: linear-gradient(to bottom, #85d5ec 0px, #5bc0de 100%); }
 .status-panic,
 .status-failinstall { background-color: #999999; background-image: linear-gradient(to bottom, #999999 0px, #888888 100%); background-repeat: repeat-x;}
+.status-failinstall-warn { background: repeating-linear-gradient(45deg, #999999, #999999 5px, transparent 5px, transparent 20px), linear-gradient(to bottom, #f0ad4e 0px, #eb9316 100%); }
+.status-failinstall-fail { background: repeating-linear-gradient(45deg, #999999, #999999 5px, transparent 5px, transparent 20px), linear-gradient(to bottom, #d9534f 0px, #c12e2a 100%); }
 .status-panic:hover,
 .status-panic.light,
 .status-failinstall:hover,

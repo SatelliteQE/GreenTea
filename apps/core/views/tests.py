@@ -266,7 +266,7 @@ class TestsListView(TemplateView):
             'test__git__id', 'test__git__localurl',
             'test__groups__name',
             'id', 'uid', 'result', 'status', 'statusbyuser', 'alias',
-            'recipe__id', 'recipe__uid', 'recipe__status', 'recipe__resultrate', 'recipe__whiteboard',
+            'recipe__id', 'recipe__uid', 'recipe__status', 'recipe__resultrate', 'recipe__whiteboard', 'recipe__statusbyuser',
             'recipe__arch__name',
             'recipe__distro__name',
             'recipe__job__id', 'recipe__job__uid',
@@ -341,7 +341,7 @@ class TestsListView(TemplateView):
                         'is_running': i.recipe.is_running(),
                         'recipe__id': i.recipe.id,
                         'recipe__uid': i.recipe.uid,
-                        'recipe__status': i.recipe.status,
+                        'recipe__result': i.recipe.get_result(),
                         'recipe__resultrate': i.recipe.resultrate,
                         'recipe__job__uid': i.recipe.job.uid,
                     }

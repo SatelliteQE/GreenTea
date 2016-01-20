@@ -87,7 +87,7 @@
                             {% with schedule_label=schedule.counter %}
                             {% with schedule_data=recipe_data.data|keyvalue:schedule.id %}
                             {% with t=schedule_data.data.values|dictsort:"uid"|last %}
-                            <td id="T:{{ t.uid|cut:"T:" }}" class="field-value status-{{ t.result }}{% if change %} {% if change.0.test.id == test.id %}r{% else %}p{% endif %}Border{% endif %}">
+                            <td id="T:{{ t.uid|cut:"T:" }}" class="field-value status-{% if t.recipe__result == "waived" or t.recipe__result == "failinstall" %}{% if t.result == "warn" or t.result == "fail" %}{{ t.recipe__result }}-{% endif %}{% endif %}{{ t.result }}{% if change %} {% if change.0.test.id == test.id %}r{% else %}p{% endif %}Border{% endif %}">
                                 <div class="icons-tr"><span class="glyphicon glyphicon-eye-open" title="System is selected."></span></div>
                                 <div class="icons-mr">
                                 {% if t.is_running %}
