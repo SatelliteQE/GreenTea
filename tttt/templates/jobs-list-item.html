@@ -2,7 +2,7 @@
 <tr>
     <td class="rWrapper">{% ifchanged %}
         <a href="{{item.object.get_absolute_url}}" >{{ item.object.whiteboard }}</a>
-        <div class='icons-br'><a href="recipe_history/{{ item.object.id }}" class="glyphicon glyphicon-tripledot" title="Show how tasks in recipe behaved in time">...</a></div>
+        <div class='icons-br'><a href="job_history/{{ item.object.id }}" class="glyphicon glyphicon-tripledot" title="Show how tasks in recipe behaved in time">...</a></div>
         {% endifchanged %}
     </td>
     <td>{{ item.label }} </td>

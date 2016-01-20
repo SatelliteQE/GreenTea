@@ -7,16 +7,16 @@ from apps.core.models import (JobTemplate, RecipeTemplate, Recipe, Task, render_
 
 logger = logging.getLogger(__name__)
 
-class RecipeHistoryView(TemplateView):
-    """Shows history of individual tasks from a recipe given in URL"""
-    template_name = 'recipe-history.html'
+class JobHistoryView(TemplateView):
+    """Shows history of individual tasks from a job given in URL"""
+    template_name = 'job-history.html'
 
 
     def dispatch(self, request, *args, **kwargs):
         """Django uses this to initialize view object"""
         self.filters = {}
         self.forms = {}
-        return super(RecipeHistoryView, self).dispatch(request, *args, **kwargs)
+        return super(JobHistoryView, self).dispatch(request, *args, **kwargs)
 
 
     def __get_period_ids(self, periodschedules):
