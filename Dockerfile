@@ -30,7 +30,7 @@ RUN virtualenv $HOME/env \
     && pip install -r $HOME/requirement/requirement.txt
 
 # create default values for running service
-RUN sh bin/init-secretkey.sh
+RUN sh bin/init-secretkey.sh > $HOME/tttt/settings/production.py
 
 RUN mkdir -p $HOME/tttt/static \
     && . $HOME/env/bin/activate \
