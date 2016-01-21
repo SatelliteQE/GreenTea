@@ -1,10 +1,15 @@
 <h2 id='Legend'>Legend</h2>
 <ul>
-  <li><span class="box status-pass"></span> - job passed</li>
-  <li><span class="box status-fail"></span> - job failed</li>
-  <li><span class="box status-waived"></span> - job waived</li>
-  <li><span class="box status-failinstall"></span> - job cancelled or failed on provisioning</li>
-  <li><span class="box"></span> - job is not started yet</li>
+  <li><span class="box status-pass"></span> - recipe or task passed</li>
+  <li><span class="box status-fail"></span> - recipe or task failed</li>
+  <li><span class="box status-warn"></span> - recipe or task warned</li>
+  <li><span class="box status-waived"></span> - job or task waived</li>
+  <li><span class="box status-failinstall"></span> - job ot task cancelled or failed on installation</li>
+  <li><span class="box status-waived-fail"></span> - task failed and its recipe was waived</li>
+  <li><span class="box status-waived-warn"></span> - task warned and its recipe was waived</li>
+  <li><span class="box status-failinstall-fail"></span> - task failed and its recipe failed on installation</li>
+  <li><span class="box status-failinstall-warn"></span> - task warned and its recipe failed on installation</li>
+  <li><span class="box"></span> - job or task is not started yet</li>
   <li><span class="glyphicon">%</span> - percentage shows how many tests passed.</li>
   <li><span class="glyphicon glyphicon-tripledot" title="Link.">...</span> - link to detail</li>
   <li><span class="glyphicon glyphicon-star" title="System is still runnig."></span> - recipe is not finished yet</li>
