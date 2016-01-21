@@ -13,6 +13,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.test import TestCase
 from django.test.client import Client
+from django.contrib.auth.models import User
 
 from apps.core.models import Job, RecipeTemplate
 from apps.core.utils.beaker import Beaker, JobGen
@@ -77,18 +78,26 @@ class ImportTest(TestCase):
 
 class SimpleTest(TestCase):
 
-    def test_running(self):
+    # anonymous users
+    def test_running_anonym(self):
+        pages = ["/", "/diffs.html", "/jobs.html", "/tests.html", "/admin/login/" ]
 
         c = Client()
-        r = c.get("/")
-        self.assertEqual(r.status_code, 200, msg="homepage is not running")
+        for url in pages:
+            r = c.get(url)
+            self.assertEqual(r.status_code, 200, msg="page %s is not running" % url)
 
-        r = c.get("/jobs.html")
-        self.assertEqual(r.status_code, 200, msg="jobs page is not running")
+    # login user
+    def test_running_auth(self):
+        username, password = "user1", "pass1"
+        c = Client()
+        user = User.objects.create_user(username, 'user1@localhost', password)
+        pages = ["/admin/",]
 
-        r = c.get("/tests.html")
-        self.assertEqual(r.status_code, 200, msg="tests page is not running")
-
+        c.login(username=username, password=password)
+        for url in pages:
+            r = c.get(url, follow=True)
+            self.assertEqual(r.status_code, 200, msg="page %s is not running (%s)" % (url, r.status_code))
 
 class BeakerTest(TestCase):
 

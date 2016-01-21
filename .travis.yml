@@ -7,6 +7,6 @@ install:
   - pip install -r requirement/requirement.txt
 before_script:
   - sh bin/init-secretkey.sh > tttt/settings/production.py
-  - python manage.py syncdb –migrate –noinput
+  - python manage.py syncdb –noinput
 script:
-  - python manage.py test
+  - python manage.py test apps.core.tests.SimpleTest
