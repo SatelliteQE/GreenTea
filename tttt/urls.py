@@ -4,7 +4,7 @@ from django.contrib import admin
 import apps.api.urls
 import settings
 from apps.core.views import (HomePageView, JobDetailView, JobsDiffView,
-                             JobsListView, RecipeHistoryView, TestDetailView,
+                             JobsListView, JobHistoryView, TestDetailView,
                              TestsListView)
 from apps.kerberos.views import LoginView
 from django.views.decorators.cache import cache_page
@@ -28,8 +28,8 @@ urlpatterns = patterns('',
                            LoginView.as_view(), name="login"),
                        url(r'^job/(?P<id>[0-9]+)$',
                            cache_page(60 * CACHE)(JobDetailView.as_view()), name='job-detail'),
-                       url(r'^recipe_history/(?P<id>[0-9]+)$',
-                           RecipeHistoryView.as_view(), name='recipe-history'),
+                       url(r'^job_history/(?P<id>[0-9]+)$',
+                           JobHistoryView.as_view(), name='job-history'),
                        url(r'^test/(?P<id>[0-9]+)$',
                            TestDetailView.as_view(), name='test-detail'),
                        url(r'^(Automation/)?[tT]ests.html$',

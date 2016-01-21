@@ -1,32 +1,38 @@
 {% extends "basic.html" %}
 {% load core_extras %}
 
-{% block title %}Recipe history{% endblock %}
+{% block title %}Job history{% endblock %}
 
 {% block content %}
 
 <h1>Job <a href='/admin/core/jobtemplate/{{ job_template.id }}/'>{{ job_template.whiteboard }}</a> history</h1>
 
-{% for periodschedule_id, periodschedule_data in recipes.items %}
-    {% for recipe, tasks in periodschedule_data.data.items %}
+{% for period, recipes in data.items %}
+    {% for recipe, tests in recipes.items %}
     <h3>{{ recipe }}</h3>
     <table class="dashboard dashboard-tests">
-        <caption>{{ periodschedule_data.title }}</caption>
+        <caption>{{ period.title }}</caption>
         <thead>
             <tr>
                 <th>Test</th>
-                {% for schedule in periodschedules|keyvalue:periodschedule_id|dictsort:"counter" %}
+                {% for schedule in periodschedules|keyvalue:period|dictsort:"counter" %}
                     <th title="Scheduled at {{ schedule.date_create|date:"D Y-m-d" }} {{ schedule.date_create|time:"H:i" }}">{{ schedule.counter }}</th>
                 {% endfor %}
             </tr>
         </thead>
         <tbody>
-            {% for name, results in tasks.items %}
+            {% for test, tasks in tests.items %}
             <tr>
-                <th>{{ name }}</th>
-                {% for schedule in periodschedules|keyvalue:periodschedule_id|dictsort:"counter" %}
-                    {% if results|keyvalue:schedule.id %}
-                        {% with t=results|keyvalue:schedule.id %}
+                <th>
+                    {{ test.name }}
+                    {% if test.get_reposituory_url %}
+                        <a href="{{ test.get_reposituory_url }}" class="testInfo">git</a>
+                    {% endif %}
+                    <a href="{{ test.get_detail_url }}" class="testInfo">detail</a>
+                </th>
+                {% for schedule in periodschedules|keyvalue:period|dictsort:"counter" %}
+                    {% if tasks|keyvalue:schedule.id %}
+                        {% with t=tasks|keyvalue:schedule.id %}
                         <td id="T:{{ t.uid }}" class="status-{{ t.get_result }}">
                             <a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ t.recipe.uid }}#task{{ t.uid }}" class="glyphicon glyphicon-tripledot" title="Link to the task in Beaker">...</a>
                         </td>
