@@ -6,7 +6,7 @@ env:
 install:
   - pip install -r requirement/requirement.txt
 before_script:
-  - python manage.py syncdb –migrate –noinput
   - sh bin/init-secretkey.sh
+  - python manage.py syncdb –migrate –noinput
 script:
   - python manage.py test
