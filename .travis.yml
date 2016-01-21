@@ -8,6 +8,6 @@ install:
 before_script:
   - sh bin/init-secretkey.sh > tttt/settings/production.py
   - django-admin.py --version
-  - python manage.py migrate –noinput
+  - python manage.py migrate --noinput
 script:
   - python manage.py test apps.core.tests.SimpleTest
