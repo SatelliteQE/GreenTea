@@ -34,7 +34,7 @@ RUN sh $HOME/bin/init-secretkey.sh > $HOME/tttt/settings/production.py
 
 RUN mkdir -p $HOME/tttt/static \
     && . $HOME/env/bin/activate \
-    && python $HOME/manage.py migrate \
+    && python $HOME/manage.py migrate --noinput \
     && python $HOME/manage.py collectstatic -c --noinput
 
 # create first user
