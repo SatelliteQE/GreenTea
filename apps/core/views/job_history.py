@@ -65,7 +65,7 @@ class JobHistoryView(TemplateView):
         # Get all latest tasks from job
         filters = {}
         filters['recipe__job__template__id'] = job_template.id
-        filters['recipe__job__schedule__counter__in'] = periodschedule_ids
+        filters['recipe__job__schedule__id__in'] = periodschedule_ids
         related = ['test', 'test__git', 'recipe', 'recipe__arch', 'recipe__distro', 'recipe__job__template', 'recipe__job__schedule', 'recipe__job__schedule__period']
         only = [
             'id', 'uid', 'statusbyuser', 'result', 'alias',
