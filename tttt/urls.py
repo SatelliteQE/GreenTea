@@ -6,6 +6,7 @@ import settings
 from apps.core.views import (HomePageView, JobDetailView, JobsDiffView,
                              JobsListView, JobHistoryView, TestDetailView,
                              TestsListView)
+from apps.core.views.report import ReportListView
 from apps.kerberos.views import LoginView
 from django.views.decorators.cache import cache_page
 
@@ -24,6 +25,8 @@ urlpatterns = patterns('',
                        #   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
                        url(r'^tests/(?P<email>.+)$',
                            TestsListView.as_view(), name='tests-email'),
+                       url(r'^reports/$',
+                           ReportListView.as_view(), name='reports'),
                        url(r'^accounts/login',
                            LoginView.as_view(), name="login"),
                        url(r'^job/(?P<id>[0-9]+)$',

@@ -1,0 +1,59 @@
+{% extends "basic.html" %}
+{% load gitweb %}
+
+{% block content %}
+
+<h1>Report of tests</h1>
+
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-striped">
+        <tr>
+            <th>Test</th><th>Count</th>
+        </tr>
+        {% for it in grouptest %}
+        </tr>
+          <td>{{ it.group__name }} </td>
+          <td>{{ it.dcount }} </td>
+        <tr>
+        </tr>
+        {% endfor %}
+    </table>
+  </div>
+  <div class="col-md-6">
+<table class="table table-striped">
+        <tr>
+            <th>Test</th><th>Run</th><th>Not Run</th><th>All</th>
+        </tr>
+        {% for it in repotest %}
+        </tr>
+          <td>{{ it.git__name }}</td>
+          <td><b>{{ it.run }}</b></td>
+          <td>{{ it.notrun }}</td>
+          <td>{{ it.dcount }}</td>
+        <tr>
+        </tr>
+        {% endfor %}
+    </table>
+  </div>
+</div>
+
+
+<h1>Report of tasks</h1>
+
+<table class="table table-striped">
+    <tr>
+        <th></th><th>All</th><th>Pass</th><th>Fail</th><th>Warning</th>
+    {% for key, it in tasks.items %}
+    </tr>
+      <td>{{ key }}</td>
+      <td>{{ it.all }}</td>
+      <td>{{ it.5 }}</td>
+      <td>{{ it.3 }}</td>
+      <td>{{ it.4 }}</td>
+    <tr>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}
