@@ -5,11 +5,25 @@ from django.views.generic import TemplateView
 from apps.core.models import GroupTestTemplate, Test, Task
 from django.db.models import Max, Count
 from apps.taskomatic.models import TaskPeriodSchedule
-from collections import defaultdict
+
+
+class ListId:
+    @staticmethod
+    def running(schedule_ids):
+        test_ids = Task.objects\
+            .filter(recipe__job__schedule__id__in=schedule_ids)\
+            .values("test__id")\
+            .annotate(dcount=Count("test"))\
+            .order_by("-dcount")
+        return [it["test__id"] for it in test_ids]
 
 
 class ReportListView(TemplateView):
     template_name = 'report.html'
+
+    def get(self, request, *args, **kwargs):
+        self.repo = request.GET.get("repo")
+        return super(self.__class__, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
@@ -27,10 +41,9 @@ class ReportListView(TemplateView):
             "group__name").annotate(dcount=Count("group")).order_by("-dcount")
         context["repotest"] = Test.objects.values("git__name").annotate(
             dcount=Count("git")).order_by("-dcount")
-        test_ids = Task.objects.filter(recipe__job__schedule__id__in=ids)\
-            .values("test__id").annotate(dcount=Count("test")).order_by("-dcount")
-        ids = [it["test__id"] for it in test_ids]
-        repotask = Test.objects.filter(id__in=ids).values(
+
+        running_ids = ListId.running(ids)
+        repotask = Test.objects.filter(id__in=running_ids).values(
             "git__name").annotate(dcount=Count("git")).order_by("-dcount")
 
         keys = dict([(it["git__name"], it["dcount"]) for it in repotask])
@@ -43,9 +56,12 @@ class ReportListView(TemplateView):
         t = {}
         for it in tasks:
             key = it["recipe__job__schedule__title"]
-            if not key in t.keys():
+            if key not in t:
                 t[key] = {}
             t[key].update({it["result"]: it["dcount"]})
         context["tasks"] = t
+
+        if self.repo:
+            context["nonrun"] = Test.objects.filter(is_enable=True, git__name=self.repo).exclude(id__in=running_ids)
 
         return context

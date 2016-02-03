@@ -29,7 +29,7 @@
         </tr>
           <td>{{ it.git__name }}</td>
           <td><b>{{ it.run }}</b></td>
-          <td>{{ it.notrun }}</td>
+          <td><a href="?repo={{ it.git__name }}">{{ it.notrun }}</a></td>
           <td>{{ it.dcount }}</td>
         <tr>
         </tr>
@@ -38,22 +38,34 @@
   </div>
 </div>
 
+{% if nonrun %}
+<h1>Non Runing Test</h1>
+<div class="row">
+{% for it in nonrun %}
+<div class="col-md-6">
+      {{ it }}
+</div>
+{% endfor %}
+</div>
+{% endif %}
 
+{% if tasks %}
 <h1>Report of tasks</h1>
-
 <table class="table table-striped">
     <tr>
         <th></th><th>All</th><th>Pass</th><th>Fail</th><th>Warning</th>
+    </tr>
     {% for key, it in tasks.items %}
     </tr>
       <td>{{ key }}</td>
       <td>{{ it.all }}</td>
       <td>{{ it.5 }}</td>
-      <td>{{ it.3 }}</td>
       <td>{{ it.4 }}</td>
+      <td>{{ it.3 }}</td>
     <tr>
     </tr>
     {% endfor %}
 </table>
+{% endif %}
 
 {% endblock %}
