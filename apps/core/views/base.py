@@ -50,7 +50,7 @@ def import_group(request):
 def get_xml(jobT):
     """Takes JobTemplate object and returns its prettified job XML"""
     jobG = JobGen()
-    xml = jobG.getXML(jobT, reserve=True)
+    xml = jobG.getXML(jobT, reserve=True, is_manual=True)
     soup = BeautifulSoup(xml, "xml")
     return soup.prettify()
 
