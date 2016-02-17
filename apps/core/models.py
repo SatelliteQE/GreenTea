@@ -584,6 +584,7 @@ class JobTemplate(models.Model):
     grouprecipes = models.CharField(max_length=255, null=False, blank=True,
                                     help_text="example: {{arch}} {{whiteboard|nostartsdate}}")
     tags = TaggableManager(blank=True)
+    group = settings.BEAKER_JOB_GROUP
 
     def __unicode__(self):
         return self.whiteboard

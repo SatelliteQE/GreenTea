@@ -272,6 +272,7 @@ BEAKER_SERVER = "https://beaker.example.com"
 # Set BEAKER_OWNER and BEAKER_PASS or you can use kerberos auth
 BEAKER_OWNER = None
 BEAKER_PASS = None
+BEAKER_JOB_GROUP = "greentea"
 
 BEAKER_DEFAULT_PACKAGES = (
     "vim", "gcc", "make", "nfs-utils", "wget", "libxml2-python",
