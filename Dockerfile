@@ -23,6 +23,7 @@ RUN echo "root:GreenTea!" | chpasswd
 
 USER greentea
 ENV HOME /data/greentea
+ENV DJANGO_SETTINGS_MODULE tttt.settings.production
 
 RUN virtualenv $HOME/env \
     && cd $HOME \
