@@ -15,9 +15,11 @@ from django.test import TestCase
 from django.test.client import Client
 from django.contrib.auth.models import User
 
-from apps.core.models import Job, RecipeTemplate
+import apps.core.views.tests
+from apps.core.models import Job, RecipeTemplate, TestHistory
 from apps.core.utils.beaker import Beaker, JobGen
 from apps.core.utils.beaker_import import Parser
+from apps.taskomatic.models import TaskPeriodSchedule
 
 
 def get_content_from_file(filename):
@@ -80,7 +82,7 @@ class SimpleTest(TestCase):
 
     # anonymous users
     def test_running_anonym(self):
-        pages = ["/", "/diffs.html", "/jobs.html", "/tests.html", "/admin/login/" ]
+        pages = ["/", "/diffs.html", "/jobs.html", "/tests.html", "/admin/login/", "/reports/"]
 
         c = Client()
         for url in pages:
@@ -92,12 +94,14 @@ class SimpleTest(TestCase):
         username, password = "user1", "pass1"
         c = Client()
         user = User.objects.create_user(username, 'user1@localhost', password)
-        pages = ["/admin/",]
+        self.assertIsNotNone(user)
+        pages = ["/admin/", ]
 
         c.login(username=username, password=password)
         for url in pages:
             r = c.get(url, follow=True)
             self.assertEqual(r.status_code, 200, msg="page %s is not running (%s)" % (url, r.status_code))
+
 
 class BeakerTest(TestCase):
 
@@ -122,9 +126,6 @@ class BeakerTest(TestCase):
             # cancel created job
             bkr.jobCancel(job)
 
-import apps.core.views.tests
-from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriod
-from apps.core.models import TestHistory
 
 class TestsGetHistory(TestCase):
     fixtures = ['apps/core/tests/db-TestsGetHistory.json']
