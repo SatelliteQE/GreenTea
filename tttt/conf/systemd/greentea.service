@@ -1,0 +1,19 @@
+# Green Tea Service
+# copy file to /etc/systemd/system/greentea.service
+
+[Unit]
+Description=Green Tea
+After=syslog.target
+
+[Service]
+ExecStart=uwsgi -x /etc/uwsgi.d/tttt.conf
+# Requires systemd version 211 or newer
+RuntimeDirectory=uwsgi
+Restart=always
+KillSignal=SIGQUIT
+Type=notify
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target
