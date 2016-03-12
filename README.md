@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/SatelliteQE/GreenTea.svg?branch=master)](https://travis-ci.org/SatelliteQE/GreenTea)
+
 # GreenTea
 
 Green Tea is tools for automation testing (quality assurance). The service collects data from beaker's jobs, saves it to database and creates statistic for users.
