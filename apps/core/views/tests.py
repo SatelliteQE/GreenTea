@@ -4,9 +4,7 @@
 """View for tests page"""
 
 import logging
-import sys
-import urllib
-from datetime import date, timedelta
+from datetime import date
 
 from django.conf import settings
 from django.core.paginator import Paginator
@@ -14,20 +12,11 @@ from django.db.models import Count, Max
 from django.views.generic import TemplateView
 
 from apps.core.forms import FilterForm
-from apps.core.models import (FAIL, Author, CheckProgress, Git, GroupOwner,
-                              Task, Test, TestHistory, Recipe, Job, render_label)
-from apps.core.models import RESULT_CHOICES
-from apps.core.utils.date_helpers import currentDate
+from apps.core.models import (Author, CheckProgress, Git, Test, GroupOwner,
+                              Task, TestHistory, render_label)
 from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriod
 from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
-
-from .base import create_matrix
-
-if sys.version_info < (2, 7):
-    from ordereddict import OrderedDict  # pylint: disable=import-error
-else:
-    from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
 
@@ -132,7 +121,7 @@ class TestsListView(TemplateView):
                 self.forms['waiveFrom'].save()
                 self.forms['waiveFrom'] = WaiverForm()
             else:
-                LOGGER.warning(self.forms['waiveFrom'].errors)
+                logger.warning(self.forms['waiveFrom'].errors)
 
     def get(self, request, *args, **kwargs):
         """Handle GET request. I.e. displaying the page"""
