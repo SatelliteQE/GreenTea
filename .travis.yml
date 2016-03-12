@@ -6,7 +6,7 @@ env:
 install:
   - pip install -r requirement/requirement.txt
 before_script:
-  - sh bin/init-secretkey.sh > tttt/settings/production.py
+  - sh bin/init-secretkey.sh >> tttt/settings/basic.py
   - django-admin.py --version
   - python manage.py migrate --noinput
 script:
