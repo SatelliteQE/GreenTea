@@ -20,7 +20,7 @@ import os
 # setting points here.
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tttt.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tttt.settings.production")
 
 application = get_wsgi_application()
 
