@@ -169,6 +169,21 @@ class GroupTestInLine(admin.TabularInline):
     ordering = ["priority"]
 
 
+class GrupRecipeTemaplate(admin.TabularInline):
+    model = GroupTaskTemplate
+    fields = ("get_recipe_link", "recipe", "jobtemplate")
+    readonly_fields = ("get_recipe_link", "recipe", "jobtemplate")
+    extra = 0
+
+    def jobtemplate(self, obj):
+        return obj.recipe.jobtemplate
+
+    def get_recipe_link(self, obj):
+        url = reverse('admin:core_recipetemplate_change', args=(obj.recipe.pk,))
+        return '<a href="%s">%s</a>' % (url, obj.recipe)
+    get_recipe_link.allow_tags = True
+
+
 class GroupTaskInLine(admin.TabularInline):
     model = GroupTaskTemplate
     extra = 0
@@ -184,7 +199,7 @@ class GroupTaskInLine(admin.TabularInline):
 
 class GroupTemplateAdmin(admin.ModelAdmin):
     search_fields = ["name", ]
-    inlines = [GroupTestInLine, ]
+    inlines = [GroupTestInLine, GrupRecipeTemaplate]
 
     def make_clone(modeladmin, request, queryset):
         for it in queryset:
@@ -206,6 +221,21 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
     list_display = ("__unicode__", "jobtemplate", "distro", "archs", "hvm")
     inlines = [GroupTaskInLine, TemplateTaskInLine]
     search_fields = ["name", "jobtemplate__whiteboard"]
+    readonly_fields = ("get_jobtemplate_link", )
+    fieldsets = (
+        (None, {
+            'fields': (('get_jobtemplate_link', 'jobtemplate'), 'name', ('distro', 'arch',), 'hvm', ('is_virtualguest', 'virtualhost'), \
+            'role', 'memory', 'disk', 'hostname', 'params', 'schedule')
+            }),
+        ('Kernel options', {
+            'fields': ('kernel_options', 'kernel_options_post', 'ks_meta',),
+            }),
+        )
+
+    def get_jobtemplate_link(self, obj):
+        url = reverse('admin:core_jobtemplate_change', args=(obj.jobtemplate.pk,))
+        return '<a href="%s">%s</a>' % (url, obj.jobtemplate)
+    get_jobtemplate_link.allow_tags = True
 
     def render_change_form(self, request, context, *args, **kwargs):
         if kwargs.get("obj", None):
