@@ -105,6 +105,19 @@ class TaskAdmin(admin.ModelAdmin):
     search_fields = ["uid"]
 
 
+class TaskTemplateInLine(admin.TabularInline):
+    model = TaskTemplate
+    extra = 0
+    fields = ("jobtemplate", "get_recipetemplate_link")
+    readonly_fields = ("jobtemplate", "get_recipetemplate_link")
+    def jobtemplate(self, obj):
+        return "%s" % obj.recipe.jobtemplate
+    def get_recipetemplate_link(self, obj):
+        url = reverse('admin:core_recipetemplate_change', args=(obj.recipe.pk,))
+        return '<a href="%s">%s</a>' % (url, obj.recipe)
+    get_recipetemplate_link.allow_tags = True
+
+
 class TestAdmin(admin.ModelAdmin):
     list_display = ("name", "owner", "is_enable")
     search_fields = ["name", "owner__email"]
@@ -115,6 +128,8 @@ class TestAdmin(admin.ModelAdmin):
 
     def ownerEmail(self, obj):
         return obj.owner.email
+
+    inlines = [TaskTemplateInLine]
 
 
 class TestHistoryAdmin(admin.ModelAdmin):
