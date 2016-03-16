@@ -14,7 +14,7 @@ class TaskPeriodAdmin(admin.ModelAdmin):
         for it in queryset:
             it.recount_all()
     recount.short_description = "Recount periods"
-    actions = [recount,]
+    actions = [recount, ]
 
 
 class TaskPeriodScheduleAdmin(admin.ModelAdmin):

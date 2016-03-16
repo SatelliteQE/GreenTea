@@ -74,6 +74,7 @@ class CustomIndexDashboard(Dashboard):
                         'apps.core.models.Author',
                         'apps.core.models.GroupOwner',
                         'apps.core.models.System',
+                        'apps.core.models.TestHistory',
                     ),
                 ),
                 modules.AppList(

@@ -536,6 +536,10 @@ class TestHistory(models.Model):
     def __unicode__(self):
         return "%s %s" % (self.commit, self.date)
 
+    class Meta:
+        verbose_name = _("history of test")
+        verbose_name_plural = _("history of tests")
+
     def to_json(self):
         return {
             'version': self.version,
@@ -723,7 +727,7 @@ class RecipeTemplate(models.Model, ObjParams):
 
         # Weekday as a decimal number [0(Sunday),6].
         weekday = int(datetime.now().strftime("%w"))
-        archs = [it.name for it in self.arch.all()]
+        # archs = [it.name for it in self.arch.all()]
         schedule = self.__parse_schedule_period(self.schedule)
 
         res = list()
@@ -1026,8 +1030,8 @@ class Recipe(models.Model):
         self.save()
 
     def recount_result(self):
-        result = Task.objects.values('result', "statusbyuser").filter(
-            recipe=self).annotate(Count('result')).order_by("uid")
+        # result = Task.objects.values('result', "statusbyuser").filter(
+        #    recipe=self).annotate(Count('result')).order_by("uid")
         total, total_ok, waived = 0, 0, False
         running = None
         failed_test = []
@@ -1271,3 +1275,20 @@ class Event(models.Model):
 
     def get_alert(self):
         return filter(lambda x: x[0] == self.alert, self.ENUM_ALERT)[0][1]
+
+
+class FileLog(models.Model):
+    recipe = models.ForeignKey(Recipe)
+    task = models.ForeignKey(Task, blank=True, null=True)
+    path = models.CharField(max_length=256, unique=True)
+
+    def __unicode__(self):
+        return "%s" % self.path
+
+    def absolute_path(self):
+        return os.path.join(settings.STORAGE_ROOT, \
+            "./%s" % self.path)
+
+    def delete(self, *args, **kwargs):
+        os.remove(self.absolute_path())
+        super(FileLog, self).delete(*args, **kwargs)

@@ -11,7 +11,6 @@ pytz
 lxml
 pexpect
 fabric
-importlib
 feedparser
 docutils
 croniter

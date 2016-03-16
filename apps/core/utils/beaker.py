@@ -251,11 +251,16 @@ class Beaker:
         logdir = os.path.dirname(logpath)
         if not os.path.exists(logdir):
             os.makedirs(logdir)
-        rawfile = urllib2.urlopen(logurl)
+        try:
+            rawfile = urllib2.urlopen(logurl)
+        except urllib2.HTTPError as e:
+            logger.error("HTTP %d: %s" % (e.code, logurl))
+            return None
         logger.debug("download logfile: %s" % logurl)
         of = open(logpath, 'wb')
         of.write(rawfile.read())
         of.close()
+        return logparse.path
 
     def listJobs(self, filter={}):
         """List and filter beaker jobs."""
@@ -360,7 +365,6 @@ def parse_task(taskxml, recipe):
     uid = taskxml.getAttribute("id")
     status_str = taskxml.getAttribute("status")
     result = taskxml.getAttribute("result")
-
     task_alias = None
     for params in taskxml.getElementsByTagName("params"):
         for param in params.getElementsByTagName("param"):

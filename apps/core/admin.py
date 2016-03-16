@@ -13,7 +13,7 @@ from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Event,
                     Git, GroupOwner, GroupTaskTemplate, GroupTemplate,
                     GroupTestTemplate, Job, JobTemplate, PhaseLabel,
                     PhaseResult, Recipe, RecipeTemplate, System, Task,
-                    TaskRoleEnum, TaskTemplate, Test, TestHistory)
+                    TaskRoleEnum, TaskTemplate, Test, TestHistory, FileLog)
 
 
 class TemplateTaskInLine(admin.TabularInline):
@@ -110,10 +110,13 @@ class TaskTemplateInLine(admin.TabularInline):
     extra = 0
     fields = ("jobtemplate", "get_recipetemplate_link")
     readonly_fields = ("jobtemplate", "get_recipetemplate_link")
+
     def jobtemplate(self, obj):
         return "%s" % obj.recipe.jobtemplate
+
     def get_recipetemplate_link(self, obj):
-        url = reverse('admin:core_recipetemplate_change', args=(obj.recipe.pk,))
+        url = reverse('admin:core_recipetemplate_change',
+                      args=(obj.recipe.pk,))
         return '<a href="%s">%s</a>' % (url, obj.recipe)
     get_recipetemplate_link.allow_tags = True
 
@@ -194,7 +197,8 @@ class GrupRecipeTemaplate(admin.TabularInline):
         return obj.recipe.jobtemplate
 
     def get_recipe_link(self, obj):
-        url = reverse('admin:core_recipetemplate_change', args=(obj.recipe.pk,))
+        url = reverse('admin:core_recipetemplate_change',
+                      args=(obj.recipe.pk,))
         return '<a href="%s">%s</a>' % (url, obj.recipe)
     get_recipe_link.allow_tags = True
 
@@ -239,16 +243,17 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
     readonly_fields = ("get_jobtemplate_link", )
     fieldsets = (
         (None, {
-            'fields': (('get_jobtemplate_link', 'jobtemplate'), 'name', ('distro', 'arch',), 'hvm', ('is_virtualguest', 'virtualhost'), \
-            'role', 'memory', 'disk', 'hostname', 'params', 'schedule')
-            }),
+            'fields': (('get_jobtemplate_link', 'jobtemplate'), 'name', ('distro', 'arch',), 'hvm', ('is_virtualguest', 'virtualhost'),
+                       'role', 'memory', 'disk', 'hostname', 'params', 'schedule')
+        }),
         ('Kernel options', {
             'fields': ('kernel_options', 'kernel_options_post', 'ks_meta',),
-            }),
-        )
+        }),
+    )
 
     def get_jobtemplate_link(self, obj):
-        url = reverse('admin:core_jobtemplate_change', args=(obj.jobtemplate.pk,))
+        url = reverse('admin:core_jobtemplate_change',
+                      args=(obj.jobtemplate.pk,))
         return '<a href="%s">%s</a>' % (url, obj.jobtemplate)
     get_jobtemplate_link.allow_tags = True
 
@@ -260,6 +265,9 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
         return super(RecipeTemplateAdmin, self).render_change_form(
             request, context, args, kwargs)
 
+
+class FileLogAdmin(admin.ModelAdmin):
+    readonly_fields = ("recipe", "task")
 
 admin.site.register(Job, JobAdmin)
 admin.site.register(Recipe, RecipeAdmin)
@@ -277,6 +285,7 @@ admin.site.register(TestHistory, TestHistoryAdmin)
 admin.site.register(GroupOwner, GroupOwnerAdmin)
 admin.site.register(TaskTemplate, TaskTemplateAdmin)
 admin.site.register(TaskRoleEnum)
+admin.site.register(FileLog, FileLogAdmin)
 admin.site.register(JobTemplate, JobTemplateAdmin)
 admin.site.register(GroupTemplate, GroupTemplateAdmin)
 admin.site.register(RecipeTemplate, RecipeTemplateAdmin)
