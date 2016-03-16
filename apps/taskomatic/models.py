@@ -44,6 +44,10 @@ class TaskPeriodSchedule(models.Model):
             period=self.period).count()
         self.save()
 
+    def delete(self, *args, **kwargs):
+        super(TaskPeriodSchedule, self).delete(*args, **kwargs)
+        self.period.recount_all()
+
 
 class TaskPeriod(models.Model):
     title = models.CharField(max_length=64)
@@ -58,7 +62,7 @@ class TaskPeriod(models.Model):
     position = models.SmallIntegerField(default=0)
 
     class Meta:
-        ordering=["position", "title"]
+        ordering = ["position", "title"]
 
     def get_previous_run(self):
         tasks = Task.objects.filter(period=self).order_by("-date_run")
@@ -150,7 +154,8 @@ class Task(models.Model):
         try:
             params = shlex.split(self.common_params)
             out = StringIO()
-            management.call_command(self.common, *params, stdout=out, verbosity=3)
+            management.call_command(
+                self.common, *params, stdout=out, verbosity=3)
             self.status = self.STATUS_ENUM_DONE  # set status "done"
             out.seek(0)
             self.exit_result += out.read()
