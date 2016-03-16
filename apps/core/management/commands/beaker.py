@@ -13,6 +13,7 @@ from apps.core.models import Job, JobTemplate, Recipe
 from apps.core.utils.beaker import Beaker
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 from django.core.management.base import BaseCommand, CommandError
+from django.db.models import Max
 
 logger = logging.getLogger("main")
 
@@ -111,11 +112,12 @@ class BeakerCommand():
             return
 
         period = TaskPeriod.objects.get(label=label)
-        count = TaskPeriodSchedule.objects.filter(period=period).count()
+        count = TaskPeriodSchedule.objects.filter(period=period).aggregate(Max('counter')).get("counter__max")
+
         schedule = TaskPeriodSchedule.objects.create(
             title=label,
             period=period,
-            counter=count,
+            counter=count + 1 if count != None else 0,
         )
 
         for jobT in jobTs:
