@@ -278,6 +278,9 @@ BEAKER_DEFAULT_PACKAGES = (
     "vim", "gcc", "make", "nfs-utils", "wget", "libxml2-python",
 )
 
+# How long should <reservesys> block the machine
+BEAKER_RESERVESYS = 86400
+
 BKR_SYSTEM_PASS = None
 BKR_SYSTEM_USER = None
 

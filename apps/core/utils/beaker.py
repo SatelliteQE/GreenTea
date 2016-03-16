@@ -294,6 +294,7 @@ class JobGen:
         jobT.cache_recipes = recipesS
         kwargs['job'] = jobT
         kwargs['default_packages'] = settings.BEAKER_DEFAULT_PACKAGES
+        kwargs['reservesys'] = settings.BEAKER_RESERVESYS
         content = self.__renderXML(kwargs)
         return content
 
