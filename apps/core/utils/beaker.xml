@@ -107,7 +107,7 @@
         {% else %}<params />{% endif %}
       </task>
       {% endfor %}
-      {% if r.cache_reserve %}<reservesys duration="286400"/>{% endif %}
+      {% if r.cache_reserve %}<reservesys duration="{{ reservesys }}"/>{% endif %}
     </recipe>
     {% endfor %}{% endfor %}
   </recipeSet>
