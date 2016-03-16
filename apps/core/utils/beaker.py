@@ -155,8 +155,8 @@ class Beaker:
             return True
         # if system status is reserved
         try:
-            #from returns import return_reservation
-            #status = return_reservation(int(recipe.uid))
+            # from returns import return_reservation
+            # status = return_reservation(int(recipe.uid))
             status = self.systemRelease(recipe)
             self.parse_job(recipe.job.uid)
             return (status == -1)

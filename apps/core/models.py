@@ -18,7 +18,6 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
-from django.db.models import Count
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -1286,8 +1285,7 @@ class FileLog(models.Model):
         return "%s" % self.path
 
     def absolute_path(self):
-        return os.path.join(settings.STORAGE_ROOT, \
-            "./%s" % self.path)
+        return os.path.join(settings.STORAGE_ROOT, "./%s" % self.path)
 
     def delete(self, *args, **kwargs):
         os.remove(self.absolute_path())

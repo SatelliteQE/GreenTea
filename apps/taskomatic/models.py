@@ -21,7 +21,7 @@ from django.core import management
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-#from single_process import single_process
+# from single_process import single_process
 
 from apps.core.utils.date_helpers import toLocalZone
 
