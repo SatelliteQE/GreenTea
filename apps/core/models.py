@@ -403,7 +403,8 @@ class Git(models.Model):
 
 class Author(models.Model):
     DEFAULT_AUTHOR = ("Unknown", "unknow@redhat.com")
-    name = models.CharField(max_length=255, unique=False, default=DEFAULT_AUTHOR[0], db_index=True)
+    name = models.CharField(max_length=255, unique=False,
+                            default=DEFAULT_AUTHOR[0], db_index=True)
     email = models.EmailField(default=DEFAULT_AUTHOR[1], db_index=True)
     is_enabled = models.BooleanField(default=True)
 
@@ -481,7 +482,8 @@ class Test(models.Model):
     dependencies = models.ManyToManyField("Test", blank=True)
     time = models.CharField(max_length=6, blank=True, null=True)
     type = models.CharField(max_length=32, blank=True, null=True)
-    folder = models.CharField(max_length=256, blank=True, null=True, db_index=True)
+    folder = models.CharField(
+        max_length=256, blank=True, null=True, db_index=True)
     is_enable = models.BooleanField("enable", default=True, db_index=True)
     groups = models.ManyToManyField(GroupOwner, blank=True)
 
@@ -660,8 +662,10 @@ class DistroTemplate(models.Model):
     def save(self, *args, **kwargs):
         model = self.__class__
         if not self.name.strip():
-            self.name = "%s %s %s" % (self.family, self.variant, self.distroname)
+            self.name = "%s %s %s" % (
+                self.family, self.variant, self.distroname)
         return super(model, self).save(*args, **kwargs)
+
 
 class RecipeTemplate(models.Model, ObjParams):
     NONE, RECIPE_MEMBERS, STANDALONE = 0, 1, 2
@@ -689,7 +693,8 @@ class RecipeTemplate(models.Model, ObjParams):
     is_virtualguest = models.BooleanField(default=False)
     virtualhost = models.ForeignKey("RecipeTemplate", null=True, blank=True,
                                     related_name="virtualguests")
-    schedule = models.CharField(_("Schedule period"), max_length=255, blank=True)
+    schedule = models.CharField(
+        _("Schedule period"), max_length=255, blank=True)
 
     def __unicode__(self):
         name = self.name
@@ -883,7 +888,8 @@ class TaskTemplate(ObjParams, models.Model):
     params = models.TextField(blank=True)
     priority = models.SmallIntegerField(default=0)
     role = models.ForeignKey(TaskRoleEnum, null=True, blank=True)
-    position = models.SmallIntegerField(default=POST_GROUP, choices=ENUM_POSTION)
+    position = models.SmallIntegerField(
+        default=POST_GROUP, choices=ENUM_POSTION)
 
     def __unicode__(self):
         return self.test.name
@@ -1280,6 +1286,7 @@ class FileLog(models.Model):
     recipe = models.ForeignKey(Recipe)
     task = models.ForeignKey(Task, blank=True, null=True)
     path = models.CharField(max_length=256, unique=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __unicode__(self):
         return "%s" % self.path
@@ -1290,3 +1297,20 @@ class FileLog(models.Model):
     def delete(self, *args, **kwargs):
         os.remove(self.absolute_path())
         super(FileLog, self).delete(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
+        # get taskid from path
+        # /beaker-logs/2016/03/12590/1259016/2554157/38992903/TESTOUT.log
+        # /beaker-logs/2016/03/12590/1259016/2554157/install.log
+        if not self.task:
+            res = re.match(r'.*/%s/([0-9]+)/[^/]+$' %
+                           self.recipe.uid, self.path)
+            print res
+            try:
+                if res:
+                    task = res.group(1)
+                    self.task = Task.objects.get(uid=task)
+            except Task.DoesNotExist:
+                logger.warn("%d doesn't exists for %s" %
+                            (int(task), self.path))
+        super(FileLog, self).save(*args, **kwargs)

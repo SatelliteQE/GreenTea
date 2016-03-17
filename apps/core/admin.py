@@ -267,7 +267,9 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
 
 
 class FileLogAdmin(admin.ModelAdmin):
+    list_display = ("recipe", "task", "path", "created")
     readonly_fields = ("recipe", "task")
+
 
 admin.site.register(Job, JobAdmin)
 admin.site.register(Recipe, RecipeAdmin)

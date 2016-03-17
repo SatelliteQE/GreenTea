@@ -82,12 +82,14 @@ class SimpleTest(TestCase):
 
     # anonymous users
     def test_running_anonym(self):
-        pages = ["/", "/diffs.html", "/jobs.html", "/tests.html", "/admin/login/", "/reports/"]
+        pages = ["/", "/diffs.html", "/jobs.html",
+                 "/tests.html", "/admin/login/", "/reports/"]
 
         c = Client()
         for url in pages:
             r = c.get(url)
-            self.assertEqual(r.status_code, 200, msg="page %s is not running" % url)
+            self.assertEqual(r.status_code, 200,
+                             msg="page %s is not running" % url)
 
     # login user
     def test_running_auth(self):
@@ -100,7 +102,8 @@ class SimpleTest(TestCase):
         c.login(username=username, password=password)
         for url in pages:
             r = c.get(url, follow=True)
-            self.assertEqual(r.status_code, 200, msg="page %s is not running (%s)" % (url, r.status_code))
+            self.assertEqual(
+                r.status_code, 200, msg="page %s is not running (%s)" % (url, r.status_code))
 
 
 class BeakerTest(TestCase):
@@ -131,10 +134,14 @@ class TestsGetHistory(TestCase):
     fixtures = ['apps/core/tests/db-TestsGetHistory.json']
 
     def test_get_history(self):
-        period_schedule_ids = [4, 5]   # IDs required period schedules have in DB
-        exp_period_ids = [11, 12]   # Counts required period schedule IDs should have
-        exp_changes_ids = [3, 4, 6]   # These changes should be relevant for given period_schedule_ids
-        exp_changes = TestHistory.objects.filter(id__in=exp_changes_ids).order_by('id')
+        # IDs required period schedules have in DB
+        period_schedule_ids = [4, 5]
+        # Counts required period schedule IDs should have
+        exp_period_ids = [11, 12]
+        # These changes should be relevant for given period_schedule_ids
+        exp_changes_ids = [3, 4, 6]
+        exp_changes = TestHistory.objects.filter(
+            id__in=exp_changes_ids).order_by('id')
         self.assertEqual(3, len(exp_changes))
         exp_test_id = 5
         expected = {
@@ -152,17 +159,21 @@ class TestsGetHistory(TestCase):
         # Far before range
         periods = TaskPeriodSchedule.objects.filter(counter__in=[12, 13])
         with self.assertRaises(Exception):
-            out = apps.core.views.tests.get_matching_period_for_change(periods, changes[0])
+            out = apps.core.views.tests.get_matching_period_for_change(periods, changes[
+                                                                       0])
         # Just before range (first part of range is somewhat special, see
         # docs string on the function in test)
         periods = TaskPeriodSchedule.objects.filter(counter__in=[10, 11, 12])
-        out = apps.core.views.tests.get_matching_period_for_change(periods, changes[2])
+        out = apps.core.views.tests.get_matching_period_for_change(periods, changes[
+                                                                   2])
         self.assertEqual(periods.order_by('counter')[1], out)
         # In range
         periods = TaskPeriodSchedule.objects.filter(counter__in=[10, 11, 12])
-        out = apps.core.views.tests.get_matching_period_for_change(periods, changes[3])
+        out = apps.core.views.tests.get_matching_period_for_change(periods, changes[
+                                                                   3])
         self.assertEqual(periods.order_by('counter')[2], out)
         # After range
         periods = TaskPeriodSchedule.objects.filter(counter__in=[10, 11, 12])
         with self.assertRaises(Exception):
-            out = apps.core.views.tests.get_matching_period_for_change(periods, changes[4])
+            out = apps.core.views.tests.get_matching_period_for_change(periods, changes[
+                                                                       4])
