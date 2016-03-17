@@ -1305,7 +1305,6 @@ class FileLog(models.Model):
         if not self.task:
             res = re.match(r'.*/%s/([0-9]+)/[^/]+$' %
                            self.recipe.uid, self.path)
-            print res
             try:
                 if res:
                     task = res.group(1)

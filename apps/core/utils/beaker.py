@@ -245,6 +245,7 @@ class Beaker:
         return raw.split()
 
     def downloadLog(self, logurl):
+        """ Download and save beaker's log file to default storage """
         logparse = urlparse(logurl)
         logpath = os.path.join(
             settings.STORAGE_ROOT, *(logparse.path.split("/")))
@@ -254,8 +255,8 @@ class Beaker:
         try:
             rawfile = urllib2.urlopen(logurl)
         except urllib2.HTTPError as e:
-            logger.error("HTTP %d: %s" % (e.code, logurl))
-            return None
+            logger.error("urllib2: http %d: %s" % (e.code, logurl))
+            return
         logger.debug("download logfile: %s" % logurl)
         of = open(logpath, 'wb')
         of.write(rawfile.read())
