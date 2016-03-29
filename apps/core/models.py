@@ -248,6 +248,10 @@ class Git(models.Model):
         if not checkDays:
             checkDays = 1
         tests = Test.objects.filter(git=self, is_enable=True).only('folder')
+        if len(tests) == 0:
+            self.__getLog().warning("repository %s is empty (0 tests)" % self.name)
+        else:
+            self.__getLog().info("repository %s contiants %d tests" % (self.name, len(tests)))
         for test in tests:
             if not test.folder:
                 self.__getLog().warning("The GIT folder for test '%s'"
@@ -488,7 +492,7 @@ class Test(models.Model):
     groups = models.ManyToManyField(GroupOwner, blank=True)
 
     class Meta:
-        ordering = ["name", ]
+        ordering = ["-is_enable", "name" ]
 
     def __unicode__(self):
         return self.name
@@ -518,6 +522,12 @@ class Test(models.Model):
         if not self.git:
             return None
         return "%s/tree/HEAD:/%s" % (self.git.localurl, self.folder)
+
+    def delete(self, *args, **kwargs):
+        # not possible to remove test
+        # dependencies on old runs
+        self.is_enable = False
+        self.save()
 
     def save(self, *args, **kwargs):
         model = self.__class__
