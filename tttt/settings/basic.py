@@ -176,6 +176,7 @@ INSTALLED_APPS = (
     'apps.taskomatic',
     'apps.kerberos',
     'apps.api',
+    'apps.report',
     'taggit',
     'reversion',
     'rest_framework',

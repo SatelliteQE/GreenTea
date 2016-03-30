@@ -32,6 +32,7 @@ class CustomIndexDashboard(Dashboard):
                     models=(
                         'apps.core.models.Event',
                         'apps.core.models.Test',
+                        'apps.report.models.Report',
                         'apps.core.models.GroupTemplate',
                         'apps.core.models.DistroTemplate',
                         'apps.core.models.JobTemplate',

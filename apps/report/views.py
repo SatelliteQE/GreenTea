@@ -4,10 +4,12 @@
 from django.views.generic import TemplateView
 from apps.core.models import GroupTestTemplate, Test, Task
 from django.db.models import Max, Count
-from apps.taskomatic.models import TaskPeriodSchedule
+from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriodList
+from apps.report.models import ReportList
 
 
 class ListId:
+
     @staticmethod
     def running(schedule_ids):
         test_ids = Task.objects\
@@ -28,10 +30,7 @@ class ReportListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
 
-        periods = TaskPeriodSchedule.objects.values("period")\
-            .annotate(dmax=Max('id'))
-
-        ids = [it["dmax"] for it in periods]
+        ids = [it["max_id"] for it in TaskPeriodList.last_runs()]
         tasks = Task.objects.filter(recipe__job__schedule__id__in=ids)\
             .values("result", "recipe__job__schedule__title")\
             .annotate(dcount=Count("result"), scount=Count("recipe__job__schedule"))\
@@ -62,6 +61,15 @@ class ReportListView(TemplateView):
         context["tasks"] = t
 
         if self.repo:
-            context["nonrun"] = Test.objects.filter(is_enable=True, git__name=self.repo).exclude(id__in=running_ids)
+            context["nonrun"] = Test.objects.filter(
+                is_enable=True, git__name=self.repo).exclude(id__in=running_ids)
 
+        #context["reports"] = Report.objects.filter(is_enabled=True)
+
+        report = ReportList(ids)
+        # get statistic about tests
+        report.stat_tests()
+        # get statistic about last runs
+        report.stat_tasks()
+        context["reports"] = report
         return context

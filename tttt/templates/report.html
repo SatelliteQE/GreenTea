@@ -49,6 +49,22 @@
 </div>
 {% endif %}
 
+<h1>Report of product</h1>
+<table class="table table-striped">
+    <tr>
+        <th>Name</th><th>Run tests</th><th>Result runs</th>
+    </tr>
+    {% for report in reports %}
+    </tr>
+      <td>{{ report }}</td>
+      <td>{{ report.tests }}</td>
+      <td>{% for it in report.tasks %}<b>{{ it.name }}</b> ({{it.dcount}}) &emsp; &ensp;{% endfor %}</td>
+    <tr>
+    </tr>
+    {% endfor %}
+</table>
+
+
 {% if tasks %}
 <h1>Report of tasks</h1>
 <table class="table table-striped">

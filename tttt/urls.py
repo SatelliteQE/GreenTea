@@ -6,7 +6,7 @@ from django.conf import settings
 from apps.core.views import (HomePageView, JobDetailView, JobsDiffView,
                              JobsListView, JobHistoryView, TestDetailView,
                              TestsListView)
-from apps.core.views.report import ReportListView
+from apps.report.views import ReportListView
 from apps.kerberos.views import LoginView
 from django.views.decorators.cache import cache_page
 
