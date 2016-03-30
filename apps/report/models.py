@@ -29,6 +29,7 @@ class ReportList:
     def stat_tasks(self):
         for report in self.reports:
             data = Task.objects.filter(
+                recipe__job__template__is_enable=True,
                 recipe__job__template__in=report.jobs.all(),
                 recipe__job__schedule__in=self.periods,
             )\
@@ -42,4 +43,5 @@ class ReportList:
     def stat_tests(self):
         for report in self.reports:
             report.tests = TaskTemplate.objects.filter(
+                recipe__jobtemplate__is_enable=True,
                 recipe__jobtemplate__in=report.jobs.all()).distinct("test").count()
