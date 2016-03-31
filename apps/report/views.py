@@ -1,3 +1,6 @@
+#!/bin/python
+# -*- coding: utf-8 -*-
+
 # Author: Pavel Studenik <pstudeni@redhat.com>
 # Date: 3.2.2016
 
@@ -71,5 +74,6 @@ class ReportListView(TemplateView):
         report.stat_tests()
         # get statistic about last runs
         report.stat_tasks()
+        report.stat_recipes()
         context["reports"] = report
         return context

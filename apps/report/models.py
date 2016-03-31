@@ -1,5 +1,11 @@
+#!/bin/python
+# -*- coding: utf-8 -*-
+
+# Author: Pavel Studenik <pstudeni@redhat.com>
+# Year: 2016
+
 from django.db import models
-from apps.core.models import JobTemplate, TaskTemplate, Task, EnumResult
+from apps.core.models import JobTemplate, TaskTemplate, Task, EnumResult, RecipeTemplate
 from apps.taskomatic.models import TaskPeriodList
 from django.db.models import Count
 
@@ -39,6 +45,13 @@ class ReportList:
             for it in data:
                 it["name"] = er.get(it["result"])
             report.tasks = data
+
+    def stat_recipes(self):
+        for report in self.reports:
+            report.recipes = RecipeTemplate.objects.filter(
+                jobtemplate__is_enable=True,
+                jobtemplate__in=report.jobs.all()
+                ).count()
 
     def stat_tests(self):
         for report in self.reports:

@@ -199,7 +199,7 @@ class GrupRecipeTemaplate(admin.TabularInline):
     def get_recipe_link(self, obj):
         url = reverse('admin:core_recipetemplate_change',
                       args=(obj.recipe.pk,))
-        return '<a href="%s">%s</a>' % (url, obj.recipe)
+        return '<a href="%s">%s</a>' % (url, obj.recipe.id)
     get_recipe_link.allow_tags = True
 
 

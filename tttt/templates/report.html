@@ -52,12 +52,13 @@
 <h1>Report of product</h1>
 <table class="table table-striped">
     <tr>
-        <th>Name</th><th>Run tests</th><th>Result runs</th>
+        <th>Name</th><th>Run tests</th><th>Configurations</th><th>Result runs</th>
     </tr>
     {% for report in reports %}
     </tr>
       <td>{{ report }}</td>
       <td>{{ report.tests }}</td>
+      <td>{{ report.recipes }}</td>
       <td>{% for it in report.tasks %}<b>{{ it.name }}</b> ({{it.dcount}}) &emsp; &ensp;{% endfor %}</td>
     <tr>
     </tr>
