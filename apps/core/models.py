@@ -12,7 +12,6 @@ import urllib2
 from datetime import datetime
 
 import git
-from lib import gitconfig
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -26,6 +25,7 @@ from taggit.managers import TaggableManager
 from apps.core.signals import recipe_changed, recipe_finished
 from apps.core.utils.date_helpers import currentDate, toUTC
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
+from lib import gitconfig
 
 logger = logging.getLogger(__name__)
 
@@ -483,6 +483,8 @@ class Test(models.Model):
     git = models.ForeignKey(Git, blank=True, null=True, db_index=True)
     owner = models.ForeignKey(Author, blank=True, null=True, db_index=True)
     description = models.TextField(blank=True, null=True)
+    external_links = models.TextField(blank=True, null=True,
+                                      help_text="external links which separated by ';'")
     dependencies = models.ManyToManyField("Test", blank=True)
     time = models.CharField(max_length=6, blank=True, null=True)
     type = models.CharField(max_length=32, blank=True, null=True)
@@ -492,7 +494,7 @@ class Test(models.Model):
     groups = models.ManyToManyField(GroupOwner, blank=True)
 
     class Meta:
-        ordering = ["-is_enable", "name" ]
+        ordering = ["-is_enable", "name"]
 
     def __unicode__(self):
         return self.name
@@ -535,6 +537,11 @@ class Test(models.Model):
         if not self.owner:
             self.owner = Author.parseAuthor("")
         return super(model, self).save(*args, **kwargs)
+
+    def get_external_links(self):
+        if not self.external_links:
+            return []
+        return [it.strip() for it in self.external_links.split() if it]
 
 
 class TestHistory(models.Model):
@@ -1152,8 +1159,13 @@ class Task(models.Model):
             'result': self.get_result_display(),
             'status': self.get_status_display(),
             'statusbyuser': self.get_statusbyuser_display(),
-            'duration': self.duration
+            'duration': self.duration,
+            'logs': self.logfiles(),
+            'links': self.test.get_external_links()
         }
+
+    def logfiles(self):
+        return FileLog.objects.filter(task=self).values("path")
 
     def get_url_journal(self):  # , job=None, recipe=None):
         # if recipe == None: recipe = self.recipe
