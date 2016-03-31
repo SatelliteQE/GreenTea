@@ -144,11 +144,11 @@ function previewRecipe(uid) {
         }
         openUIDs.add(uid);
     }
-    lastUID = uid;
+    lastUID = uid.replace(/R:/,'')
     if(uid) {
-        $.getJSON("/api/recipe-info?recipe=" + uid, function(data) {
+        $.getJSON("/api/v1/recipe/" + lastUID + "?format=json", function(data) {
 		var loadToBackend = openUIDs.has(data.recipe.uid);
-		if (lastUID.replace(/R:/,'') != data.recipe.uid && !loadToBackend) { return; }
+		if (lastUID != data.recipe.uid && !loadToBackend) { return; }
 		if (loadToBackend) {
 			openUIDs.del(data.recipe.uid);
 			$('.dashboard tbody td[id="R:'+data.recipe.uid+'"]').addClass('selected');

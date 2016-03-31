@@ -1,14 +1,14 @@
+from django.conf import settings
 from django.conf.urls import include, patterns, url
 from django.contrib import admin
+from django.views.decorators.cache import cache_page
 
 import apps.api.urls
-from django.conf import settings
-from apps.core.views import (HomePageView, JobDetailView, JobsDiffView,
-                             JobsListView, JobHistoryView, TestDetailView,
+from apps.core.views import (HomePageView, JobDetailView, JobHistoryView,
+                             JobsDiffView, JobsListView, TestDetailView,
                              TestsListView)
-from apps.report.views import ReportListView
 from apps.kerberos.views import LoginView
-from django.views.decorators.cache import cache_page
+from apps.report.views import ReportListView
 
 admin.autodiscover()
 

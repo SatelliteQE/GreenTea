@@ -5,9 +5,11 @@
 # Year: 2016
 
 from django.db import models
-from apps.core.models import JobTemplate, TaskTemplate, Task, EnumResult, RecipeTemplate
-from apps.taskomatic.models import TaskPeriodList
 from django.db.models import Count
+
+from apps.core.models import (EnumResult, JobTemplate, RecipeTemplate, Task,
+                              TaskTemplate)
+from apps.taskomatic.models import TaskPeriodList
 
 
 class Report(models.Model):
@@ -51,7 +53,7 @@ class ReportList:
             report.recipes = RecipeTemplate.objects.filter(
                 jobtemplate__is_enable=True,
                 jobtemplate__in=report.jobs.all()
-                ).count()
+            ).count()
 
     def stat_tests(self):
         for report in self.reports:

@@ -7,13 +7,14 @@
 
 import logging
 import time
+
+from django.core.management.base import BaseCommand, CommandError
+from django.db.models import Max
 from texttable import Texttable
 
 from apps.core.models import Job, JobTemplate, Recipe
 from apps.core.utils.beaker import Beaker
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
-from django.core.management.base import BaseCommand, CommandError
-from django.db.models import Max
 
 logger = logging.getLogger("main")
 
@@ -27,7 +28,6 @@ class BeakerCommand():
         if not return2beaker_recipe:
             raise CommandError(
                 "return2beaker - parameter return2beaker_recipe cannot be empty")
-
 
         for uid in return2beaker_recipe:
             recipe = Recipe.objects.get(uid=uid[2:])
@@ -112,7 +112,8 @@ class BeakerCommand():
             return
 
         period = TaskPeriod.objects.get(label=label)
-        count = TaskPeriodSchedule.objects.filter(period=period).aggregate(Max('counter')).get("counter__max")
+        count = TaskPeriodSchedule.objects.filter(
+            period=period).aggregate(Max('counter')).get("counter__max")
 
         schedule = TaskPeriodSchedule.objects.create(
             title=label,

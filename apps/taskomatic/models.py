@@ -8,23 +8,24 @@
 # Date: 20.07.2014
 
 import logging
+import shlex
 import time
 import traceback
-import shlex
-from StringIO import StringIO
 from datetime import datetime, timedelta
+from StringIO import StringIO
 
 from croniter import croniter
 from django.conf import settings
 from django.core import management
-
 from django.db import models
+from django.db.models import Count, Max
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-from django.db.models import Max, Count
-# from single_process import single_process
 
 from apps.core.utils.date_helpers import toLocalZone
+
+# from single_process import single_process
+
 
 logger = logging.getLogger(__name__)
 

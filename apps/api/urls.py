@@ -5,10 +5,11 @@
 # Email: pstudeni@redhat.com
 # Date: 1.3.2015
 
-from django.conf.urls import patterns, url, include
-from apps.core.views import ApiView
+from django.conf.urls import include, patterns, url
 from rest_framework import routers
+
 import views
+from apps.core.views import ApiView
 
 router = routers.DefaultRouter()
 router.register(r'recipe', views.RecipeViewSet)

@@ -12,9 +12,9 @@ from django.db.models import Count, Max
 from django.views.generic import TemplateView
 
 from apps.core.forms import FilterForm
-from apps.core.models import (Author, CheckProgress, Git, Test, GroupOwner,
-                              Task, TestHistory, render_label)
-from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriod
+from apps.core.models import (Author, CheckProgress, Git, GroupOwner, Task,
+                              Test, TestHistory, render_label)
+from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
 
@@ -31,11 +31,12 @@ def get_matching_period_for_change(periods, change):
        oldest one."""
     periods = periods.order_by('counter')
     if change.date <= periods.earliest('counter').date_create \
-        or change.date >= periods.latest('counter').date_create:
-        raise Exception("Change %s do not fit among %s periods" % (change, periods))
+            or change.date >= periods.latest('counter').date_create:
+        raise Exception("Change %s do not fit among %s periods" %
+                        (change, periods))
     for i in range(len(periods) - 1):
-        if periods[i].date_create < change.date < periods[i+1].date_create:
-            return periods[i+1]
+        if periods[i].date_create < change.date < periods[i + 1].date_create:
+            return periods[i + 1]
 
 
 def get_history(period_ids):
@@ -44,9 +45,10 @@ def get_history(period_ids):
     # catch changes which happened right before our first period
     period_ids_one_prev_added = period_ids
     if period_ids:
-        period_ids_one_prev_added += [min(period_ids)-1]
+        period_ids_one_prev_added += [min(period_ids) - 1]
     # Get time/date limits we will use when getting list of changes
-    periods_age_list = TaskPeriodSchedule.objects.filter(id__in=period_ids_one_prev_added)
+    periods_age_list = TaskPeriodSchedule.objects.filter(
+        id__in=period_ids_one_prev_added)
     if len(periods_age_list):
         period_oldest_date = periods_age_list.earliest('counter').date_create
         period_newest_date = periods_age_list.latest('counter').date_create
@@ -68,7 +70,8 @@ def get_history(period_ids):
     for change in changes:
         if change.test_id not in history:
             history[change.test_id] = dict()
-        period_id = get_matching_period_for_change(periods_age_list, change).counter
+        period_id = get_matching_period_for_change(
+            periods_age_list, change).counter
         if period_id not in history[change.test_id]:
             history[change.test_id][period_id] = list()
         history[change.test_id][period_id].insert(0, change)
@@ -163,7 +166,8 @@ class TestsListView(TemplateView):
         periodschedule_ids = []
         for periodschedule in periodschedules.values():
             periodschedule_ids += [i['id'] for i in periodschedule]
-        logger.debug("TestsListView.__get_period_ids returns: %s" % periodschedule_ids)
+        logger.debug("TestsListView.__get_period_ids returns: %s" %
+                     periodschedule_ids)
         return periodschedule_ids
 
     def __get_period_tree(self):
@@ -186,7 +190,8 @@ class TestsListView(TemplateView):
                     'counter': p['counter'],
                     'period__title': p['period__title'],
                 })
-        logger.debug("TestsListView.__get_period_tree returns: %s" % periodschedules)
+        logger.debug("TestsListView.__get_period_tree returns: %s" %
+                     periodschedules)
         return periodschedules
 
     def __get_test_ids(self):
@@ -207,7 +212,8 @@ class TestsListView(TemplateView):
         # TODO: Cant we somehow limit this query to return only count of items
         #       per paginator settings
         tests = Test.objects.filter(**testFilter).only("id").values("id")
-        tests = sorted(set(it['id'] for it in tests))   # this just makes the list uniqe
+        # this just makes the list uniqe
+        tests = sorted(set(it['id'] for it in tests))
         logger.debug("TestsListView.__get_test_ids returns: %s" % tests)
         return tests
 
@@ -224,7 +230,8 @@ class TestsListView(TemplateView):
         paginator = Paginator(test_ids_all, settings.PAGINATOR_OBJECTS_ONPAGE)
         test_ids = paginator.page(int(self.request.GET.get('page', 1)))
         # Load and reorder data about tests
-        data = self.prepare_matrix(test_ids=test_ids, periodschedules=periodschedules)
+        data = self.prepare_matrix(
+            test_ids=test_ids, periodschedules=periodschedules)
         # Return page
         context.update({
             'data': data,
@@ -267,7 +274,8 @@ class TestsListView(TemplateView):
         # Now process all the tests
         for test_id in test_ids:
             filters['test_id'] = test_id
-            data = Task.objects.filter(**filters).select_related(*relations).only(*fields)
+            data = Task.objects.filter(
+                **filters).select_related(*relations).only(*fields)
             # Reorder data into tempate friendly data structure
             for i in data:
                 # Popupate tests
@@ -284,8 +292,10 @@ class TestsListView(TemplateView):
                     }
                 # Populate test's groups
                 if i.test.groups.name not in out_dict[i.test.id]['test__groups__name']:
-                    out_dict[i.test.id]['test__groups__name'].append(i.test.groups.name)
-                # Populate period schedules (because one test can run in 'Daily automation' and 'Weekly automation' and...)
+                    out_dict[i.test.id]['test__groups__name'].append(
+                        i.test.groups.name)
+                # Populate period schedules (because one test can run in 'Daily
+                # automation' and 'Weekly automation' and...)
                 if i.recipe.job.schedule.period_id not in out_dict[i.test.id]['data']:
                     title = ''
                     for p in periodschedules[i.recipe.job.schedule.period_id]:
@@ -302,7 +312,8 @@ class TestsListView(TemplateView):
                         'template__whiteboard': i.recipe.job.template.whiteboard,
                         'data': {},
                     }
-                # Popupate recipe (just general info common for more nightly runs)
+                # Popupate recipe (just general info common for more nightly
+                # runs)
                 tmp = {
                     "arch": i.recipe.arch.name,
                     "distro": i.recipe.distro.name,
@@ -310,7 +321,8 @@ class TestsListView(TemplateView):
                     "whiteboard": i.recipe.whiteboard,
                     "alias": i.alias,
                 }
-                recipe_matcher = render_label(tmp, i.recipe.job.template.grouprecipes)
+                recipe_matcher = render_label(
+                    tmp, i.recipe.job.template.grouprecipes)
                 if recipe_matcher not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data']:
                     out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher] = {
                         'data': {},

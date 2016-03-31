@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='tasktemplate',
             name='position',
-            field=models.SmallIntegerField(default=2, choices=[(0, b'Begin'), (1, b'Pre'), (2, b'Post'), (3, b'End')]),
+            field=models.SmallIntegerField(default=2, choices=[(
+                0, b'Begin'), (1, b'Pre'), (2, b'Post'), (3, b'End')]),
         ),
     ]

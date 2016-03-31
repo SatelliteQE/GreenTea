@@ -5,8 +5,9 @@ import datetime
 
 from django.db import migrations, models, transaction
 from django.utils.timezone import utc
+
 from apps.core.models import Job, JobTemplate
-from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriod
+from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 
 
 def migrate_chedule(label, period):
@@ -19,9 +20,11 @@ def migrate_chedule(label, period):
 
     for it in Job.objects.filter(template__period=period).order_by("date"):
         try:
-            tps = TaskPeriodSchedule.objects.get(period=tp, date_create__year=it.date.year, date_create__month=it.date.month, date_create__day=it.date.day)
+            tps = TaskPeriodSchedule.objects.get(
+                period=tp, date_create__year=it.date.year, date_create__month=it.date.month, date_create__day=it.date.day)
         except TaskPeriodSchedule.DoesNotExist:
-            tps = TaskPeriodSchedule(title=label, date_create=it.date, period=tp)
+            tps = TaskPeriodSchedule(
+                title=label, date_create=it.date, period=tp)
             it.counter = TaskPeriodSchedule.objects.filter().count()
             tps.save()
         it.schedule = tps
@@ -29,12 +32,14 @@ def migrate_chedule(label, period):
 
     tp.recount_all()
 
+
 def migrate_data(apps, schema_editor):
     for taskperiod in TaskPeriod.objects.all():
         if taskperiod.label == "daily-automation":
             migrate_chedule(taskperiod.label, JobTemplate.DAILY)
         elif taskperiod.label == "weekly-automation":
             migrate_chedule(taskperiod.label, JobTemplate.WEEKLY)
+
 
 def unmigrate_data(apps, schema_editor):
     pass

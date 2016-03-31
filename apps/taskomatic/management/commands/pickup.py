@@ -5,7 +5,9 @@
 # created: 24.1.2014
 
 import logging
+
 from django.core.management.base import BaseCommand
+
 from apps.taskomatic.models import Taskomatic
 
 logger = logging.getLogger(__name__)

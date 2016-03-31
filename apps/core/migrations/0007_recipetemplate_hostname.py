@@ -14,6 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='recipetemplate',
             name='hostname',
-            field=models.CharField(help_text=b"Set to '= system42.beaker.example.com' if you want your recipe to run on exactly this system", max_length=255, blank=True),
+            field=models.CharField(
+                help_text=b"Set to '= system42.beaker.example.com' if you want your recipe to run on exactly this system", max_length=255, blank=True),
         ),
     ]

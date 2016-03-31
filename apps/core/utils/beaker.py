@@ -11,13 +11,13 @@
 
 import logging
 import os
+import random
 import re
 import subprocess
 import sys
+import urllib2
 import xml.dom.minidom
 import xmlrpclib
-import urllib2
-import random
 from datetime import datetime, timedelta
 from urlparse import urlparse
 

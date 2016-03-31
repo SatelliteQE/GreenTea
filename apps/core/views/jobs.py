@@ -3,6 +3,7 @@
 
 import hashlib
 import logging
+from collections import OrderedDict
 from copy import copy
 from datetime import datetime, timedelta
 
@@ -16,12 +17,10 @@ from taggit.models import Tag
 from apps.core.forms import FilterForm
 from apps.core.models import (RESULT_CHOICES, Author, CheckProgress, Event,
                               JobTemplate, Recipe, render_label)
-from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriod
+from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 from apps.waiver.forms import WaiverForm
 from apps.waiver.models import Comment
 from base import create_matrix
-
-from collections import OrderedDict
 
 logger = logging.getLogger(__name__)
 

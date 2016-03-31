@@ -103,7 +103,7 @@ class Parser:
 
         rt.distro, status = DistroTemplate.objects.get_or_create(
             name=distro_name, distroname=distro_name,
-            variant=distro_variant, family = distro_family)
+            variant=distro_variant, family=distro_family)
         rt.kernel_options = xmlrecipe.getAttribute("kernel_options")
         rt.kernel_options_post = xmlrecipe.getAttribute("kernel_options_post")
         rt.ks_meta = xmlrecipe.getAttribute("ks_meta")

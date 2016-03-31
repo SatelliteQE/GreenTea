@@ -1,7 +1,8 @@
 
 
-from apps.core.models import JobTemplate, Recipe, Job
 from rest_framework import serializers
+
+from apps.core.models import Job, JobTemplate, Recipe
 
 
 class JobTemplateSerializer(serializers.HyperlinkedModelSerializer):

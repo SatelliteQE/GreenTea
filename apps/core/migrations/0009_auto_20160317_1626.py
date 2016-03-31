@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.db import migrations, models
 import datetime
+
+from django.db import migrations, models
 from django.utils.timezone import utc
 
 
@@ -16,7 +17,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='filelog',
             name='created',
-            field=models.DateTimeField(default=datetime.datetime(2016, 3, 17, 15, 26, 40, 221466, tzinfo=utc), auto_now=True),
+            field=models.DateTimeField(default=datetime.datetime(
+                2016, 3, 17, 15, 26, 40, 221466, tzinfo=utc), auto_now=True),
             preserve_default=False,
         ),
         migrations.AlterField(

@@ -11,9 +11,9 @@ import os
 
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.test.client import Client
-from django.contrib.auth.models import User
 
 import apps.core.views.tests
 from apps.core.models import Job, RecipeTemplate, TestHistory

@@ -5,6 +5,7 @@
 # Year: 2016
 
 from django.contrib import admin
+
 from models import Report
 
 

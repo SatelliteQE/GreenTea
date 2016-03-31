@@ -27,7 +27,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='recipetemplate',
             name='hvm',
-            field=models.BooleanField(default=False, verbose_name='Support virtualizaion'),
+            field=models.BooleanField(
+                default=False, verbose_name='Support virtualizaion'),
         ),
         migrations.AlterField(
             model_name='recipetemplate',
@@ -37,7 +38,8 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='recipetemplate',
             name='schedule',
-            field=models.CharField(max_length=255, verbose_name='Schedule period', blank=True),
+            field=models.CharField(
+                max_length=255, verbose_name='Schedule period', blank=True),
         ),
         migrations.AlterField(
             model_name='test',

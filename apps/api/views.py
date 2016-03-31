@@ -8,16 +8,15 @@
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-
-from models import Performance
 from rest_framework import viewsets
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from serializers import RecipeSerializer, JobTemplateSerializer
-from apps.core.models import Recipe, JobTemplate, Task
-from apps.core.models import (FAIL, NEW, WAIVED, WARN)
-from apps.waiver.models import Comment
+from rest_framework.response import Response
+
+from apps.core.models import FAIL, NEW, WAIVED, WARN, JobTemplate, Recipe, Task
 from apps.core.views import base
+from apps.waiver.models import Comment
+from models import Performance
+from serializers import JobTemplateSerializer, RecipeSerializer
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -109,6 +108,7 @@ class JobTemplateViewSet(viewsets.ModelViewSet):
 
         }
         return Response(data)
+
 
 @csrf_exempt
 def performance(request):

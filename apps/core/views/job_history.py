@@ -1,9 +1,11 @@
 import logging
+
 from django.conf import settings
 from django.http import Http404
 from django.views.generic import TemplateView
-from apps.taskomatic.models import TaskPeriodSchedule, TaskPeriod
-from apps.core.models import (JobTemplate, RecipeTemplate, Task)
+
+from apps.core.models import JobTemplate, RecipeTemplate, Task
+from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 
 logger = logging.getLogger(__name__)
 

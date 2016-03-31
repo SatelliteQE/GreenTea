@@ -1,6 +1,7 @@
 # Django settings for tttt project.
 
 import os
+
 from django.conf import global_settings
 
 ROOT_PATH = os.path.abspath("%s/%s/" %
@@ -120,19 +121,19 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-#    'django.middleware.cache.FetchFromCacheMiddleware',
+    #    'django.middleware.cache.FetchFromCacheMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 # Cache only for production deployment
-#CACHES = {
+# CACHES = {
 #    'default': {
-        #'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        #'LOCATION': 'unique-snowflake'
+#'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#'LOCATION': 'unique-snowflake'
 # If following code will be set, you need run ./manage.py createcachetable gt_cache_table
-        #'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        #'LOCATION': 'gt_cache_table',
+#'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#'LOCATION': 'gt_cache_table',
 #    }
 #}
 
@@ -192,9 +193,9 @@ except ImportError:
     pass
 
 ENABLE_PLUGINS = (
-#       "irc",
-        "backuplogs",
-    )
+    #       "irc",
+    "backuplogs",
+)
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
@@ -212,7 +213,7 @@ LOGGING = {
             '()': 'django.utils.log.RequireDebugFalse'
         }
     },
-  'formatters': {
+    'formatters': {
         'simple': {
             'format': '%(levelname)s %(message)s'
         },
@@ -316,11 +317,7 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
-}
-
-REST_FRAMEWORK = {
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [],
-    'DEFAULT_PERMISSION_CLASSES': [],
     'PAGE_SIZE': 10
 }

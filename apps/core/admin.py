@@ -10,10 +10,10 @@ from django.contrib import admin
 from django.core.urlresolvers import reverse
 
 from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Event,
-                    Git, GroupOwner, GroupTaskTemplate, GroupTemplate,
+                    FileLog, Git, GroupOwner, GroupTaskTemplate, GroupTemplate,
                     GroupTestTemplate, Job, JobTemplate, PhaseLabel,
                     PhaseResult, Recipe, RecipeTemplate, System, Task,
-                    TaskRoleEnum, TaskTemplate, Test, TestHistory, FileLog)
+                    TaskRoleEnum, TaskTemplate, Test, TestHistory)
 
 
 class TemplateTaskInLine(admin.TabularInline):
@@ -103,13 +103,14 @@ class RecipeAdmin(admin.ModelAdmin):
 class TaskAdmin(admin.ModelAdmin):
     list_display = ("uid", "recipe", "test", "status", "duration", "result")
     search_fields = ["uid"]
+    raw_id_fields = ("recipe", "test")
 
 
 class TaskTemplateInLine(admin.TabularInline):
     model = TaskTemplate
     extra = 0
-    fields = ("jobtemplate", "get_recipetemplate_link")
-    readonly_fields = ("jobtemplate", "get_recipetemplate_link")
+    fields = ("get_recipetemplate_link", "jobtemplate")
+    readonly_fields = fields
 
     def jobtemplate(self, obj):
         return "%s" % obj.recipe.jobtemplate
@@ -117,7 +118,7 @@ class TaskTemplateInLine(admin.TabularInline):
     def get_recipetemplate_link(self, obj):
         url = reverse('admin:core_recipetemplate_change',
                       args=(obj.recipe.pk,))
-        return '<a href="%s">%s</a>' % (url, obj.recipe)
+        return '<a href="%s">%s</a>' % (url, obj.recipe.id)
     get_recipetemplate_link.allow_tags = True
 
 
@@ -190,7 +191,7 @@ class GroupTestInLine(admin.TabularInline):
 class GrupRecipeTemaplate(admin.TabularInline):
     model = GroupTaskTemplate
     fields = ("get_recipe_link", "recipe", "jobtemplate")
-    readonly_fields = ("get_recipe_link", "recipe", "jobtemplate")
+    readonly_fields = fields
     extra = 0
 
     def jobtemplate(self, obj):
@@ -268,7 +269,7 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
 
 class FileLogAdmin(admin.ModelAdmin):
     list_display = ("recipe", "task", "path", "created")
-    readonly_fields = ("recipe", "task")
+    raw_id_fields = ("recipe", "task")
 
 
 admin.site.register(Job, JobAdmin)
