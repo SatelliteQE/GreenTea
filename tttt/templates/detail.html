@@ -1,5 +1,7 @@
 {% extends "basic.html" %}
 
+{% block title %}- Detail{% endblock %}
+
 {% block content %}
 <h1>Job "{{ jobtemplate }}" detail <a href="{% url 'admin:core_jobtemplate_change' jobtemplate.id %}">Link to administration</a></h1>
 
