@@ -68,7 +68,7 @@
       <tr>
           <th>Job</th>
           <th width="50">Recipe</th>
-          {% for key, period in plan.periods.items %} {{key}} {{period}}
+          {% for key, period in plan.periods.items %}
           <th class="date"><a href="#{{period.id}}" title="{{period.date_create}}" >{{key}}</a></th>
           {% endfor %}
       </tr>
