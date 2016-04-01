@@ -95,7 +95,8 @@ class JobHistoryView(TemplateView):
                 out_dict[task.recipe.job.schedule.period][task_recipe] = dict()
 
             # Create new task if needed
-            if task.test not in out_dict[task.recipe.job.schedule.period][task_recipe]:
+            if task.test not in out_dict[
+                    task.recipe.job.schedule.period][task_recipe]:
                 out_dict[task.recipe.job.schedule.period][
                     task_recipe][task.test] = dict()
 

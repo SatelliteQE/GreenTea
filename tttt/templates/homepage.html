@@ -15,6 +15,39 @@
   </div>
 </div>
 
+{% if score %}
+<h1>Score </h1>
+<table class="table table-striped">
+    <tr>
+        <th>Test</th>
+        <th><a href="?order=score">Score</a></th>
+        <th><a href="?order=rate">Rate</a></th>
+        <th>Results</th>
+    </tr>
+    {% for it in score %}
+    <tr>
+      <td width="50%"><a href="{% url 'tests-list' %}?test_id={{it.test.id}}">{{it.test}}</a></td>
+      <td>{{it.score}}</td>
+      <td>{{it.rate|floatformat:2}}</td>
+      <td>
+        <div class="progress" style="height:20px">
+          <div class="progress-bar progress-bar-success" style="width: {{it.get_result.pass}}%">
+            <span class="sr-only">{{it.get_result.pass}}% Complete (success)</span>
+          </div>
+          <div class="progress-bar progress-bar-warning" style="width: {{it.get_result.warning}}%">
+            <span class="sr-only">{{it.get_result.warning}}% Complete (warning)</span>
+          </div>
+          <div class="progress-bar progress-bar-danger" style="width: {{it.get_result.fail}}%">
+            <span class="sr-only">{{it.get_result.fail}}% Complete (danger)</span>
+          </div>
+        </div>
+      </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
+
 {% if networking %}
 <h1>Network <span style="color:red">(in progress)</span></h1>
 <table class="table table-striped">

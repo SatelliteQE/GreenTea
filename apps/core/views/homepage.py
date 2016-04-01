@@ -10,7 +10,8 @@ from django.db.models import Count
 from django.views.generic import TemplateView
 
 from apps.core.models import CheckProgress, EnumResult, Task, TestHistory
-from apps.taskomatic.models import TaskPeriodSchedule
+from apps.report.models import Score
+from apps.taskomatic.models import TaskPeriodList, TaskPeriodSchedule
 from apps.waiver.models import Comment
 
 logger = logging.getLogger(__name__)
@@ -81,4 +82,9 @@ class HomePageView(TemplateView):
         context['hpaginator'] = paginator
 
         # context['networking'] = self.get_network_stas()
+        ids = [it["max_id"] for it in TaskPeriodList.last_runs()]
+        order = self.request.GET.get(
+            "order") if self.request.GET.get("order") else "score"
+        context["score"] = Score.objects.filter(
+            schedule__in=ids).order_by(order)[:10]
         return context

@@ -106,6 +106,8 @@ class TestsListView(TemplateView):
             self.filters['group_id'] = parameters.get('group')
         if 'email' in kwargs:
             self.filters['email'] = kwargs.get('email')
+        if 'test_id' in parameters:
+            self.filters['test_id'] = parameters.get('test_id')
         if 'search' in parameters:
             self.filters['email'] = None
             if self.forms['search'].is_valid():
@@ -207,6 +209,8 @@ class TestsListView(TemplateView):
             testFilter["git__id"] = self.filters.get('repo_id')
         if 'group_id' in self.filters:
             testFilter["groups__id"] = self.filters.get('group_id')
+        if 'test_id' in self.filters:
+            testFilter["id"] = self.filters.get('test_id')
         # Load all the Test-s
         # TODO: Why are we ordering these?
         # TODO: Cant we somehow limit this query to return only count of items
@@ -263,7 +267,7 @@ class TestsListView(TemplateView):
             'test__groups__name',
             'id', 'uid', 'result', 'status', 'statusbyuser', 'alias',
             'recipe__id', 'recipe__uid', 'recipe__status', 'recipe__resultrate', 'recipe__whiteboard', 'recipe__statusbyuser',
-            'recipe__arch__name',
+            'recipe__arch__name', 'recipe__result',
             'recipe__distro__name',
             'recipe__job__id', 'recipe__job__uid',
             'recipe__job__template__id', 'recipe__job__template__whiteboard', 'recipe__job__template__grouprecipes',
@@ -291,12 +295,14 @@ class TestsListView(TemplateView):
                         'data': {},
                     }
                 # Populate test's groups
-                if i.test.groups.name not in out_dict[i.test.id]['test__groups__name']:
+                if i.test.groups.name not in out_dict[
+                        i.test.id]['test__groups__name']:
                     out_dict[i.test.id]['test__groups__name'].append(
                         i.test.groups.name)
                 # Populate period schedules (because one test can run in 'Daily
                 # automation' and 'Weekly automation' and...)
-                if i.recipe.job.schedule.period_id not in out_dict[i.test.id]['data']:
+                if i.recipe.job.schedule.period_id not in out_dict[
+                        i.test.id]['data']:
                     title = ''
                     for p in periodschedules[i.recipe.job.schedule.period_id]:
                         if p['id'] == i.recipe.job.schedule.id:
@@ -307,7 +313,8 @@ class TestsListView(TemplateView):
                         'data': {},
                     }
                 # Popupate job (just general info common for more nightly runs)
-                if i.recipe.job.template.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data']:
+                if i.recipe.job.template.id not in out_dict[i.test.id][
+                        'data'][i.recipe.job.schedule.period_id]['data']:
                     out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id] = {
                         'template__whiteboard': i.recipe.job.template.whiteboard,
                         'data': {},
@@ -323,18 +330,21 @@ class TestsListView(TemplateView):
                 }
                 recipe_matcher = render_label(
                     tmp, i.recipe.job.template.grouprecipes)
-                if recipe_matcher not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data']:
+                if recipe_matcher not in out_dict[i.test.id]['data'][
+                        i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data']:
                     out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher] = {
                         'data': {},
                     }
                 # Populate schedule
-                if i.recipe.job.schedule.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data']:
+                if i.recipe.job.schedule.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id][
+                        'data'][i.recipe.job.template.id]['data'][recipe_matcher]['data']:
                     out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id] = {
                         'counter': i.recipe.job.schedule.counter,
                         'data': {},
                     }
                 # Populate task (i.e. test run)
-                if i.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data']:
+                if i.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][
+                        i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data']:
                     out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data'][i.id] = {
                         'uid': i.uid,
                         'result': i.get_result(),

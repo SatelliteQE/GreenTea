@@ -99,7 +99,8 @@ class BeakerCommand():
             self.scheduleByJobTemplates(
                 filter, "".join(label), fullInfo, simulate, reserver)
 
-    def scheduleByJobTemplates(self, filter, label, fullInfo, simulate, reserve):
+    def scheduleByJobTemplates(
+            self, filter, label, fullInfo, simulate, reserve):
         jobTs = JobTemplate.objects.filter(**filter).distinct()
         logger.info("%s JobTemplates are prepared." % len(jobTs))
         if fullInfo:
@@ -118,7 +119,7 @@ class BeakerCommand():
         schedule = TaskPeriodSchedule.objects.create(
             title=label,
             period=period,
-            counter=count + 1 if count != None else 0,
+            counter=count + 1 if count is not None else 0,
         )
 
         for jobT in jobTs:

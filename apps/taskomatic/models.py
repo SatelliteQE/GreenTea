@@ -34,7 +34,8 @@ class TaskPeriodList:
 
     @staticmethod
     def last_runs():
-        return TaskPeriodSchedule.objects.values("period", "period__title").annotate(max_id=Max("id"), dcount=Count("period"))
+        return TaskPeriodSchedule.objects.values("period", "period__title").annotate(
+            max_id=Max("id"), dcount=Count("period"))
 
 
 class TaskPeriodSchedule(models.Model):

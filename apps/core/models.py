@@ -81,6 +81,17 @@ def render_label(data, rule):
 
 
 class EnumResult:
+    UNKNOW = 0
+    ABOART = 1
+    WAIT = 2
+    WARN = 3
+    FAIL = 4
+    PASS = 5
+    NEW = 6
+    CANCEL = 7
+    SCHEDULED = 8
+    PANIC = 9
+    FAILINSTALL = 10
 
     def __init__(self):
         self.enums = dict(RESULT_CHOICES)
@@ -251,7 +262,9 @@ class Git(models.Model):
         if len(tests) == 0:
             self.__getLog().warning("repository %s is empty (0 tests)" % self.name)
         else:
-            self.__getLog().info("repository %s contiants %d tests" % (self.name, len(tests)))
+            self.__getLog().info(
+                "repository %s contiants %d tests" %
+                (self.name, len(tests)))
         for test in tests:
             if not test.folder:
                 self.__getLog().warning("The GIT folder for test '%s'"
