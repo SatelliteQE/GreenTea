@@ -1165,7 +1165,7 @@ class Task(models.Model):
         }
 
     def logfiles(self):
-        return FileLog.objects.filter(task=self).values("path")
+        return list(FileLog.objects.filter(task=self).values("path"))
 
     def get_url_journal(self):  # , job=None, recipe=None):
         # if recipe == None: recipe = self.recipe
