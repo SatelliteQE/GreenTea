@@ -13,6 +13,7 @@ from apps.core.models import CheckProgress, EnumResult, Task, TestHistory
 from apps.report.models import Score
 from apps.taskomatic.models import TaskPeriodList, TaskPeriodSchedule
 from apps.waiver.models import Comment
+from apps.core.forms import HomepageForm
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +62,12 @@ class HomePageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
+
+        form = HomepageForm(self.request.GET)
+        form.is_valid()
+        context["forms"] = form
+        self.filters = form.cleaned_data
+
         try:
             context['progress'] = CheckProgress.objects.order_by(
                 "-datestart")[0]
@@ -83,8 +90,11 @@ class HomePageView(TemplateView):
 
         # context['networking'] = self.get_network_stas()
         ids = [it["max_id"] for it in TaskPeriodList.last_runs()]
-        order = self.request.GET.get(
-            "order") if self.request.GET.get("order") else "score"
+
+        if self.filters.get("schedule"):
+            ids = [int(self.filters.get("schedule"))]
+        order = self.filters.get("order") if self.filters.get("order") else "score"
         context["score"] = Score.objects.filter(
             schedule__in=ids).order_by(order)[:10]
+        context["schedules"] = TaskPeriodSchedule.objects.filter(id__in=ids).order_by("period")
         return context

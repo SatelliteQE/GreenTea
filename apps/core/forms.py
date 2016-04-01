@@ -12,6 +12,19 @@ from models import GroupTemplate, GroupTestTemplate, JobTemplate, Test
 logger = logging.getLogger(__name__)
 
 
+class HomepageForm(forms.Form):
+    ORDER_CHOICES = (
+        ("rate", "rate"),
+        ("score", "score")
+    )
+    order = forms.ChoiceField(
+        choices = ORDER_CHOICES,
+        required=False
+    )
+    schedule = forms.IntegerField(
+        required=False
+    )
+
 class FilterForm(forms.Form):
     onlyfail = forms.BooleanField(
         required=False, initial=False
