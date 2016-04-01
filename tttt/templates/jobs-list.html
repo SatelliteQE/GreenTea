@@ -60,6 +60,7 @@
 <div id="slider"></div>
 </div>
 
+
 {% for plan in plans %}
 <table class="dashboard dashboard-jobs" id="{{plan.object.label}}" >
   <thead>
@@ -67,8 +68,8 @@
       <tr>
           <th>Job</th>
           <th width="50">Recipe</th>
-          {% for it in plan.label %}
-          <th class="date"><a href="#" >{{it}}</a></th>
+          {% for key, period in plan.periods.items %} {{key}} {{period}}
+          <th class="date"><a href="#{{period.id}}" title="{{period.date_create}}" >{{key}}</a></th>
           {% endfor %}
       </tr>
     </thead>

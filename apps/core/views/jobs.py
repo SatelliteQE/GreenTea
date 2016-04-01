@@ -50,7 +50,7 @@ class JobListObject:
                     "max_num": plan["counter"]}
 
                 actual_max = plan["counter"] + 1
-                self.plans[key]["label"] = range(
+                self.plans[key]["period_labels"] = range(
                     actual_max -
                     self.range_size -
                     self.history_back,
@@ -60,20 +60,29 @@ class JobListObject:
                 self.plans[key]["data"].append(plan["id"])
 
         for key, it in self.plans.items():
-            it["count"] = len(it["label"])
+            it["count"] = len(it["period_labels"])
 
     def execute(self):
         # ids of TaskPeriod, which are used in selected recipes
         plans = set()
         for key, it in self.plans.items():
             self.filters.update({
-                "job__schedule__counter__in": it["label"],
+                "job__schedule__counter__in": it["period_labels"],
                 "job__schedule__id__in": it["data"],
                 "job__template__is_enable": True
             })
             recipes = Recipe.objects.filter(**self.filters)\
                 .select_related("job", "job__template", "arch", "distro", "job__schedule")\
                 .order_by("job__template__position", "job_id")
+
+            # load models of schedule run
+            it["periods"] = OrderedDict(
+                zip(it["period_labels"], it["period_labels"]))
+            periods = TaskPeriodSchedule.objects.filter(
+                counter__in=it["period_labels"],
+                period=key).order_by("counter")
+            for period_label in periods:
+                it["periods"][period_label.counter] = period_label
 
             # remove task period from view when there are no recipes
             if len(recipes) == 0:
@@ -93,8 +102,8 @@ class JobListObject:
                     (template_label, recipe.job.template)).hexdigest()
                 id_counter = recipe.job.schedule.counter
                 if template not in objects:
-                    label = OrderedDict([(k, None) for k in it["label"]])
-
+                    label = OrderedDict([(k, None)
+                                         for k in it["period_labels"]])
                     objects[template] = {
                         "object": recipe.job.template,
                         "label": template_label,
@@ -103,6 +112,7 @@ class JobListObject:
                 objects[template]["data"].update({
                     id_counter: recipe
                 })
+
             self.plans[key]["objects"] = objects
         # load used plans for this select
         self.taskperiod = TaskPeriod.objects.filter(id__in=plans)
