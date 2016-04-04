@@ -15,8 +15,8 @@
   </div>
 </div>
 
+{% if schedules %}
 
-{% if score %}
 <h1>Score </h1>
 <ul class="nav nav-tabs">
   <li role="presentation" {%if not forms.cleaned_data.schedule%}class="active" {% endif %}><a href="{% url "homepage" %}">All</a></li>

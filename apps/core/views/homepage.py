@@ -90,11 +90,12 @@ class HomePageView(TemplateView):
 
         # context['networking'] = self.get_network_stas()
         ids = [it["max_id"] for it in TaskPeriodList.last_runs()]
-
+        filter_ids = ids
         if self.filters.get("schedule"):
-            ids = [int(self.filters.get("schedule"))]
+            filter_ids = [int(self.filters.get("schedule"))]
         order = self.filters.get("order") if self.filters.get("order") else "score"
         context["score"] = Score.objects.filter(
-            schedule__in=ids).order_by(order)[:10]
+            schedule__in=filter_ids).order_by(order)[:10]
+
         context["schedules"] = TaskPeriodSchedule.objects.filter(id__in=ids).order_by("period")
         return context
