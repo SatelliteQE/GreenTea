@@ -186,7 +186,7 @@ class JobsListView(TemplateView):
         # include only jobs with given name
         search_query = ""
         if self.filters.get('search'):
-            search_query = 'AND lower("core_jobtemplate"."whiteboard") LIKE lower(%%%s%%)' % self.filters.get('search')
+            search_query = """AND lower("core_jobtemplate"."whiteboard") LIKE lower('%%{}%%')""".format(self.filters.get('search'))
 
         query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
            LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
