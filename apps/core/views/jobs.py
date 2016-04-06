@@ -173,35 +173,32 @@ class JobsListView(TemplateView):
             context, **kwargs)
 
     def get_statistic(self):
-        jobstag = JobTemplate.objects.filter(
-            tags__slug=self.filters.get("tag"))
+        """ returns data for pass/fail/warn graph"""
+
+        # include only jobs with given tag
+        tag_query = ""
+        if self.filters.get("tag"):
+            jobstag = JobTemplate.objects.filter(
+                tags__slug=self.filters.get("tag"))
+            tag_query = map(lambda x: "%d" % int(x.id), jobstag)
+            tag_query = 'AND "core_job"."template_id" IN ( %s )' % ", ".join(tag_query)
+
+        # include only jobs with given name
+        search_query = ""
+        if self.filters.get('search'):
+            search_query = 'AND lower("core_jobtemplate"."whiteboard") LIKE lower(%%%s%%)' % self.filters.get('search')
+
+        query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
+           LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
+           LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
+           LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
+           WHERE "core_job"."date" > %%s AND "core_jobtemplate"."is_enable" = True
+           %s %s
+           GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """ % (tag_query, search_query)
 
         cursor = connection.cursor()
-        tag_query = ""
-        if jobstag:
-            tag_query = map(lambda x: "%d" % int(x.id), jobstag)
-            tag_query = """ AND "core_job"."template_id" IN ( %s ) """ % ", ".join(
-                tag_query)
-        if self.filters.get('search'):
-            # statistic information
-            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
-               LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
-               LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
-               LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
-               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s
-               AND lower("core_jobtemplate"."whiteboard") LIKE lower(%s)
-               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
-            cursor.execute(query,
-                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True, "%%%s%%" % self.filters.get('search')])
-        else:
-            query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
-               LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
-               LEFT JOIN "core_job" ON ("core_recipe"."job_id" = "core_job"."id")
-               LEFT JOIN "core_jobtemplate" ON ("core_jobtemplate"."id" = "core_job"."template_id")
-               WHERE "core_job"."date" > %s AND "core_jobtemplate"."is_enable" = %s """ + tag_query + """
-               GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """
-            cursor.execute(query,
-                           [(datetime.now().date() - timedelta(days=14)).isoformat(), True])
+        cursor.execute(query, [
+            (datetime.now().date() - timedelta(days=14)).isoformat()])
 
         data = cursor.fetchall()
         label = OrderedDict()
