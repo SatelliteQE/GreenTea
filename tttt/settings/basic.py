@@ -10,7 +10,7 @@ ROOT_PATH = os.path.abspath("%s/%s/" %
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-VERSION = "1.0beta"
+VERSION = "1.0"
 
 ADMINS = (
     # ('Example', 'admin@example.com'),
@@ -295,9 +295,12 @@ REPOSITORIES_GIT = {
         ("/tests",),
 }
 
-PAGINATOR_OBJECTS_ONPAGE = 10
+PAGINATOR_OBJECTS_ONPAGE = 20
 PAGINATOR_OBJECTS_ONHOMEPAGE = 10
 CHECK_COMMMITS_PREVIOUS_DAYS = 7
+
+GRAPPELLI_ADMIN_TITLE = "<a href='/' >Green Tea</a>"
+GRAPPELLI_INDEX_DASHBOARD = 'dashboard_redhat.CustomIndexDashboard'
 
 # how many periods is shown
 RANGE_PREVIOUS_RUNS = 9
@@ -321,3 +324,4 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'PAGE_SIZE': 10
 }
+

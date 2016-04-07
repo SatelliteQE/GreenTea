@@ -5,10 +5,10 @@
 # Date: 3.2.2016
 
 from django.db.models import Count, Max
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, DetailView
 
 from apps.core.models import GroupTestTemplate, Task, Test
-from apps.report.models import ReportList
+from apps.report.models import ReportList, ExternalPage
 from apps.taskomatic.models import TaskPeriodList, TaskPeriodSchedule
 
 
@@ -22,6 +22,19 @@ class ListId:
             .annotate(dcount=Count("test"))\
             .order_by("-dcount")
         return [it["test__id"] for it in test_ids]
+
+
+class ReportPageView(DetailView):
+    template_name = 'report.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(self.__class__, self).get_context_data(**kwargs)
+        context["external_links"] = ExternalPage.objects.filter(is_enabled=True)
+        context["page"] = self.page
+        return context
+
+    def get_object(self, queryset=None):
+        self.page = ExternalPage.objects.get(id=self.kwargs.get("id"))
 
 
 class ReportListView(TemplateView):
@@ -77,4 +90,6 @@ class ReportListView(TemplateView):
         report.stat_tasks()
         report.stat_recipes()
         context["reports"] = report
+
+        context["external_links"] = ExternalPage.objects.filter(is_enabled=True)
         return context

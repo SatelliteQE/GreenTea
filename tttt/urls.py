@@ -8,7 +8,7 @@ from apps.core.views import (HomePageView, JobDetailView, JobHistoryView,
                              JobsDiffView, JobsListView, TestDetailView,
                              TestsListView)
 from apps.kerberos.views import LoginView
-from apps.report.views import ReportListView
+from apps.report.views import ReportListView, ReportPageView
 
 admin.autodiscover()
 
@@ -27,6 +27,8 @@ urlpatterns = patterns('',
                            TestsListView.as_view(), name='tests-email'),
                        url(r'^reports/$',
                            ReportListView.as_view(), name='reports'),
+                       url(r'^reports/(?P<id>[0-9]+)$',
+                           ReportPageView.as_view(), name='report-page'),
                        url(r'^accounts/login',
                            LoginView.as_view(), name="login"),
                        url(r'^job/(?P<id>[0-9]+)$',

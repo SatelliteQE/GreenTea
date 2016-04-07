@@ -5,8 +5,22 @@
 
 {% block content %}
 
-<h1>Report of tests</h1>
+<ul class="nav nav-tabs">
+  <li role="presentation" {% if not page %}class="active"{% endif %} ><a href="{% url "reports" %}">All</a></li>
+  {% for it in external_links %}
+  <li role="presentation" {% if page.id == it.id %} class="active" {% endif %} ><a href="{{ it.get_absolute_url }}" >{{ it }}</a></li>
+  {% endfor %}
+</ul>
 
+{% if page %}
+
+<iframe src="{{page.url}}" width="100%" height="100%" frameborder="0" style="height: calc(100vh - 220px);">
+</iframe>
+
+{% endif %}
+
+{% if grouptest %}
+<h1>Report of tests</h1>
 <div class="row">
   <div class="col-md-6">
     <table class="table table-striped">
@@ -39,6 +53,7 @@
     </table>
   </div>
 </div>
+{% endif %}
 
 {% if nonrun %}
 <h1>Non Runing Test</h1>
@@ -51,6 +66,7 @@
 </div>
 {% endif %}
 
+{% if reports %}
 <h1>Report of product</h1>
 <table class="table table-striped">
     <tr>
@@ -66,7 +82,7 @@
     </tr>
     {% endfor %}
 </table>
-
+{% endif %}
 
 {% if tasks %}
 <h1>Report of tasks</h1>

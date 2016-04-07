@@ -7,8 +7,7 @@
 import json
 
 from django.db import models
-from django.db.models import Count
-
+from django.db.models import Count, permalink
 from apps.core.models import (EnumResult, JobTemplate, RecipeTemplate, Task,
                               TaskTemplate, Test)
 from apps.taskomatic.models import TaskPeriodList, TaskPeriodSchedule
@@ -41,6 +40,19 @@ class Score(models.Model):
         for it in result:
             data[er.get(it["result"])] = (it["count"] * 100) / self.count
         return data
+
+
+class ExternalPage(models.Model):
+    name = models.CharField(max_length=128)
+    url = models.CharField(max_length=256)
+    is_enabled = models.BooleanField(default=True)
+
+    def __unicode__(self):
+        return "%s" % self.name
+
+    @permalink
+    def get_absolute_url(self):
+        return ("report-page", [self.id,])
 
 
 class ReportList:

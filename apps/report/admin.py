@@ -6,10 +6,11 @@
 
 from django.contrib import admin
 
-from models import Report
+from models import Report, ExternalPage
 
 
 class ReportAdmin(admin.ModelAdmin):
     filter_horizontal = ('jobs',)
 
 admin.site.register(Report, ReportAdmin)
+admin.site.register(ExternalPage)
