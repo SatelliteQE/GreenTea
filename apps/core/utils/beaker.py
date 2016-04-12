@@ -255,7 +255,7 @@ class Beaker:
         try:
             rawfile = urllib2.urlopen(logurl)
         except urllib2.HTTPError as e:
-            logger.error("urllib2: http %d: %s" % (e.code, logurl))
+            logger.warning("urllib2: http %d: %s" % (e.code, logurl))
             return
         logger.debug("download logfile: %s" % logurl)
         of = open(logpath, 'wb')
