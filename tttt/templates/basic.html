@@ -4,15 +4,16 @@
     <title>Green Tea {% block title %}{% endblock %}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/media/css/smoothness/jquery-ui-1.10.3.custom.css">    
+    <link rel="stylesheet" href="/media/css/smoothness/jquery-ui-1.10.3.custom.css">
     <link rel="stylesheet" href="/media/lib/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/media/lib/bootstrap/dist/css/bootstrap-theme.min.css">    
+    <link rel="stylesheet" href="/media/lib/bootstrap/dist/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="/media/css/basic.css">
     <script src="/media/js/jquery-1.10.1.min.js"></script>
     <script src="/media/js/jquery.cookie.js"></script>
     <script src="/media/js/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="/media/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     <link rel="shortcut icon" href="/media/images/shortcut.ico">
+    <script src="/media/js/functions.js"></script>
     <script language="javascript">
     {% for key, value in conf.items %}
       var {{ key }}="{{ value }}";
@@ -56,7 +57,7 @@
         <!-- END content -->
       </div>
     </div>
- 
+
     <div id="footer">
         <div class="container">
         <p class="text-muted">

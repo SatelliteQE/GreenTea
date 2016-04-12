@@ -12,8 +12,11 @@ import views
 from apps.core.views import ApiView
 
 router = routers.DefaultRouter()
-router.register(r'recipe', views.RecipeViewSet)
+router.register(r'author', views.AuthorViewSet)
 router.register(r'jobtemplate', views.JobTemplateViewSet)
+router.register(r'recipe', views.RecipeViewSet)
+router.register(r'task', views.TaskViewSet)
+
 
 urlpatterns = patterns('',
                        url(r'^v1/', include(router.urls)),

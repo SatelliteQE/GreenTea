@@ -1,29 +1,3 @@
-function px(num) {return Math.round(num)+'px';}
-function log(mess) { console.log(mess); }
-function isObject(obj) {return obj !== null && typeof obj === 'object';}
-function isNumber(obj) {return obj !== null && !isNaN(parseInt(obj, 10));}
-function isArray(myArray) {return Object.prototype.toString.call(myArray) === "[object Array]";}
-
-function Set() {
-	this.field = [];
-	this.has = function(item) {
-		return this.field.indexOf(item) != -1;
-	};
-	this.add = function(item) {
-		if (!this.has(item)) {
-			this.field.push(item);
-		}
-	};
-	this.del = function(item) {
-		var ix = this.field.indexOf(item);
-		if (ix != -1) {
-			this.field[ix] = null;
-		}
-	};
-	this.getAll = function() {
-	    return this.field;
-	};
-}
 
 function selectMenu() {
   $('#manMenu li').each(function(){
@@ -47,7 +21,7 @@ function getCommentIcon(action) {
 	}
 }
 
-function DetailPanel(elm) {	
+function DetailPanel(elm) {
 	this.elm = elm;
 	this.func = {
 		getInfoAboutTask: null,
@@ -64,7 +38,7 @@ function DetailPanel(elm) {
 	this.__mouseMove = function(event) {
 		if (!detailPanel.mouseEvents.move) return;
 		var diff = event.pageY - detailPanel.mouseEvents.y;
-		detailPanel.elm.height(detailPanel.elm.height() - diff); 		
+		detailPanel.elm.height(detailPanel.elm.height() - diff);
 		detailPanel.mouseEvents.x = event.pageX;
 		detailPanel.mouseEvents.y = event.pageY;
 	};
@@ -76,7 +50,7 @@ function DetailPanel(elm) {
 		}
 		detailPanel.mouseEvents.move = true;
 		detailPanel.mouseEvents.x = event.pageX;
-		detailPanel.mouseEvents.y = event.pageY;		
+		detailPanel.mouseEvents.y = event.pageY;
 		detailPanel.mouseEvents.startX = event.pageX;
 		detailPanel.mouseEvents.startY = event.pageY;
 	};
@@ -100,7 +74,7 @@ function DetailPanel(elm) {
               detailPanel.func.hoverTab(event, 'OUT');
           }
     };
-	
+
 	this.__deleteDetailTab = function() {
 		var link;
 		if ($(this).hasClass('tab-detail-close')) {
@@ -118,7 +92,7 @@ function DetailPanel(elm) {
 		}
 		link.parent().remove();
 	};
-	
+
 	this.__tabOpen = function(e){
        detailPanel.doElastic($($(e.target).attr('href'), detailPanel.elm));
     };
@@ -126,7 +100,7 @@ function DetailPanel(elm) {
 	this.changePaddingOfPage = function() {
 		$('body').css({paddingBottom: px(detailPanel.elm.height())});
 	};
-	
+
 	this.__changeRecipe = function(event) {
 		var len = $(this).children('div').length;
 		// This event is runned before removing of element.
@@ -145,7 +119,7 @@ function DetailPanel(elm) {
 		$.cookie('detailHidden', (detailPanel.elm.hasClass('small')?1:0), { expires: 365 });
 		$.cookie('detailHeight', detailPanel.elm.height(), { expires: 365 });
 	};
-	
+
 	this.isHidden = function() {
 	     return this.elm.hasClass('small');
 	};
@@ -164,12 +138,12 @@ function DetailPanel(elm) {
 			var hh = $(this).offset().top - dp.offset().top;
 			var height = Math.round(dp.height() - hh);
 			if (height < 40) {
-				height = 40;				
+				height = 40;
 			}
-			$(this).height(height);			
+			$(this).height(height);
 		});
 	};
-	
+
 	this.updateDetailTab = function(data, tab) {
 		var name = data.name.trim();
 		var sname = name.replace(/:/g,'-');
@@ -184,8 +158,8 @@ function DetailPanel(elm) {
 					title = ico.title;
 					ico = ico.icon;
 				}
-				line += '&nbsp<span class="glyphicon glyphicon-'+ico+'" title="'+title+'"></span>';	
-			}		
+				line += '&nbsp<span class="glyphicon glyphicon-'+ico+'" title="'+title+'"></span>';
+			}
 		}
 		if (!tab) {
 			tab = $('.tab-detail-header > li:first > a', this.elm);
@@ -201,14 +175,14 @@ function DetailPanel(elm) {
 		tab.html(line)
 		   .attr('title', data.title)
 		   .attr('data-status', data.status)
-		   .attr('data-name', name);		   	
+		   .attr('data-name', name);
         $('.tab-detail-header', this.elm).scrollTop(0);
 		if(!preview) {
 			tab.attr('href', '#tab-detail-'+sname)
 			   .append('<span class="glyphicon glyphicon-remove tab-detail-close"></span>')
 			   .on('shown.bs.tab', this.__tabOpen);
 			panel.attr('id', 'tab-detail-'+sname);
-			$('.tab-detail-close', tab).bind('click', this.__deleteDetailTab);			
+			$('.tab-detail-close', tab).bind('click', this.__deleteDetailTab);
 			// Button
 			var info = this.func.getInfoAboutTask(data.status);
 			var button = $('.recipe-list div[data-href="'+oldHref+'"]', this.elm);
@@ -222,18 +196,18 @@ function DetailPanel(elm) {
 			      .attr('data-href', '#tab-detail-'+sname)
 			      .attr('data-name', name)
 			      .hover(this.__hoverTabIn, this.__hoverTabOut)
-			      .html(line);			
+			      .html(line);
 		} else {
 			tab.tab('show');
 		}
 		return panel;
 	};
-		
+
 	this.createNewDetailTab = function(ix) {
 		// Add new blank tab
 		var name = '';
 		var sname = 'empty';
-		var line = 'Preview';		
+		var line = 'Preview';
 		// Tab
 		if (!ix) ix = 0;
 		ix = Math.min(ix, $('.tab-detail-header li', this.elm).length);
@@ -252,7 +226,7 @@ function DetailPanel(elm) {
 		link.hover(this.__hoverTabIn, this.__hoverTabOut);
 		return link;
 	};
-	
+
 	this.openDetailTab = function(num) {
 		if (isNumber(num)) {
 			num = $('.tab-detail-header li:eq('+num+') a', this.elm);
