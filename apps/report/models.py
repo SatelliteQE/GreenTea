@@ -20,6 +20,7 @@ class Report(models.Model):
 
     class Meta:
         ordering = ["name", ]
+        app_label = "report"
 
     def __unicode__(self):
         return "%s" % self.name
@@ -32,6 +33,9 @@ class Score(models.Model):
     rate = models.FloatField(default=0)
     count = models.IntegerField(default=0)
     result = models.TextField(blank=True)
+
+    class Meta:
+        app_label = "report"
 
     def get_result(self):
         result = json.loads(self.result)
@@ -47,34 +51,39 @@ class ExternalPage(models.Model):
     url = models.CharField(max_length=256)
     is_enabled = models.BooleanField(default=True)
 
+    class Meta:
+        app_label = "report"
+
     def __unicode__(self):
         return "%s" % self.name
 
     @permalink
     def get_absolute_url(self):
-        return ("report-page", [self.id,])
+        return ("report-page", [self.id, ])
 
 
 class ReportList:
 
     def __init__(self, periods=None):
-        self.periods = periods
+        self.period_ids = periods
         self.reports = Report.objects.all()
+        self.periods = TaskPeriodSchedule.objects.filter(
+            id__in=self.period_ids)
 
     def __iter__(self):
         for it in self.reports:
             yield it
 
     def stat_tasks(self):
+        er = EnumResult()
         for report in self.reports:
             data = Task.objects.filter(
                 recipe__job__template__is_enable=True,
                 recipe__job__template__in=report.jobs.all(),
-                recipe__job__schedule__in=self.periods,
+                recipe__job__schedule__in=self.period_ids,
             )\
                 .values("result").annotate(dcount=Count("result")).order_by("result")
 
-            er = EnumResult()
             for it in data:
                 it["name"] = er.get(it["result"])
             report.tasks = data

@@ -29,7 +29,8 @@ class ReportPageView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
-        context["external_links"] = ExternalPage.objects.filter(is_enabled=True)
+        context["external_links"] = ExternalPage.objects.filter(
+            is_enabled=True)
         context["page"] = self.page
         return context
 
@@ -47,7 +48,7 @@ class ReportListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
 
-        ids = [it["max_id"] for it in TaskPeriodList.last_runs()]
+        ids = [it["max_id"] for it in TaskPeriodList.last_runs(history=1)]
         tasks = Task.objects.filter(recipe__job__schedule__id__in=ids)\
             .values("result", "recipe__job__schedule__title")\
             .annotate(dcount=Count("result"), scount=Count("recipe__job__schedule"))\
@@ -81,8 +82,6 @@ class ReportListView(TemplateView):
             context["nonrun"] = Test.objects.filter(
                 is_enable=True, git__name=self.repo).exclude(id__in=running_ids)
 
-        #context["reports"] = Report.objects.filter(is_enabled=True)
-
         report = ReportList(ids)
         # get statistic about tests
         report.stat_tests()
@@ -91,5 +90,6 @@ class ReportListView(TemplateView):
         report.stat_recipes()
         context["reports"] = report
 
-        context["external_links"] = ExternalPage.objects.filter(is_enabled=True)
+        context["external_links"] = ExternalPage.objects.filter(
+            is_enabled=True)
         return context

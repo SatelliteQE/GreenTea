@@ -18,12 +18,13 @@ class HomepageForm(forms.Form):
         ("score", "score")
     )
     order = forms.ChoiceField(
-        choices = ORDER_CHOICES,
+        choices=ORDER_CHOICES,
         required=False
     )
     schedule = forms.IntegerField(
         required=False
     )
+
 
 class FilterForm(forms.Form):
     onlyfail = forms.BooleanField(

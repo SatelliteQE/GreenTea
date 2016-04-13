@@ -21,7 +21,6 @@ from django.db import models
 from django.db.models import Count, Max
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
-
 from apps.core.utils.date_helpers import toLocalZone
 
 # from single_process import single_process
@@ -33,9 +32,13 @@ logger = logging.getLogger(__name__)
 class TaskPeriodList:
 
     @staticmethod
-    def last_runs():
-        return TaskPeriodSchedule.objects.values("period", "period__title").annotate(
-            max_id=Max("id"), dcount=Count("period"))
+    def last_runs(history=0):
+        filters = {}
+        if history > 0:
+            filters["date_create__lt"] = datetime.now() - timedelta(history)
+        return TaskPeriodSchedule.objects.values("period", "period__title",)\
+            .filter(**filters)\
+            .annotate(max_id=Max("id"), counter_id=Max("counter"), dcount=Count("period"))
 
 
 class TaskPeriodSchedule(models.Model):

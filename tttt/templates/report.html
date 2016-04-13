@@ -68,6 +68,10 @@
 
 {% if reports %}
 <h1>Report of product</h1>
+Render from
+  <ul>{% for render in reports.periods %}
+    <li><b>{{render.date_create}}</b> ({{render.period}}) {% endfor %}</li>
+  </ul>
 <table class="table table-striped">
     <tr>
         <th>Name</th><th>Run tests</th><th>Configurations</th><th>Result runs</th>
