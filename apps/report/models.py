@@ -76,17 +76,39 @@ class ReportList:
 
     def stat_tasks(self):
         er = EnumResult()
-        for report in self.reports:
-            data = Task.objects.filter(
-                recipe__job__template__is_enable=True,
-                recipe__job__template__in=report.jobs.all(),
-                recipe__job__schedule__in=self.period_ids,
-            )\
-                .values("result").annotate(dcount=Count("result")).order_by("result")
+        pass_test = Score.objects.filter(
+            schedule__in=self.period_ids,
+            rate__gt=1.9
+        ).values("test__id")
+        test_ids = [x["test__id"] for x in pass_test]
 
-            for it in data:
-                it["name"] = er.get(it["result"])
-            report.tasks = data
+        for report in self.reports:
+            fail = Task.objects.filter(
+                recipe__job__template__is_enable=True,
+                recipe__job__schedule__in=self.period_ids,
+                recipe__job__template__in=report.jobs.all(),
+                result=er.FAIL,
+            ).distinct("test").count()
+
+            passs = Task.objects.filter(
+                recipe__job__template__is_enable=True,
+                recipe__job__schedule__in=self.period_ids,
+                recipe__job__template__in=report.jobs.all(),
+                test__id__in=test_ids
+            ).distinct("test").count()
+
+            report.tests = Task.objects.filter(
+                recipe__job__template__is_enable=True,
+                recipe__job__schedule__in=self.period_ids,
+                recipe__job__template__in=report.jobs.all(),
+            ).distinct("test").count()
+
+            report.tasks = [
+                {"name": "fail", "dcount": int(fail)},
+                {"name": "pass", "dcount": int(passs)},
+                {"name": "warning", "dcount": int(
+                    report.tests - passs - fail)},
+            ]
 
     def stat_recipes(self):
         for report in self.reports:
@@ -94,9 +116,3 @@ class ReportList:
                 jobtemplate__is_enable=True,
                 jobtemplate__in=report.jobs.all()
             ).count()
-
-    def stat_tests(self):
-        for report in self.reports:
-            report.tests = TaskTemplate.objects.filter(
-                recipe__jobtemplate__is_enable=True,
-                recipe__jobtemplate__in=report.jobs.all()).distinct("test").count()

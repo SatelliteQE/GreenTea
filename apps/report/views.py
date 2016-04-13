@@ -83,8 +83,6 @@ class ReportListView(TemplateView):
                 is_enable=True, git__name=self.repo).exclude(id__in=running_ids)
 
         report = ReportList(ids)
-        # get statistic about tests
-        report.stat_tests()
         # get statistic about last runs
         report.stat_tasks()
         report.stat_recipes()
