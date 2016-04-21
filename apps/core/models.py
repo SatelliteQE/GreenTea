@@ -1338,8 +1338,8 @@ class FileLog(models.Model):
                 settings.STORAGE_ROOT, "./%s" % path_dir)
             if os.path.exists(absolute_path):
                 if len(os.listdir(absolute_path)) == 0:
+                    logger.info("empty dir to remove %s" % absolute_path)
                     os.rmdir(absolute_path)
-                    print "to remove", absolute_path
             clean_dir(path_dir)
 
         file_path = self.absolute_path()
