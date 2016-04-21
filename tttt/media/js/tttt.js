@@ -7,27 +7,135 @@ function selectMenu() {
   });
 }
 
-function getCommentIcon(action) {
-	if (action == 'mark waived') {
-		return {icon: "hand-up", title: "This recipe was wavied."};
-	} else if (action == "reshedule job") {
-		return {icon: "refresh", title: "This job was rescheduled."};
-	} else if (action == "return2beaker") {
-		return {icon: "save", title: "This job was returned to beaker."};
-	} else if (action == 'rescheduled-job-link') {
-		return {icon: "refresh", title: "This recipe is new version of previous recipe.."};
-	} else {
-		return {icon: "info-sign", title: "Comment"};
-	}
+var events = {
+    __events: {},
+    addEvent: function(ev, fce) {
+        if (this.__events[ev] == null) {
+            this.__events[ev] = [];
+        }
+        this.__events[ev].push(fce)
+    },
+    runEvent: function() {
+        arg = $.makeArray(arguments);
+        var ev = arg.shift();
+        if (isArray(this.__events[ev])) {
+            var obj = arg.shift();
+            for(var iLoop=0; iLoop < this.__events[ev].length; iLoop++) {
+                this.__events[ev][iLoop].apply(obj, arg);
+            }
+        }
+    }
+}
+
+function DetailTab(data) {
+    this.head_elm = null;
+    this.content_elm = null;
+    this.parent_elm = data.detailPanel.elm;
+    this.data = $.extend({}, data)
+    /*
+    {
+      detailPanel: null,
+      id: null,
+      content: null
+      head: null,
+      head_title: ""
+    }
+    */
+
+    this.__init__ = function() {
+        var id = this.data.id;
+        // Content
+        this.content_elm = $('<div class="tab-panel" id="tab-detail-'+id+'">'+
+                             this.data.content+'</div>')
+        $('.tab-detail-content', this.parent_elm).append(this.content_elm);
+        this.content_elm.data('detailTab', this);
+
+        // Add header
+        var newTab = $('<li><a href="#tab-detail-'+id+'" '+
+                              'id="tab-head-'+id+'" '+
+		                      'data-toggle="tab" '+
+                              'title="'+this.data.head_title+'">'+this.data.head+'</a>'+
+                              '<span class="glyphicon glyphicon-remove tab-detail-close"></span></li>');
+        $('.tab-detail-header', this.parent_elm).prepend(newTab);
+        $('.tab-detail-close', newTab).bind('click', function(){
+            $(this).prevAll('a').data('detailTab').delete();
+        });
+        this.head_elm = $('.tab-detail-header a#tab-head-'+id)
+        this.head_elm.data('detailTab', this);
+        this.head_elm.bind('click', function() {
+            $(this).data('detailTab').open();
+        }).hover(function() {
+             events.runEvent('HOVER', $(this).data('detailTab'), 'IN');
+         }, function() {
+             events.runEvent('HOVER', $(this).data('detailTab'), 'OUT');
+         });
+        this.data.detailPanel.registerTab(this)
+        events.runEvent('CREATE', this)
+    }
+
+    this.update = function(ndata) {
+        events.runEvent('UPDATE', this, ndata)
+        for (key in ndata) {
+            if (key == 'id') {
+                if(ndata.id != this.data.id) {
+                    this.data.id = ndata.id;
+                    this.content_elm.attr('id', 'tab-detail-'+ndata.id);
+                    this.head_elm.attr('id', 'tab-head-'+ndata.id)
+                                 .attr('href', '#tab-detail-'+ndata.id);
+                }
+            } else if (key == 'content') {
+                this.content_elm.html(ndata.content);
+                this.data.content = ndata.content;
+            } else if (key == 'head') {
+                this.head_elm.html(ndata.head);
+                this.data.head = ndata.head;
+            } else if (key == 'head_title') {
+                this.head_elm.attr('title', ndata.head_title);
+                this.data.head_title = ndata.head_title;
+            } else {
+                this.data[key] = ndata[key];
+            }
+        }
+        events.runEvent('UPDATE', this)
+    }
+
+
+    this.open = function() {
+        this.content_elm.parent('div').children().removeClass('active');
+        this.content_elm.addClass('active');
+        this.data.detailPanel.doElastic(this.content_elm);
+        this.head_elm.parents('ul').children().removeClass('active');
+        this.head_elm.parent('li').addClass('active');
+        events.runEvent('OPEN', this)
+    }
+
+    this.delete = function() {
+		events.runEvent('DELETE', this)
+		this.head_elm.parent('li').remove();
+        this.head_elm = null;
+		this.content_elm.remove();
+        this.content_elm = null;
+        this.data.detailPanel.unregisterTab(this);
+        console.debug("Tab '"+this.data.id+"' was deleted.")
+	};
+
+    this.__init__();
 }
 
 function DetailPanel(elm) {
 	this.elm = elm;
+    this.tabs = [];
+    /*
 	this.func = {
 		getInfoAboutTask: null,
 		deleteTask: null,
 		hoverTab: null,
-	};
+	};*/
+    this.default_tab = {
+        id:'preview',
+        content: '<br><p><strong>Fast preview:</strong> Move cursor on the job box and here, you can see informations about job.</p>        <p><strong>Keep detail of job:</strong> If you want to preserve informations about job here, click on the job box.</p>',
+        head: 'Preview'
+    }
 	this.mouseEvents = {
 		move: false,
 		x: 0,
@@ -62,57 +170,61 @@ function DetailPanel(elm) {
 		detailPanel.changePaddingOfPage();
 	};
 
-
-	this.__hoverTabIn = function(event) {
-          if (detailPanel.func.hoverTab != null) {
-              detailPanel.func.hoverTab(event, 'IN');
-          }
+    this.registerTab = function(tab) {
+        this.tabs.unshift(tab);
     };
 
-    this.__hoverTabOut = function(event) {
-          if (detailPanel.func.hoverTab != null) {
-              detailPanel.func.hoverTab(event, 'OUT');
-          }
+    this.unregisterTab = function(tab) {
+        this.tabs.removeItem(this.getIndexTab(tab));
     };
 
-	this.__deleteDetailTab = function() {
-		var link;
-		if ($(this).hasClass('tab-detail-close')) {
-			link = $(this).parent();
-		} else {
-			link = $(".tab-detail-header a[href='"+$(this).attr('data-href')+"']", detailPanel.elm);
-		}
-		if (detailPanel.func.deleteTask) {
-			detailPanel.func.deleteTask(link);
-		}
-		$('.tab-detail-content '+link.attr('href'), detailPanel.elm).remove();
-		$(".recipe-list div[data-href='"+link.attr('href')+"']").remove();
-		if(link.parent().hasClass('active')) {
-		    $(".tab-detail-header li:first a ").tab('show');
-		}
-		link.parent().remove();
+    this.getIndexTab = function(tab) {
+        return this.tabs.indexOf(tab);
+    }
+
+    this.getTab = function(index) {
+        var ll = this.tabs.length;
+        if (isNumber(index) && index < ll) {
+            return this.tabs[index];
+        } else if (isObject(index)) {
+            for(var iLoop = 0; iLoop < ll; iLoop++) {
+                var res = 1;
+                for (x in index) {
+                    var reg = RegExp(index[x]);
+                    if (!reg.test(this.tabs[iLoop].head_elm.attr(x))) {
+                        res = 0;
+                    }
+                }
+                if (res == 1) {
+                    return this.tabs[iLoop]
+                }
+            }
+        } else {
+            for(var iLoop = 0; iLoop < ll; iLoop++) {
+                if (this.tabs[iLoop].data.id == index) {
+                    return this.tabs[iLoop];
+                }
+            }
+        }
+        console.debug("This tab '"+index+"' does not found.");
+    };
+
+    this.openTab = function(tab) {
+        if (isNumber(tab)) {
+            tab = this.getTab(tab);
+        }
+        tab.open();
 	};
 
-	this.__tabOpen = function(e){
-       detailPanel.doElastic($($(e.target).attr('href'), detailPanel.elm));
-    };
+    this.createDefaultTab = function() {
+        var def = {detailPanel: this};
+        var tab = new DetailTab($.extend(def, this.default_tab));
+        this.openTab(tab);
+    }
 
+    // Method set bottom padding of page, for show bottom of page
 	this.changePaddingOfPage = function() {
-		$('body').css({paddingBottom: px(detailPanel.elm.height())});
-	};
-
-	this.__changeRecipe = function(event) {
-		var len = $(this).children('div').length;
-		// This event is runned before removing of element.
-		if (event.type == 'DOMNodeRemoved') {
-			len = len - 1;
-		}
-		var buttons = $('.action-panel button', detailPanel.elm);
-		if (len == 0) {
-			buttons.prop('disabled', true);
-		} else {
-			buttons.prop('disabled', false);
-		}
+	 	$('body').css({paddingBottom: px(detailPanel.elm.height())});
 	};
 
 	this.rememberDetail = function() {
@@ -132,6 +244,7 @@ function DetailPanel(elm) {
         detailPanel.changePaddingOfPage();
 	};
 
+    // it changes height of all .elastic elements for current size of detail panel
 	this.doElastic = function(parent) {
 		$('.elastic', parent).each(function(){
 			var dp = $(this).closest('.panel-detail');
@@ -144,96 +257,6 @@ function DetailPanel(elm) {
 		});
 	};
 
-	this.updateDetailTab = function(data, tab) {
-		var name = data.name.trim();
-		var sname = name.replace(/:/g,'-');
-		var line = name;
-		var preview = false;
-		// Tab
-		if (data.icons) {
-			for (ix in data.icons) {
-				var titile = "";
-				var ico = data.icons[ix];
-				if (isObject(ico)) {
-					title = ico.title;
-					ico = ico.icon;
-				}
-				line += '&nbsp<span class="glyphicon glyphicon-'+ico+'" title="'+title+'"></span>';
-			}
-		}
-		if (!tab) {
-			tab = $('.tab-detail-header > li:first > a', this.elm);
-			preview = true;
-		}
-		var oldHref = tab.attr('href');
-		// Panel
-		var panel = $('.tab-detail-content > '+oldHref, this.elm)
-		    .attr('data-name', name)
-		    .html(data.html);
-		this.doElastic(panel);
-		// Tab
-		tab.html(line)
-		   .attr('title', data.title)
-		   .attr('data-status', data.status)
-		   .attr('data-name', name);
-        $('.tab-detail-header', this.elm).scrollTop(0);
-		if(!preview) {
-			tab.attr('href', '#tab-detail-'+sname)
-			   .append('<span class="glyphicon glyphicon-remove tab-detail-close"></span>')
-			   .on('shown.bs.tab', this.__tabOpen);
-			panel.attr('id', 'tab-detail-'+sname);
-			$('.tab-detail-close', tab).bind('click', this.__deleteDetailTab);
-			// Button
-			var info = this.func.getInfoAboutTask(data.status);
-			var button = $('.recipe-list div[data-href="'+oldHref+'"]', this.elm);
-			if (button.length == 0) {
-				button = $('<div></div>');
-				$('.recipe-list', this.elm).append(button);
-				button.bind('click', this.__deleteDetailTab);
-			}
-			button.attr('class', 'btn btn-'+info.color)
-			      .attr('title', data.title)
-			      .attr('data-href', '#tab-detail-'+sname)
-			      .attr('data-name', name)
-			      .hover(this.__hoverTabIn, this.__hoverTabOut)
-			      .html(line);
-		} else {
-			tab.tab('show');
-		}
-		return panel;
-	};
-
-	this.createNewDetailTab = function(ix) {
-		// Add new blank tab
-		var name = '';
-		var sname = 'empty';
-		var line = 'Preview';
-		// Tab
-		if (!ix) ix = 0;
-		ix = Math.min(ix, $('.tab-detail-header li', this.elm).length);
-		var newTab = $('<li><a href="#tab-detail-'+sname+'" '+
-		                      'data-toggle="tab" '+
-		                      'data-name="'+name+'">'+line+'</a></li>');
-		if (ix > 1) {
-		    console.log($('.tab-detail-header li:eq('+ix+')', this.elm));
-			newTab.insertBefore($('.tab-detail-header li:eq('+ix+')', this.elm));
-		} else {
-			$('.tab-detail-header', this.elm).append(newTab);
-		}
-		$('.tab-detail-content', this.elm)
-		    .append('<div class="tab-pane" id="tab-detail-'+sname+'"></div>');
-		var link = newTab.children('a');
-		link.hover(this.__hoverTabIn, this.__hoverTabOut);
-		return link;
-	};
-
-	this.openDetailTab = function(num) {
-		if (isNumber(num)) {
-			num = $('.tab-detail-header li:eq('+num+') a', this.elm);
-		}
-		num.tab('show');
-	};
-
 	this.init = function() {
 		$('.header', this.elm)
 		.bind('mousedown',this.__mouseDown)
@@ -241,14 +264,14 @@ function DetailPanel(elm) {
 		$('.header .visibilitySwitcher', this.elm)
 		    .bind('click', this.switchDisplay);
 		$('body').bind('mouseup', this.__mouseUp);
-		$('.recipe-list', this.elm)
-		    .bind('DOMNodeInserted DOMNodeRemoved', this.__changeRecipe);
 		this.doElastic($('#stab-detail', this.elm));
 		this.changePaddingOfPage();
-		$('.tab-detail-header a[data-toggle="tab"]', this.elm).hover(this.__hoverTabIn, this.__hoverTabOut);
+        this.createDefaultTab();
 	};
 	return this;
 };
+// ---------------------------END detailPanel ---------------------------------
+
 
 function confirmSubmit() {
 	this.__clickFrom = function(event) {

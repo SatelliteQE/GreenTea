@@ -13,6 +13,7 @@ def basic(request):
         "footer": settings.TEMPLATE_FOOTER,
         "conf": {
             "BEAKER_SERVER": settings.BEAKER_SERVER,
+            "STORAGE_URL": settings.STORAGE_URL,
         }
     }
 

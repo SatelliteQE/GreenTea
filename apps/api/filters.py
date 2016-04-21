@@ -25,4 +25,4 @@ class TaskFilter(FilterSet):
     class Meta:
         model = Task
         fields = ['recipe', 'recipe__uid', 'test', 'result', 'results',
-                  'status', 'statusbyuser']
+                  'status', 'statusbyuser', 'uid']

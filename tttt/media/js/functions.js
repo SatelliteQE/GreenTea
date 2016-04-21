@@ -10,6 +10,17 @@ function isObject(obj) {return obj !== null && typeof obj === 'object';}
 function isNumber(obj) {return obj !== null && !isNaN(parseInt(obj, 10));}
 function isArray(myArray) {return Object.prototype.toString.call(myArray) === "[object Array]";}
 
+// Definition remove item from Aarray
+
+Object.defineProperty(Array.prototype, "removeItem", {
+	enumerable: false,
+	value: function(from, to) {
+	  var rest = this.slice((to || from) + 1 || this.length);
+	  console.log(this);
+	  this.length = from < 0 ? this.length + from : from;
+	  return this.push.apply(this, rest);
+}});
+
 // Definition of Set
 function Set() {
 	this.field = [];
@@ -71,22 +82,65 @@ function getAuthor(id) {
     return storage[id];
 }
 
-function getResultIcon(result) {
+function getResultRecipeIcon(recipe) {
+	// Return icon parametrs for special result code
+	var res = {icon: '', color: '', title: "", status:""};
+	if (recipe.result == 5) {
+		res = {status: "pass", icon: 'thumbs-up', color: 'green', title: "All is alright."};
+	} else if (recipe.result == 3) {
+		res = {status: 'warn', icon: 'bullhorn', color: 'orange', title: "Some of tasks warned us."};
+	} else if (recipe.result == 10 || recipe.result == 9) {
+		res = {status:"failinstall", icon: 'wrench', color: 'gray', title: "Recipe failed on installation."};
+	} else if (recipe.result == 4) {
+		res = {status: "fail", icon: 'thumbs-down', color: 'red', title: "Some task(s) faild."};
+	}
+	if (recipe.statusbyuser == 11) {
+		res.status = "waived";
+		res.color = '#5bc0de';
+		res.title = "Problems was solved.";
+	}
+    return res;
+}
+
+function getTaskResultIcon(task, recipe) {
     // Return icon parametrs for special result code
-    if (result == 4 || result == 'fail') {
-        return {icon: 'thumbs-down', color: 'danger', title: "Some task(s) faild.", titleTask: "This task faild."};
-    } else if (result == 5 || result == 'pass') {
-	    return {icon: 'thumbs-up', color: 'success', title: "All is alright.", titleTask: "This task passed."};
-    } else if (result == 6 || result == 'new') {
-	    return {icon: 'plane', color: 'default', title: "System is preparing to start.", titleTask: "This task does not yet run."};
-    } else if (result == 10 || result == 9 || result == 'failinstall' || result == 'panic') {
-	    return {icon: 'wrench', color: 'gray', title: "System probably didn't boot.", titleTask: ""};
-    } else if (result ==  3 || result == 'warning') {
-	    return {icon: 'bullhorn', color: 'warning', title: "Some of tasks warned us.", titleTask: "This task throwed warning."};
-    } else if (result == 11 || result == 'waived') {
-	    return {icon: 'hand-up', color: 'info', title: "Problems was solved.", titleTask: "Problems was already solved in this task."};
-    }
-    return {icon: '', color: '', title: "", titleTask: ""};
+	var res = {icon: '', color: '', title: "", status:""}
+	if (task.status == 1) {
+		res = {status: 'run', icon: 'play', color: '#286090', title: "This task is running now."};
+	} else if (task.status == 3) {
+		res = {status: 'scheduled', icon: 'hourglass', color: 'default', title: "This task does not yet run."};
+	} else if (task.status == 5) {
+		res = {status: 'aborted', icon: 'remove-circle', color: '#999', title: "This task was skipped. The recipe was aborted."};
+	} else if (task.result == 5) {
+		res = {status: "pass", icon: 'thumbs-up', color: 'green', title: "This task passed."};
+	} else if (task.result == 3) {
+		res = {status: 'warn', icon: 'bullhorn', color: 'orange', title: "This task throwed warning."};
+	} else if (task.result == 10 || task.result == 9) {
+		res = {status:"failinstall", icon: 'wrench', color: 'gray', title: "This task failinstall or panic"};
+	} else if (task.result == 4) {
+		res = {status: "fail", icon: 'thumbs-down', color: 'red', title:"This task faild."};
+	}
+	if (task.result != 5 &&
+		(task.statusbyuser == 11 || (recipe != null && recipe.statusbyuser == 11))) {
+		res.status = "waived";
+		res.color = '#5bc0de';
+		res.title = "Problems was solved.";
+		res.titleTask = "Problems was already solved in this task.";
+	}
+    return res;
+}
+
+function getTaskStatusIcon(task) {
+	if (task.status == 1) {
+		res = {status: 'run', icon: 'play', color: '#286090', title: "This task is running now."};
+	} else if (task.status == 3) {
+		res = {status: 'scheduled', icon: 'hourglass', color: 'default', title: "This task does not yet run."};
+	} else if (task.status == 5) {
+		res = {status: 'aborted', icon: 'remove-circle', color: '#999', title: "This task as skipped."};
+	} else {
+		res = {status: 'completed', icon: 'ok-circle', color: 'green', title: "This task is done."};
+	}
+	return res;
 }
 
 function getCommentIcon(action) {
@@ -101,4 +155,29 @@ function getCommentIcon(action) {
 	} else {
 		return {icon: "info-sign", title: "Comment"};
 	}
+}
+
+function openModalWindow(content, title) {
+	var html = "";
+	html += '<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">'+
+  		    '  <div class="modal-dialog modal-lg" role="document">'+
+            '   <div class="modal-content">'+
+            '     <div class="modal-header">'+
+            '      <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>'+
+            '      <h4 class="modal-title" id="myModalLabel">'+title+'</h4>'+
+            '    </div>'+
+            '    <div class="modal-body">'+
+        	content+
+            '    </div>'+
+      		'    <div class="modal-footer">'+
+			'      <span class="info">Press Esc to close.</span>'+
+        	'      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>'+
+            '    </div>'+
+    	    '   </div>'+
+            '  </div>'+
+            '</div>';
+	$('body').append(html);
+	$('#myModal').modal('show').on('hidden.bs.modal', function (e) {
+		$(this).remove();
+	});
 }

@@ -14,92 +14,28 @@ from rest_framework.response import Response
 from rest_framework import filters
 from rest_framework import pagination
 
-from apps.core.models import FAIL, NEW, WAIVED, WARN, JobTemplate, Recipe, \
-    Task, Author
+from apps.core.models import JobTemplate, Recipe, \
+    Task, Author, Arch, Distro, System, Job, Test
 from apps.core.views import base
 from apps.waiver.models import Comment
 from models import Performance
 from filters import TaskFilter
 from serializers import JobTemplateSerializer, RecipeSerializer, \
-    TaskSerializer, AuthorSerializer
+    TaskSerializer, AuthorSerializer, ArchSerializer, \
+    DistroSerializer, SystemSerializer, JobSerializer, \
+    CommentSerializer, TestSerializer
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
-    queryset = Recipe.objects.all()
+    queryset = Recipe.objects.all().select_related('job', 'arch', 'distro')
     serializer_class = RecipeSerializer
-    filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter,)
-    #filter_fields = ('id', 'uid')
     ordering_fields = '__all__'
     ordering = ('-uid',)
-    pagination_class = pagination.LimitOffsetPagination
+    filter_fields = ('uid', )
     http_method_names = ['get', 'head']
-
-    # def retrieve(self, request, pk=None):
-    #     recipe = Recipe.objects.get(uid=pk)
-    #     tasks = Task.objects.filter(recipe=recipe).order_by('uid')
-    #
-    #     data = {
-    #         'results': recipe.get_result(),
-    #         'recipe': recipe.to_json(),
-    #         'job': recipe.job.to_json(),
-    #         'job_name': recipe.job.template.whiteboard,
-    #         'task_progress': [],
-    #         'tasks': [],
-    #     }
-    #
-    #     # TODO rewrite this part code - looks crazy
-    #     count = len(tasks)
-    #     counter = 0
-    #     ecount = 0
-    #     commentsCounter = 0
-    #     last_result = -10
-    #     sum = 0
-    #     for task in tasks:
-    #         if task.result in [NEW, WARN, FAIL]:
-    #             ecount += 1
-    #             tComments = Comment.objects.filter(task=task, recipe=recipe)\
-    #                                .order_by('-created_date')
-    #             if len(tComments) > 0:
-    #                 commentsCounter += 1
-    #             if ecount < 10:
-    #                 tjson = task.to_json()
-    #                 tjson['comments'] = [comm.to_json() for comm in tComments]
-    #                 data['tasks'].append(tjson)
-    #         tres = task.get_result_display()
-    #         if task.statusbyuser == WAIVED:
-    #             tres = task.get_statusbyuser_display()
-    #         if tres != last_result:
-    #             if last_result and counter > 0:
-    #                 perc = max(counter * 100 / count, 1)
-    #                 data['task_progress'].append((last_result,
-    #                                               perc, counter))
-    #                 sum += perc
-    #             counter = 0
-    #         last_result = tres
-    #         counter += 1
-    #     perc = max(counter * 100 / count, 1)
-    #     sum += perc
-    #     if not recipe.job.is_running and sum < 100:
-    #         perc += 100 - sum
-    #     if sum > 100:
-    #         perc -= (sum - 100)
-    #
-    #     # TOOD doesnt work with schedule plan
-    #     # data['reschduled'] = self.getReschdulesOfRecipe(recipe)
-    #     data['reschduled'] = ()
-    #
-    #     data['task_progress'].append((last_result, perc, counter))
-    #     data['task_len'] = ecount
-    #     data['comments_counter'] = commentsCounter
-    #
-    #     comments = Comment.objects.filter(recipe=recipe, task__isnull=True)\
-    #         .order_by('-created_date')
-    #     data['comments'] = [comm.to_json() for comm in comments]
-    #
-    #     return Response(data)
 
 
 class AuthorViewSet(viewsets.ModelViewSet):
@@ -119,7 +55,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     filtering more then one result.
     &results=3,4,5
     """
-    queryset = Task.objects.all()
+    queryset = Task.objects.all().select_related('test')
     serializer_class = TaskSerializer
     filter_class = TaskFilter
     ordering_fields = '__all__'
@@ -128,21 +64,67 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 
 class JobTemplateViewSet(viewsets.ModelViewSet):
-    queryset = JobTemplate.objects.all().order_by("-is_enable", "position")
+    queryset = JobTemplate.objects.all()
     serializer_class = JobTemplateSerializer
+    ordering_fields = '__all__'
+    ordering = ('-id',)
+    filter_fields = ('uid', )
     http_method_names = ['get', 'head']
 
-    def retrieve(self, request, pk=None):
-        jobtempalte = JobTemplate.objects.get(id=pk)
-        data = {
-            "title": jobtempalte.whiteboard,
-            "is_enable": jobtempalte.is_enable,
-            "url": jobtempalte.get_absolute_url(),
-            "schedule": jobtempalte.schedule.label,
-            "xml": base.get_xml(jobtempalte),
 
-        }
-        return Response(data)
+class ArchViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for Arch.
+    """
+    queryset = Arch.objects.all()
+    serializer_class = ArchSerializer
+    ordering_fields = '__all__'
+    ordering = ('-id',)
+    http_method_names = ['get', 'head']
+
+
+class DistroViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for Distro.
+    """
+    queryset = Distro.objects.all()
+    serializer_class = DistroSerializer
+    ordering_fields = '__all__'
+    ordering = ('-id',)
+    http_method_names = ['get', 'head']
+
+
+class SystemViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for System.
+    """
+    queryset = System.objects.all()
+    serializer_class = SystemSerializer
+    ordering_fields = '__all__'
+    ordering = ('-id',)
+    http_method_names = ['get', 'head']
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for Comment.
+    """
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    ordering_fields = '__all__'
+    ordering = ('-id',)
+    http_method_names = ['get', 'head']
+
+
+class TestViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint for Test.
+    """
+    queryset = Test.objects.all()
+    serializer_class = TestSerializer
+    ordering_fields = '__all__'
+    ordering = ('-id',)
+    http_method_names = ['get', 'head']
 
 
 @csrf_exempt

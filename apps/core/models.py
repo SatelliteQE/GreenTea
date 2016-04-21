@@ -984,7 +984,7 @@ class Job(models.Model):
         return "%s/%s/" % (settings.BEAKER_SERVER, self.uid)
 
     def get_original_job(self):
-        Job.objects.filter(schedule=sefl.schedule, template=self.template,
+        Job.objects.filter(schedule=self.schedule, template=self.template,
                            uid__gt=self.uid).order_by('uid')[:1]
 
 
@@ -1347,7 +1347,8 @@ class Event(models.Model):
 
 class FileLog(models.Model):
     recipe = models.ForeignKey(Recipe)
-    task = models.ForeignKey(Task, blank=True, null=True)
+    task = models.ForeignKey(Task, blank=True, null=True,
+                             related_name="logfiles")
     path = models.CharField(max_length=256, unique=True)
     created = models.DateTimeField(auto_now_add=True)
 

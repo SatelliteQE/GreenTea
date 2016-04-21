@@ -1,5 +1,5 @@
 function onChangeDetail() {
-    $('.rTriangle, .pTriangle').hover(function(){
+    /*$('.rTriangle, .pTriangle').hover(function(){
         var td = $(this);
         if(td.attr('popover-loaded') == null) {
             var changesIDs = td.attr('data-params');
@@ -24,10 +24,9 @@ function onChangeDetail() {
         }
     }, function(){
         $(this).popover("hide");
-    });
+    });*/
 }
 
-var preLoadTabUID = null;
 
 function initPage() {
 	// Set default disable buttons
@@ -57,168 +56,224 @@ function initPage() {
 		$('input[name="uids"]', detailPanel.elm).val(res.join(' '));
 	});
 
-    // Add function to get Informations about tasks
-    detailPanel.func.getInfoAboutTask = getResultIcon;
-    detailPanel.func.deleteTask = function(link) {
-	    var name = link.text().trim();
-		$('.dashboard tbody td[id="'+name+'"]').removeClass('selected');
-    };
-    detailPanel.func.hoverTab = function(event, action) {
-        var uid = $(event.target).attr('data-name');
-        var td = $('.dashboard tbody td[id="'+uid+'"]');
-        if (action == 'IN') {
-             td.addClass('light');
-        } else {
-            td.removeClass('light');
-        }
-    };
+    events.addEvent('DELETE',function() {
+		this.data.box_el.removeClass('selected');
+		this.data.button_el.remove();
+		var ix = detailPanel.getIndexTab(this);
+		var tab = detailPanel.getTab(ix+1);
+		if (tab == null) {
+			tab = detailPanel.getTab(ix-1)
+		}
+		tab.open();
+		// Disable comment buttons, if no-recipe is selected.
+		if ($('.recipe-list div', detailPanel.elm).length == 0) {
+			$("button[data-action-field='action']", detailPanel.elm).attr('disabled',"");
+		}
+    });
 
-    var uid = window.location.hash.substring(1).replace(/T:/,'');;
-    if (isNumber(uid)) {
-		preLoadTabUID = uid;
+	events.addEvent('UPDATE', function() {
+			$('.filter-switch .btn', this.content_elm).click(function(){
+				loadTasks($(this).closest('div.tab-panel').data('detailTab').data.id,
+						  $(this).children('input').attr('name'));
+			});
+			$('.comentsSwitcher', this.content_elm).click(function(){
+				$(this).toggleClass('glyphicon-chevron-down')
+					   .toggleClass('glyphicon-chevron-right')
+					   .parent().next('ul').toggle();
+				return false;
+			});
+			$('.openInModalWindow', this.contet_elm).click(function(){
+				openModalWindow('<iframe src="'+$(this).attr('href')+'" width="100%" height="500"></iframe>', $(this).html());
+				return false;
+			})
+	});
+
+	events.addEvent('HOVER', function(direct) {
+		if (this.data.box_el == null) return;
+		if (direct == 'IN') {
+			this.data.box_el.addClass('light');
+		} else {
+			this.data.box_el.removeClass('light');
+		}
+	});
+    var uid = window.location.hash.substring(1);
+	if (uid.match(/^T:[0-9]+/) != null) {
 		previewTask(uid);
-    }
+	}
 }
 
-function getResultIcon(result) {
-	if (result == 'fail') {
-		return {icon: 'thumbs-down', color: 'danger', title: "This task faild."};
-    } else if (result == 'pass') {
-		return {icon: 'thumbs-up', color: 'success', title: "This task passed."};
-    } else if (result == 'new') {
-		return {icon: 'plane', color: 'default', title: "This task does not yet run."};
-    } else if (result == 'failinstall' || result == 'panic' ) {
-		return {icon: 'wrench', color: 'gray', titleTask: ""};
-    } else if (result == 'warning' || result == 'warn') {
-		return {icon: 'bullhorn', color: 'warning', title: "This task throwed warning."};
-    } else if (result == 'waived') {
-		return {icon: 'hand-up', color: 'info', title: "Problems was already solved in this task."};
+function render_task_detail_tab(data) {
+    var message = "";
+    var recipeWhiteboard = "";
+    if(data.recipe.arch.name) {
+        recipeWhiteboard += ' - '+data.recipe.arch.name;
     }
-    return null;
-}
-
-var lastUID = null;
-var openUIDs = new Set();
-
-function previewTask(uid) {
-	if (!isNumber(uid)) {
-        // Preview
-        uid = $(this).attr("id");
-    } else {        
-        if(detailPanel.isHidden()) {
-            detailPanel.switchDisplay();
+    var recipe_icon = getResultRecipeIcon(data.recipe);
+    var task_icon = getTaskResultIcon(data)
+	var status_icon = getTaskStatusIcon(data)
+    message += '<h4>'+data.recipe.job_name+' '+recipeWhiteboard+' ('+data.recipe.job.date+')&nbsp;&nbsp;'+
+       '<a class="glyphicon glyphicon-link" href="/jobs.html#R:'+data.recipe.uid+'" title="Job detail"></a>&nbsp;&nbsp;'+
+       '<a href="https://' + BEAKER_SERVER + '/recipes/'+data.recipe.uid+'#'+data.uid+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>'+
+       '</h4>';
+    message += '<table class="taskInfo">';
+    message += '<tr><th>Test:</th><td><strong>'+data.test.name;
+    if (data.test.repository_url.length > 0) {
+        message += '&nbsp;&nbsp;<a href="'+data.test.repository_url+'" class="octicon octicon-mark-github"  target="_blank" title="The source code of the test"></a>';
+    }
+    if (data.test.detail_url.length > 0) {
+        message += '&nbsp;&nbsp;<a href="'+data.test.detail_url+'" class="glyphicon glyphicon-list-alt"  target="_blank" title="Detail of the test"></a>';
+    }
+	message += '</strong></td></tr>';
+	if (data.test.external_links != null && data.test.external_links.length > 0) {
+		message += '<tr><th style="vertical-align: top">Test external information:</th><td>';
+		var exlinks = data.test.external_links.split(';');
+		for (var ix in exlinks) {
+			message += '<a href="'+ exlinks[ix] +'">&nbsp;'+exlinks[ix]+'<span class="octicon octicon-link-external link-external"></span></a><br>';
+		}
+		message += '</td></tr>';
+	}
+    message += '<tr><th>Task / Recipe result:</th><td>'+
+               '<span class="glyphicon glyphicon-'+task_icon.icon+'" style="color:'+task_icon.color+'" title="'+task_icon.title+'"></span>&nbsp;&nbsp;'+task_icon.status+'&nbsp;/&nbsp;&nbsp;'+
+               '<span class="glyphicon glyphicon-'+recipe_icon.icon+'" style="color:'+recipe_icon.color+'" title="'+recipe_icon.title+'"></span>&nbsp;&nbsp;'+recipe_icon.status+'</td></tr>';
+    message += '<tr><th>Status:</th><td>'+
+			   '<span class="glyphicon glyphicon-'+status_icon.icon+'" style="color:'+status_icon.color+'" title="'+status_icon.title+'"></span>&nbsp;&nbsp;'+status_icon.status+'</td></tr>';
+	if (data.logfiles.length > 0) {
+		message += '<tr><th style="vertical-align: top">Logs:</th><td>';
+		for (var ix in data.logfiles) {
+			var name = data.logfiles[ix].substring(data.logfiles[ix].lastIndexOf('/')+1);
+			message += '<a href="'+ STORAGE_URL + data.logfiles[ix] +'" class="glyphicon glyphicon-briefcase openInModalWindow">&nbsp;'+name+'</a><br>';
+		}
+		message += '</td></tr>';
+	}
+    message += '</table>';
+    var sumComments = data.comments.length + data.recipe.comments.length;
+    if (sumComments > 0) {
+        message += '<strong>Comments ('+sumComments+'):</strong>';
+        message += '<div class="comment-list scrolling elastic">'+
+                   '<ul class="nopoints coments-list">';
+        for(ix in data.comments) {
+            var icon = getCommentIcon(data.comments[ix].action);
+            message += '<li><span class="glyphicon glyphicon-'+icon.icon+'" title="'+icon.title+'"></span>&nbsp;&nbsp;'+
+                       '<b>Task:</b>&nbsp;&nbsp;'+data.comments[ix].created_date+'&nbsp;&nbsp;'+
+                        data.comments[ix].content+
+                        '&nbsp;&nbsp;('+data.comments[ix].username+')</li>';
         }
-        // Persistent
-        openUIDs.add(uid);
+        for(ix in data.recipe.comments) {
+            var icon = getCommentIcon(data.recipe.comments[ix].action);
+            message += '<li><span class="glyphicon glyphicon-'+icon.icon+'" title="'+icon.title+'"></span>&nbsp;&nbsp;'+
+                       '<b>Recipe:</b>&nbsp;&nbsp;'+data.recipe.comments[ix].created_date+'&nbsp;&nbsp;'+
+                        data.recipe.comments[ix].content+
+                        '&nbsp;&nbsp;('+data.recipe.comments[ix].username+')</li>';
+        }
+        /*
+        for(ix in data.reschduled) {
+            icon = getCommentIcon("rescheduled-job-link");
+            var jid = data.reschduled[ix].uid.replace(/J:/,'');
+            message += '<li><span class="glyphicon glyphicon-'+icon.icon+'" title="'+icon.title+'"></span>&nbsp;&nbsp;'+
+                        '<b>Recipe:</b>&nbsp;&nbsp;'+data.reschduled[ix].date+'&nbsp;&nbsp;'+
+                        'This recipe is new version of previous recipe (<a href="https://' + BEAKER_SERVER + '/jobs/'+jid+'">'+
+                        data.reschduled[ix].uid+'</a>)</li>';
+        }
+        */
+        message += '</ul></div>';
     }
-    lastUID = uid;
-    if(uid) {
-        $.getJSON("/api/task-info?task=" + uid, function(data){
-            var loadToBackend = openUIDs.has(data.task.uid);
-            if (lastUID.replace(/T:/,'') != data.task.uid && !loadToBackend) { return; }
-            if (loadToBackend) {
-                openUIDs.del(data.task.uid);
-                $('.dashboard tbody td[id="T:'+data.task.uid+'"]').addClass('selected');
-            } else {
-                $("td.hover").removeClass('hover');
-                $('.dashboard tbody td[id="T:'+data.task.uid+'"]').addClass('hover');
-            }
-            var message = "";
-            var recipeWhiteboard = "";
-            if(data.recipe.arch) {
-				recipeWhiteboard += ' - '+data.recipe.arch;
-            }
-            message += '<h4>'+data.job_name+' '+recipeWhiteboard+' ('+data.job.date+')&nbsp;&nbsp;'+
-			   '<a class="glyphicon glyphicon-link" href="/jobs.html#'+data.recipe.uid+'" title="Job detail"></a>&nbsp;&nbsp;'+
-               '<a href="https://' + BEAKER_SERVER + '/recipes/'+data.recipe.uid+'#'+data.task.uid+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>'+
-               '</h4>';
-            message += '<h5>'+data.task.test.name+'</h5>';
-            message += '<table class="taskInfo">';
-            message +=  '<tr><th>Status:</th><td>'+data.task.status+'</td></tr>';
-            message += '</table>';
-            var sumComments = data.task.comments.length + data.recipe.comments.length + data.reschduled.length;
-            if (sumComments > 0) {
-				message += '<strong>Comments ('+sumComments+'):</strong>';
-				message += '<div class="comment-list scrolling elastic">'+
-						   '<ul class="nopoints coments-list">';
-				for(ix in data.task.comments) {
-					var icon = getCommentIcon(data.task.comments[ix].action);
-					message += '<li><span class="glyphicon glyphicon-'+icon.icon+'" title="'+icon.title+'"></span>&nbsp;&nbsp;'+
-					           '<b>Task:</b>&nbsp;&nbsp;'+data.task.comments[ix].created_date+'&nbsp;&nbsp;'+
-					            data.task.comments[ix].content+
-					            '&nbsp;&nbsp;('+data.task.comments[ix].username+')</li>';
+    return message;
+}
+
+function previewTask(id) {
+	var api_url = "/api/v1/task/";
+	$('.dashboard-tests td').removeClass('hover');
+	if (!isNumber(id) && (id+"").match(/^T:[0-9]+/) != null) {
+		// This is situation, when we open detail via UID.
+		api_url += ("?uid="+id).replace('T:','');
+		var sElm = $("td[id='"+id+"']");
+		$('html, body').animate({
+	        scrollTop: sElm.offset().top - 200
+	    }, 2000);
+	} else{
+	    if (!isNumber(id)) {
+	        id = $(this).attr("data-id");
+	    }
+		$(this).addClass('hover');
+		api_url += id + "/";
+	}
+    if(id) {
+        $.getJSON(api_url, function(data){
+			if (data.previous == null && data.results !=null) {
+				// This is situation, when we open detail via UID.
+				if (data.results.length == 0) {
+					return 0;
 				}
-				for(ix in data.recipe.comments) {
-					var icon = getCommentIcon(data.recipe.comments[ix].action);
-					message += '<li><span class="glyphicon glyphicon-'+icon.icon+'" title="'+icon.title+'"></span>&nbsp;&nbsp;'+
-					           '<b>Recipe:</b>&nbsp;&nbsp;'+data.recipe.comments[ix].created_date+'&nbsp;&nbsp;'+
-					            data.recipe.comments[ix].content+
-					            '&nbsp;&nbsp;('+data.recipe.comments[ix].username+')</li>';
-				}
-				for(ix in data.reschduled) {
-					icon = getCommentIcon("rescheduled-job-link");
-					var jid = data.reschduled[ix].uid.replace(/J:/,'');
-					message += '<li><span class="glyphicon glyphicon-'+icon.icon+'" title="'+icon.title+'"></span>&nbsp;&nbsp;'+
-					            '<b>Recipe:</b>&nbsp;&nbsp;'+data.reschduled[ix].date+'&nbsp;&nbsp;'+
-					            'This recipe is new version of previous recipe (<a href="https://' + BEAKER_SERVER + '/jobs/'+jid+'">'+
-					            data.reschduled[ix].uid+'</a>)</li>';
-				}
-				message += '</ul></div>';
+				data = data.results[0];
+				$('td[data-id="'+data.id+'"]').addClass('hover');
 			}
+            var tab = detailPanel.getTab(data.id);
+			if (tab == null) {
+				tab = detailPanel.getTab(0);
+			}
+			tab.open()
+
             var icons = [];
-            if (data.task.result == 'fail' && data.task.statusbyuser == 'waived') {
-				icons[icons.length] = getResultIcon('waived');
-            } else {
-				icons[icons.length] = getResultIcon(data.task.result);
+            icons[icons.length] = getTaskResultIcon(data);
+            if (data.recipe.job.is_running) {
+				icons.push({icon: 'star', title: "System is still runnig."});
             }
+            /*
             if (data.reschduled.length > 0) {
 				icons[icons.length] = {
 					icon: 'refresh',
 					title: "Job was "+data.reschduled.length+"-times rescheduled."
 				};
             }
-            if (data.job.is_running) {
-				icons[icons.length] = {icon: 'star', title: "System is still runnig."};
-            }
-            var tab = null;
-            if (loadToBackend) {
-                tab = detailPanel.createNewDetailTab(1);
-            }
-            var panel = detailPanel.updateDetailTab({
-				icons: icons,
-				name: "T:"+data.task.uid,
-				title: data.job_name+recipeWhiteboard+' ('+data.job.date+')',
-				html: message,
-				status: data.results,
-			}, tab);
-			if (preLoadTabUID) {
-				var sElm = $("td[id='T:"+preLoadTabUID+"']");
-				if (sElm.length > 0) {
-					sElm.addClass('selected');
-					$('html, body').animate({
-				        scrollTop: sElm.offset().top - 200
-				    }, 2000);
-				}
-				detailPanel.openDetailTab(1);
-                preLoadTabUID = null;
+            */
+            var head = 'T:'+data.uid;
+			for (var ix in icons) {
+				head += '&nbsp<span class="glyphicon glyphicon-'+icons[ix].icon+'" title="'+icons[ix].title+'"></span>'
 			}
+            tab.update({
+				id: data.id,
+				head: head,
+				head_title: data.job_name+' - '+data.whiteboard+' ('+data.recipe.job.date+')',
+                content: render_task_detail_tab(data),
+				status: data.result,
+				box_el: $(".dashboard-tests td[data-id='"+data.id+"']")
+			});
         });
     }
 }
 
-function saveTaskPanel(){    
-    var exist = $('.tab-detail-header a[href="#tab-detail-'+
-                  $(this).attr('id').replace(':','-')+'"]', 
-                  detailPanel.elm);
-    if (exist.length > 0) {
-        return;
-    }
-	previewTask($(this).attr('id').replace(/T:/,''));
+function saveTaskPanel(){
+    var tab = detailPanel.getTab(0);
+	detailPanel.createDefaultTab();
+	tab.data.box_el.addClass('selected');
+	tab.open();
+	// Add link to recipe list
+	var button = $('<div class="btn action-button"></div>');
+	$('.recipe-list', detailPanel.elm).append(button);
+	tab.data.button_el = button;
+	// btn-'+info.color)
+	button.bind('click', function() {
+			$(this).data('detailTab').delete()
+		  })
+		  .data('detailTab', tab)
+		  .attr('title', tab.data.head_title)
+		  .css({'background-color': tab.data.box_el.css('background-color'),
+		        'background-image': tab.data.box_el.css('background-image'),
+		        'background-repeat': tab.data.box_el.css('background-repeat')})
+		  .hover(function() {
+			   events.runEvent('HOVER', $(this).data('detailTab'), 'IN');
+		   }, function() {
+			   events.runEvent('HOVER', $(this).data('detailTab'), 'OUT');
+		   })
+		  .html(tab.data.head);
+	// Enable comment buttons, if some recipe is selected.
+	$("button[data-action-field='action']", detailPanel.elm).removeAttr('disabled');
 }
 
 function onHoverTask(){
-    $("td.field-value").filter(':not(.status-)').mouseenter(previewTask)
-                                                .click(saveTaskPanel);
+    $("td.field-value").filter(':not(.status-)')
+        .mouseenter(previewTask)
+        .click(saveTaskPanel);
 }
 
 function setupAutoHeight(elm, h){

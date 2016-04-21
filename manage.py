@@ -10,7 +10,7 @@ if __name__ == "__main__":
     if os.geteuid() == 0:
         exit("You can't run script as superuser")
 
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tttt.settings.production")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tttt.settings")
 
     from django.core.management import execute_from_command_line
     execute_from_command_line(sys.argv)

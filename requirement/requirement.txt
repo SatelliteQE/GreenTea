@@ -5,6 +5,7 @@ django-taggit
 django-reversion < 1.9
 django-widget-tweaks
 django-filter
+django-crispy-forms
 GitPython
 python-dateutil
 elasticsearch
