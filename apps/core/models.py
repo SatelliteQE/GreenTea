@@ -1360,11 +1360,13 @@ class FileLog(models.Model):
                            self.recipe.uid, self.path)
             try:
                 if res:
-                    self.task = Task.objects.get(uid=res.group(1))
+                    task = res.group(1)
+                    self.task = Task.objects.get(uid=task)
                 else:
                     res = re.match(r'.*[+]/([0-9]+)/[^/]+$', self.path)
                     if res:
-                        self.task = Task.objects.get(uid=res.group(1))
+                        task = res.group(1)
+                        self.task = Task.objects.get(uid=task)
             except Task.DoesNotExist:
                 logger.warn("%d doesn't exists for %s" %
                             (int(task), self.path))
