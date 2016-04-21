@@ -9,7 +9,7 @@ from django import forms
 import apps.core.views
 from models import GroupTemplate, GroupTestTemplate, JobTemplate, Test
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("main")
 
 
 class HomepageForm(forms.Form):

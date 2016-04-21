@@ -286,6 +286,8 @@ BEAKER_RESERVESYS = 86400
 BKR_SYSTEM_PASS = None
 BKR_SYSTEM_USER = None
 
+LOGFILE_LIFETIME = 30
+
 RESERVE_TEST = "/distribution/reservesys"
 
 # If you want to change directory with repositories,

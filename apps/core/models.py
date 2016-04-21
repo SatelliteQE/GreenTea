@@ -9,7 +9,7 @@ import logging
 import os
 import re
 import urllib2
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import git
 from django.conf import settings
@@ -27,7 +27,7 @@ from apps.core.utils.date_helpers import currentDate, toUTC
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 from lib import gitconfig
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("main")
 
 UNKNOW = 0
 ABOART = 1
@@ -1330,7 +1330,25 @@ class FileLog(models.Model):
         return os.path.join(settings.STORAGE_ROOT, "./%s" % self.path)
 
     def delete(self, *args, **kwargs):
-        os.remove(self.absolute_path())
+        def clean_dir(path):
+            path_dir = os.path.dirname(path)
+            if path_dir == path:
+                return
+            absolute_path = os.path.join(
+                settings.STORAGE_ROOT, "./%s" % path_dir)
+            if os.path.exists(absolute_path):
+                if len(os.listdir(absolute_path)) == 0:
+                    os.rmdir(absolute_path)
+                    print "to remove", absolute_path
+            clean_dir(path_dir)
+
+        file_path = self.absolute_path()
+        clean_dir(self.path)
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        else:
+            logger.warning("the file %s doesn't exist" % file_path)
         super(FileLog, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
@@ -1344,7 +1362,21 @@ class FileLog(models.Model):
                 if res:
                     task = res.group(1)
                     self.task = Task.objects.get(uid=task)
+                else:
+                    res = re.match(r'.*[+]/([0-9]+)/[^/]+$', self.path)
+                    task = res.group(1)
+                    self.task = Task.objects.get(uid=task)
             except Task.DoesNotExist:
                 logger.warn("%d doesn't exists for %s" %
                             (int(task), self.path))
         super(FileLog, self).save(*args, **kwargs)
+
+    @staticmethod
+    def clean_old(days=settings.LOGFILE_LIFETIME):
+        to_delete = datetime.now() - timedelta(days=days)
+        logs = FileLog.objects.filter(created__lt=to_delete)
+        logger.info("%d logs to prepare remove" % len(logs))
+        # remove all file and dirs
+        for it in logs:
+            logger.debug("remove file %s" % it)
+            it.delete()

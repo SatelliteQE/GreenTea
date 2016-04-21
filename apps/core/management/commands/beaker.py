@@ -12,7 +12,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db.models import Max
 from texttable import Texttable
 
-from apps.core.models import Job, JobTemplate, Recipe
+from apps.core.models import Job, JobTemplate, Recipe, FileLog
 from apps.core.utils.beaker import Beaker
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 
@@ -98,6 +98,9 @@ class BeakerCommand():
                 label = period_label
             self.scheduleByJobTemplates(
                 filter, "".join(label), fullInfo, simulate, reserver)
+
+    def clean(self, **kwargs):
+        FileLog.clean_old()
 
     def scheduleByJobTemplates(
             self, filter, label, fullInfo, simulate, reserve):
@@ -189,7 +192,7 @@ class Command(BaseCommand):
                            '(J:12345) for identify of job. We can use more values')
         group.add_argument('--return2beaker-message', nargs=None, type=str,)
 
-        parser.add_argument('action', choices=("schedule", "reschedule", "return2beaker", "cancel"),
+        parser.add_argument('action', choices=("schedule", "reschedule", "return2beaker", "cancel", "clean"),
                             help='Action for beaker client')
 
     def handle(self, *args, **options):
