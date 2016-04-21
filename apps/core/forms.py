@@ -24,6 +24,9 @@ class HomepageForm(forms.Form):
     schedule = forms.IntegerField(
         required=False
     )
+    page = forms.IntegerField(
+        required=False
+    )
 
 
 class FilterForm(forms.Form):

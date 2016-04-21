@@ -67,12 +67,14 @@ class HomePageView(TemplateView):
         form.is_valid()
         context["forms"] = form
         self.filters = form.cleaned_data
+        pag_type = self.request.GET.get('type')
 
         try:
             context['progress'] = CheckProgress.objects.order_by(
                 "-datestart")[0]
         except IndexError:
             context['progress'] = None
+
         # Waiver
         comments = Comment.objects\
             .filter(created_date__gt=datetime.today().date())\
@@ -80,13 +82,12 @@ class HomePageView(TemplateView):
         paginator = Paginator(comments, settings.PAGINATOR_OBJECTS_ONHOMEPAGE)
         context['waiver'] = paginator.page(
             int(self.request.GET.get('cpage', 1)))
-        context['cpaginator'] = paginator
+
         history = TestHistory.objects.filter().order_by(
             "-date")[:settings.PAGINATOR_OBJECTS_ONHOMEPAGE * 10]
         paginator = Paginator(history, settings.PAGINATOR_OBJECTS_ONHOMEPAGE)
         context['history'] = paginator.page(
             int(self.request.GET.get('hpage', 1)))
-        context['hpaginator'] = paginator
 
         # context['networking'] = self.get_network_stas()
         ids = [it["max_id"] for it in TaskPeriodList.last_runs()]
@@ -94,8 +95,24 @@ class HomePageView(TemplateView):
         if self.filters.get("schedule"):
             filter_ids = [int(self.filters.get("schedule"))]
         order = self.filters.get("order") if self.filters.get("order") else "score"
-        context["score"] = Score.objects.filter(
-            schedule__in=filter_ids).order_by(order)[:10]
+
+        # Score
+        score_obj = Score.objects.filter(
+            schedule__in=filter_ids).order_by(order)
+        score = Paginator(score_obj, settings.PAGINATOR_OBJECTS_ONHOMEPAGE)
+
+        page = 1
+        if "score" == pag_type:
+            page = int(self.filters.get('page', 1))
+        context["score"] = score.page(int(page))
+        range_min = page - 5
+        range_range = 10
+        if page < range_range/2:
+            range_min = 1
+            range_range += page
+        if score.page_range[-1] < range_min+range_range:
+            range_min = score.page_range[-1]-range_range
+        context["score"].ranges = sorted(set([1, page, score.page_range[-1]]).union(range(range_min, range_min+range_range)))
 
         context["schedules"] = TaskPeriodSchedule.objects.filter(id__in=ids).order_by("period")
         return context

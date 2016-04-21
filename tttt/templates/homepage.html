@@ -27,17 +27,17 @@
 <table class="table table-striped">
     <tr>
         <th>Test</th>
-        <th><a href="?order=score&amp;schedule={{forms.cleaned_data.schedule}}">Score</a></th>
-        <th><a href="?order=rate&amp;schedule={{forms.cleaned_data.schedule}}">Rate</a></th>
+        <th><a href="?order=score&amp;schedule={{forms.cleaned_data.schedule}}&amp;page={{score.number}}">Score</a></th>
+        <th><a href="?order=rate&amp;schedule={{forms.cleaned_data.schedule}}&amp;page={{score.number}}">Rate</a></th>
         <th>Results</th>
     </tr>
-    {% for it in score %}
+    {% for it in score.object_list %}
     <tr>
       <td width="50%"><a href="{% url 'tests-list' %}?test_id={{it.test.id}}">{{it.test}}</a></td>
       <td>{{it.score}}</td>
       <td>{{it.rate|floatformat:2}}</td>
       <td>
-        <div class="progress" style="height:20px">
+        <div class="progress" style="margin:0px">
           <div class="progress-bar progress-bar-success" style="width: {{it.get_result.pass}}%">
             <span class="sr-only">{{it.get_result.pass}}% Complete (success)</span>
           </div>
@@ -52,6 +52,15 @@
     </tr>
     {% endfor %}
 </table>
+
+<ul class="pagination">
+  {% if score.has_previous %}<li><a href="?type=score&amp;page={{ score.previous_page_number }}&amp;schedule={{forms.cleaned_data.schedule}}">&laquo;</a></li>{% else %}<li class="disabled" ><span>&laquo;</span></li>{%endif%}
+  {% for it in score.ranges %}
+  <li {% ifequal score.number it %}class="active"{% endifequal %}><a href="?type=score&amp;page={{it}}&amp;schedule={{forms.cleaned_data.schedule}}">{{it}} <span class="sr-only">(current)</span></a></li>
+  {% endfor %}
+  {% if score.has_next %}<li><a href="?type=score&amp;page={{ score.next_page_number }}&amp;schedule={{forms.cleaned_data.schedule}}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>{%endif%}
+</ul>
+
 {% endif %}
 
 
@@ -91,7 +100,7 @@
 
 <ul class="pagination">
   {% if waiver.has_previous %}<li><a href="?cpage={{ waiver.previous_page_number }}">&laquo;</a></li>{% else %}<li class="disabled" ><span>&laquo;</span></li>{%endif%}
-  {% for it in cpaginator.page_range %}
+  {% for it in waiver.paginator.page_range %}
   <li {% ifequal waiver.number  it %}class="active"{% endifequal %}><a href="?cpage={{it}}">{{it}} <span class="sr-only">(current)</span></a></li>
   {% endfor %}
   {% if waiver.has_next %}<li><a href="?cpage={{ waiver.next_page_number }}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>{%endif%}
@@ -107,14 +116,14 @@
         <td>{{it.author.name}}</td>
         <td><a target="_new" href="{% url 'tests-list' %}{{it.test.get_absolute_url}}">{{it.test}}</a></td>
         <td>{{it.date}}</td>
-        <td><a target="_new" href="{{ it.get_absolute_url }}">{{it.commit}}</a></td>
+        <td><a target="_new" href="{{ it.get_absolute_url }}">{{it.commit|slice:':15'}}</a></td>
     </tr>
 {% endfor %}
 </table>
 
 <ul class="pagination">
   {% if history.has_previous %}<li><a href="?hpage={{ history.previous_page_number }}">&laquo;</a></li>{% else %}<li class="disabled" ><span>&laquo;</span></li>{%endif%}
-  {% for it in hpaginator.page_range %}
+  {% for it in history.paginator.page_range %}
   <li {% ifequal history.number  it %}class="active"{% endifequal %}><a href="?hpage={{it}}">{{it}} <span class="sr-only">(current)</span></a></li>
   {% endfor %}
   {% if history.has_next %}<li><a href="?hpage={{ history.next_page_number }}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>{%endif%}
