@@ -22,7 +22,6 @@ from django.db.models import Count, Max
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 from apps.core.utils.date_helpers import toLocalZone
-
 # from single_process import single_process
 
 

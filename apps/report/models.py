@@ -53,6 +53,19 @@ class Score(models.Model):
             data[er.get(it["result"])] = it["count"]
         return data
 
+    @staticmethod
+    def recount_by_schedule(schedule):
+        skips = []
+        tasks = Task.objects.filter(recipe__job__schedule=schedule)
+        counter = 0
+        for task in tasks:
+            if task.test.id not in skips:
+                task.save()
+                skips.append(task.test.id)
+                counter+=1
+        return counter, len(tasks)
+
+
 
 class ExternalPage(models.Model):
     name = models.CharField(max_length=128)

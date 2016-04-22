@@ -181,12 +181,14 @@ class JobsListView(TemplateView):
             jobstag = JobTemplate.objects.filter(
                 tags__slug=self.filters.get("tag"))
             tag_query = map(lambda x: "%d" % int(x.id), jobstag)
-            tag_query = 'AND "core_job"."template_id" IN ( %s )' % ", ".join(tag_query)
+            tag_query = 'AND "core_job"."template_id" IN ( %s )' % ", ".join(
+                tag_query)
 
         # include only jobs with given name
         search_query = ""
         if self.filters.get('search'):
-            search_query = """AND lower("core_jobtemplate"."whiteboard") LIKE lower('%%{}%%')""".format(self.filters.get('search'))
+            search_query = """AND lower("core_jobtemplate"."whiteboard") LIKE lower('%%{}%%')""".format(
+                self.filters.get('search'))
 
         query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
            LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")

@@ -94,7 +94,8 @@ class HomePageView(TemplateView):
         filter_ids = ids
         if self.filters.get("schedule"):
             filter_ids = [int(self.filters.get("schedule"))]
-        order = self.filters.get("order") if self.filters.get("order") else "score"
+        order = self.filters.get(
+            "order") if self.filters.get("order") else "score"
 
         # Score
         score_obj = Score.objects.filter(
@@ -107,12 +108,14 @@ class HomePageView(TemplateView):
         context["score"] = score.page(int(page))
         range_min = page - 5
         range_range = 10
-        if page < range_range/2:
+        if page <= range_range / 2:
             range_min = 1
             range_range += page
-        if score.page_range[-1] < range_min+range_range:
-            range_min = score.page_range[-1]-range_range
-        context["score"].ranges = sorted(set([1, page, score.page_range[-1]]).union(range(range_min, range_min+range_range)))
+        if score.page_range[-1] < range_min + range_range:
+            range_min = score.page_range[-1] - range_range
+        context["score"].ranges = sorted(set(
+            [1, page, score.page_range[-1]]).union(range(range_min, range_min + range_range)))
 
-        context["schedules"] = TaskPeriodSchedule.objects.filter(id__in=ids).order_by("period")
+        context["schedules"] = TaskPeriodSchedule.objects.filter(
+            id__in=ids).order_by("period")
         return context

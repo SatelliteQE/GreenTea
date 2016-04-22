@@ -37,14 +37,14 @@
       <td>{{it.rate|floatformat:2}}</td>
       <td>
         <div class="progress" style="margin:0px" title="{{it.get_result}}">
-          <div class="progress-bar progress-bar-success" style="width: {{it.get_result_percent.pass}}%">
-            <span class="sr-only">{{it.get_result_percent.pass}}% Complete (success)</span>
+          <div class="progress-bar progress-bar-danger" style="width: {{it.get_result_percent.fail}}%">
+            <span class="sr-only">{{it.get_result_percent.fail}}% Complete (danger)</span>
           </div>
           <div class="progress-bar progress-bar-warning" style="width: {{it.get_result_percent.warning}}%">
             <span class="sr-only">{{it.get_result_percent.warning}}% Complete (warning)</span>
           </div>
-          <div class="progress-bar progress-bar-danger" style="width: {{it.get_result_percent.fail}}%">
-            <span class="sr-only">{{it.get_result_percent.fail}}% Complete (danger)</span>
+          <div class="progress-bar progress-bar-success" style="width: {{it.get_result_percent.pass}}%">
+            <span class="sr-only">{{it.get_result_percent.pass}}% Complete (success)</span>
           </div>
         </div>
       </td>

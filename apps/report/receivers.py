@@ -27,12 +27,12 @@ def recount_test_score(sender, **kwargs):
     score.count = 0
     for it in results:
         score.count += it["count"]
-        if EnumResult.PASS == it["result"]:
-            score.score += 2 * it["count"]
-        elif EnumResult.FAIL == it["result"]:
+        if EnumResult.FAIL == it["result"]:
             score.score -= 2 * it["count"]
         elif EnumResult.WARN == it["result"]:
             score.score -= 1 * it["count"]
+        elif EnumResult.PASS == it["result"]:
+            score.score += 0 * it["count"]
 
     score.rate = (score.score / float(score.count))
     score.result = json.dumps(list(results))
