@@ -37,12 +37,20 @@ class Score(models.Model):
     class Meta:
         app_label = "report"
 
-    def get_result(self):
+    def get_result_percent(self):
         result = json.loads(self.result)
         data = {"count": self.count}
         er = EnumResult()
         for it in result:
             data[er.get(it["result"])] = (it["count"] * 100) / self.count
+        return data
+
+    def get_result(self):
+        result = json.loads(self.result)
+        data = {"count": self.count}
+        er = EnumResult()
+        for it in result:
+            data[er.get(it["result"])] = it["count"]
         return data
 
 
