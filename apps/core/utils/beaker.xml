@@ -4,7 +4,6 @@
   {% if not job.is_set_recipe %}
   <recipeSet priority="Normal">
   {% endif %}
-  {{ job.is_set_recipe }}
   {% for r in job.cache_recipes %}
     {% if job.is_set_recipe %}
     <recipeSet priority="Normal">
