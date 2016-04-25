@@ -620,6 +620,7 @@ class JobTemplate(models.Model):
                                     help_text="example: {{arch}} {{whiteboard|nostartsdate}}")
     tags = TaggableManager(blank=True)
     group = settings.BEAKER_JOB_GROUP
+    is_set_recipe = False
 
     def __unicode__(self):
         return self.whiteboard
@@ -671,6 +672,22 @@ class JobTemplate(models.Model):
         self.save()
         for recipe in recipes:
             recipe.clone(self)
+
+    def check_set_recipe(self):
+        """
+        The method checks parameters for beaker's recipe. If recipes contain
+        same hostname then the recipe has to be used in own recipeSet.
+        The property is set as attribute 'is_set_recipe'.
+        """
+        hostnames = []
+        for it in self.trecipes.all():
+            if not it.hostname:
+                continue
+            if it.hostname in hostnames:
+                self.is_set_recipe = True
+                return True
+            hostnames.append(it.hostname)
+        return False
 
 
 class DistroTemplate(models.Model):

@@ -276,6 +276,10 @@ class JobGen:
             .filter(jobtemplate=jobT, is_virtualguest=False)
         # .select_related("distro", "virtualguests")
         recipesS = list()
+
+        # check if the receipeSet has to be used
+        jobT.check_set_recipe()
+
         for recipeT in recipesT:
             if len(recipeT.getArchsForToday()) == 0:
                 raise Exception("JobTemplate %d: arch is not set" % jobT.id)

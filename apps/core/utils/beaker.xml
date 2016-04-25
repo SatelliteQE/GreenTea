@@ -1,8 +1,14 @@
 {% load core_extras %}
 <job {% if not is_manual and job.group %}group="{{job.group}}"{%endif%} retention_tag="scratch">
   <whiteboard>{{ job.whiteboard }}</whiteboard>
+  {% if not job.is_set_recipe %}
   <recipeSet priority="Normal">
+  {% endif %}
+  {{ job.is_set_recipe }}
   {% for r in job.cache_recipes %}
+    {% if job.is_set_recipe %}
+    <recipeSet priority="Normal">
+    {% endif %}
     {% for arch in r.getArchsForToday %}
     <recipe kernel_options="{{ r.kernel_options }}" kernel_options_post="{{ r.kernel_options_post }}" ks_meta="{{ r.ks_meta }}" role="{{ r.get_role|default:"STANDALONE" }}" whiteboard="{{ r.name }}">
       {% comment %} ### Render xml for virtual guest ###  {% endcomment %}
@@ -109,6 +115,8 @@
       {% endfor %}
       {% if r.cache_reserve %}<reservesys duration="{{ reservesys }}"/>{% endif %}
     </recipe>
-    {% endfor %}{% endfor %}
-  </recipeSet>
+    {% endfor %}
+    {% if job.is_set_recipe %}</recipeSet>{% endif %}
+    {% endfor %}
+  {% if not job.is_set_recipe %}</recipeSet>{% endif %}
 </job>
