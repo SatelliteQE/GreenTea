@@ -9,6 +9,7 @@ import logging
 import os
 import re
 import urllib2
+import json
 from datetime import datetime, timedelta
 
 import git
@@ -26,6 +27,8 @@ from apps.core.signals import recipe_changed, recipe_finished
 from apps.core.utils.date_helpers import currentDate, toUTC
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 from lib import gitconfig
+from elasticsearch import Elasticsearch
+
 
 logger = logging.getLogger("main")
 
@@ -1366,6 +1369,8 @@ class FileLog(models.Model):
             os.remove(file_path)
         else:
             logger.warning("the file %s doesn't exist" % file_path)
+        if settings.ELASTICSEARCH:
+            self.index_remove()
         super(FileLog, self).delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
@@ -1386,7 +1391,10 @@ class FileLog(models.Model):
                         self.task = Task.objects.get(uid=task)
             except Task.DoesNotExist:
                 logger.warn("%d doesn't exists for %s" %
-                            (int(task), self.path))
+                           (int(task), self.path))
+        if settings.ELASTICSEARCH:
+            self.index()
+
         super(FileLog, self).save(*args, **kwargs)
 
     @staticmethod
@@ -1398,3 +1406,24 @@ class FileLog(models.Model):
         for it in logs:
             logger.debug("remove file %s" % it)
             it.delete()
+
+    def index_remove(self):
+        es = Elasticsearch(settings.ELASTICSEARCH)
+        name = os.path.basename(self.absolute_path())
+        es.delete(index=name.lower(), doc_type="log", id=self.id)
+
+    def index(self):
+        es = Elasticsearch(settings.ELASTICSEARCH)
+        file_path = self.absolute_path()
+        f = open(file_path)
+        content = json.dumps(f.read())
+        f.close()
+        name = os.path.basename(file_path)
+
+        es.index(index=name.lower(), doc_type="log", id=self.id,
+                    body={"content": content,
+                        "job": self.recipe.job.id,
+                        "recipe": self.recipe.uid,
+                        "period": self.recipe.job.schedule.id,
+                        "task": self.task.uid,
+                        "path": file_path})
