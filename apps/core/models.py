@@ -1410,7 +1410,10 @@ class FileLog(models.Model):
     def index_remove(self):
         es = Elasticsearch(settings.ELASTICSEARCH)
         name = os.path.basename(self.absolute_path())
-        es.delete(index=name.lower(), doc_type="log", id=self.id)
+        try:
+            es.delete(index=name.lower(), doc_type="log", id=self.id)
+        except:
+            pass
 
     def index(self):
         es = Elasticsearch(settings.ELASTICSEARCH)
@@ -1420,10 +1423,13 @@ class FileLog(models.Model):
         f.close()
         name = os.path.basename(file_path)
 
-        es.index(index=name.lower(), doc_type="log", id=self.id,
+        try:
+            es.index(index=name.lower(), doc_type="log", id=self.id,
                     body={"content": content,
                         "job": self.recipe.job.id,
                         "recipe": self.recipe.uid,
                         "period": self.recipe.job.schedule.id,
-                        "task": self.task.uid,
+                        "task": self.task.uid if self.task else '',
                         "path": file_path})
+        except:
+            pass
