@@ -112,6 +112,10 @@ class TaskTemplateInLine(admin.TabularInline):
     fields = ("get_recipetemplate_link", "jobtemplate")
     readonly_fields = fields
 
+    def get_queryset(self, request):
+        qs = super(TaskTemplateInLine, self).get_queryset(request)
+        return qs.filter(recipe__jobtemplate__is_enable=True)
+
     def jobtemplate(self, obj):
         return "%s" % obj.recipe.jobtemplate
 
