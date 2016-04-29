@@ -1408,7 +1408,7 @@ class FileLog(models.Model):
             it.delete()
 
     def index_remove(self):
-        es = Elasticsearch(settings.ELASTICSEARCH)
+        es = Elasticsearch(settings.ELASTICSEARCH, timeout=60)
         name = os.path.basename(self.absolute_path())
         try:
             es.delete(index=name.lower(), doc_type="log", id=self.id)
@@ -1416,7 +1416,7 @@ class FileLog(models.Model):
             pass
 
     def index(self):
-        es = Elasticsearch(settings.ELASTICSEARCH)
+        es = Elasticsearch(settings.ELASTICSEARCH, timeout=60)
         file_path = self.absolute_path()
         f = open(file_path)
         content = json.dumps(f.read())
