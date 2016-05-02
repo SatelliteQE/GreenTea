@@ -82,6 +82,8 @@ STATIC_ROOT = "%s/tttt/%s/" % (ROOT_PATH, 'static')
 
 STORAGE_ROOT = "%s/%s/" % (ROOT_PATH, 'storage')
 
+STORAGE_URL = "/storage/"
+
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
@@ -181,6 +183,8 @@ INSTALLED_APPS = (
     'apps.report',
     'apps.kerberos',
     'apps.api',
+    'django_filters',
+    'crispy_forms',
     'plugins',
 )
 
@@ -323,8 +327,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',
+                                'rest_framework.filters.OrderingFilter'),
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.LimitOffsetPagination',
     'DEFAULT_AUTHENTICATION_CLASSES': [],
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 100
 }
-
 ELASTICSEARCH = ()

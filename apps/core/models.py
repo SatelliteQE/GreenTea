@@ -983,6 +983,10 @@ class Job(models.Model):
     def get_url_beaker(self):
         return "%s/%s/" % (settings.BEAKER_SERVER, self.uid)
 
+    def get_original_job(self):
+        Job.objects.filter(schedule=self.schedule, template=self.template,
+                           uid__gt=self.uid).order_by('uid')[:1]
+
 
 class Recipe(models.Model):
     UNKNOW = 0
@@ -1040,13 +1044,17 @@ class Recipe(models.Model):
             'statusbyuser': self.get_statusbyuser_display()
         }
 
+    def get_comment(self):
+        Comment.objects.filter(recipe=self, task__isnull=True)\
+            .order_by('-created_date')
+
     def get_template(self):
         return self.job.template
 
     def set_result(self, value):
         try:
-            self.result = [it[0]
-                           for it in RESULT_CHOICES if it[1] == value.lower()][0]
+            self.result = \
+                [it[0] for it in RESULT_CHOICES if it[1] == value.lower()][0]
         except IndexError:
             logger.error("IndexError: result %s %s %s" %
                          (value, self.result, RESULT_CHOICES))
@@ -1067,8 +1075,8 @@ class Recipe(models.Model):
             return
 
         if status != self.status:
-            if self.status in (
-                    self.COMPLETED, self.ABORTED, self.RESERVED, self.CANCELLED):
+            if self.status in (self.COMPLETED, self.ABORTED,
+                               self.RESERVED, self.CANCELLED):
                 recipe_finished.send(sender="models:Recipe", recipe=self)
             else:
                 recipe_changed.send(sender="models:Recipe", recipe=self)
@@ -1168,7 +1176,7 @@ class Recipe(models.Model):
 
 class Task(models.Model):
     uid = models.CharField("Task ID", max_length=12, unique=True)
-    recipe = models.ForeignKey(Recipe)
+    recipe = models.ForeignKey(Recipe, related_name="tasks")
     test = models.ForeignKey(Test)
     result = models.SmallIntegerField(choices=RESULT_CHOICES, default=UNKNOW)
     status = models.SmallIntegerField(
@@ -1339,7 +1347,8 @@ class Event(models.Model):
 
 class FileLog(models.Model):
     recipe = models.ForeignKey(Recipe)
-    task = models.ForeignKey(Task, blank=True, null=True)
+    task = models.ForeignKey(Task, blank=True, null=True,
+                             related_name="logfiles")
     path = models.CharField(max_length=256, unique=True)
     created = models.DateTimeField(auto_now_add=True)
 

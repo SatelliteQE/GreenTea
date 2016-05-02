@@ -22,8 +22,10 @@ class Comment(models.Model):
         (ENUM_ACTION_RESCHEDULE, "reshedule job"),
     )
     job = models.ForeignKey(Job, blank=True, null=True)
-    recipe = models.ForeignKey(Recipe, blank=True, null=True)
-    task = models.ForeignKey(Task, blank=True, null=True)
+    recipe = models.ForeignKey(Recipe, blank=True, null=True,
+                               related_name='comments')
+    task = models.ForeignKey(Task, blank=True, null=True,
+                             related_name='comments')
     username = models.CharField(max_length=32)
     content = models.TextField()
     created_date = models.DateTimeField(auto_now_add=True)

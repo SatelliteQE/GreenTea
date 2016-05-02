@@ -285,6 +285,7 @@ class TestsListView(TemplateView):
                 # Popupate tests
                 if i.test.id not in out_dict:
                     out_dict[i.test.id] = {
+                        'id': i.id,
                         'name': i.test.name,
                         'owner__name': i.test.owner.name,
                         'owner__email': i.test.owner.email,
@@ -347,8 +348,9 @@ class TestsListView(TemplateView):
                         i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data']:
                     out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data'][i.id] = {
                         'uid': i.uid,
+                        'id': i.id,
                         'result': i.get_result(),
-                        'status': i.recipe.get_status(),
+                        'status': i.status,#i.recipe.get_status(),
                         'is_running': i.recipe.is_running(),
                         'recipe__id': i.recipe.id,
                         'recipe__uid': i.recipe.uid,

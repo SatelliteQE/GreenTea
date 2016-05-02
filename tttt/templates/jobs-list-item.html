@@ -7,7 +7,7 @@
     </td>
     <td>{{ item.label }} </td>
     {% for k, recipe in item.data.items %}
-    <td {% if recipe.uid %}id="R:{{recipe.uid}}"{% endif %} class="field-value {% if not recipe.is_result_pass %} field-job{% endif %} status-{{recipe.get_result}}">
+    <td {% if recipe.uid %}id="R:{{recipe.uid}}" data-id="{{recipe.id}}"{% endif %} class="field-value {% if not recipe.is_result_pass %} field-job{% endif %} status-{{recipe.get_result}}">
        <div class="rWrapper">
         <div class="icons-tr"><span class="glyphicon glyphicon-eye-open" title="System is selected."></span></div>
         <div class="icons-mr">
