@@ -79,6 +79,9 @@ function getAuthor(id) {
              window.sessionStorage.authors = JSON.stringify(storage)
          });
     }
+	if (id == null) {
+		return storage;
+	}
     return storage[id];
 }
 

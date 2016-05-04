@@ -152,11 +152,6 @@ class Git(models.Model):
     def __unicode__(self):
         return self.name
 
-    def to_json(self):
-        return {
-            'name': self.name,
-        }
-
     @staticmethod
     def getGitFromFolder(folder):
         """
@@ -431,12 +426,6 @@ class Author(models.Model):
     def __unicode__(self):
         return "%s <%s>" % (self.name, self.email)
 
-    def to_json(self):
-        return {
-            'name': self.name,
-            'email': self.email
-        }
-
     @staticmethod
     def FromUser(user):
         if user.is_anonymous():
@@ -522,14 +511,6 @@ class Test(models.Model):
             return self.id == other.id
         return self.name == other.name and self.git == other.git
 
-    def to_json(self):
-        return {
-            'name': self.name,
-            'git': self.git.to_json() if self.git else None,
-            'owner': self.owner.to_json() if self.owner else None,
-            'description': self.description,
-        }
-
     def get_absolute_url(self):
         return "?search=%s" % self.name
 
@@ -574,16 +555,6 @@ class TestHistory(models.Model):
         verbose_name = _("history of test")
         verbose_name_plural = _("history of tests")
 
-    def to_json(self):
-        return {
-            'version': self.version,
-            'test': self.test.to_json() if self.test else None,
-            'author': self.author.to_json() if self.author else None,
-            'date': self.date.strftime("%Y-%m-%d %H:%M:%S"),
-            'commit': self.commit,
-            'url': self.get_absolute_url()
-        }
-
     def get_absolute_url(self):
         # FIXME maybe create url from db record
         # for example: return self.test.git.url % self.commit
@@ -601,16 +572,6 @@ class System(models.Model):
     def __unicode__(self):
         return self.hostname
 
-    def to_json(self):
-        return {
-            'hostname': self.hostname,
-            'ram': self.ram,
-            'cpu': self.cpu,
-            'hdd': self.hdd,
-            'parent': self.parent.hostname if self.parent else None,
-            'group': self.group
-        }
-
 
 class JobTemplate(models.Model):
     whiteboard = models.CharField(max_length=255, unique=True)
@@ -619,8 +580,9 @@ class JobTemplate(models.Model):
         choices=EVENT_FINISH_ENUM, default=RETURN)
     schedule = models.ForeignKey(TaskPeriod, null=True, blank=True)
     position = models.SmallIntegerField(default=0)
-    grouprecipes = models.CharField(max_length=255, null=False, blank=True,
-                                    help_text="example: {{arch}} {{whiteboard|nostartsdate}}")
+    grouprecipes = models.CharField(
+        max_length=255, null=False, blank=True,
+        help_text="example: {{arch}} {{whiteboard|nostartsdate}}")
     tags = TaggableManager(blank=True)
     group = settings.BEAKER_JOB_GROUP
     is_set_recipe = False
@@ -968,15 +930,6 @@ class Job(models.Model):
     def __unicode__(self):
         return self.uid
 
-    def to_json(self):
-        return {
-            'template_id': self.template.id,
-            'uid': self.uid,
-            'date': self.date.strftime("%Y-%m-%d %H:%M:%S"),
-            'is_running': self.is_running,
-            'is_finished': self.is_finished
-        }
-
     def get_uid(self):
         return self.uid[2:]
 
@@ -1028,21 +981,6 @@ class Recipe(models.Model):
 
     def __unicode__(self):
         return self.uid
-
-    def to_json(self):
-        return {
-            'uid': self.uid,
-            'whiteboard': self.whiteboard,
-            'result': self.get_result_display(),
-            'status': self.get_status_display(),
-            'resultrate': self.resultrate,
-            'system': self.system.to_json(),
-            'arch': self.arch.name,
-            'distro': self.distro.name,
-            'parentrecipe':
-                self.parentrecipe.to_json() if self.parentrecipe else None,
-            'statusbyuser': self.get_statusbyuser_display()
-        }
 
     def get_comment(self):
         Comment.objects.filter(recipe=self, task__isnull=True)\
@@ -1189,21 +1127,6 @@ class Task(models.Model):
 
     def __unicode__(self):
         return self.uid
-
-    def to_json(self):
-        return {
-            'uid': self.uid,
-            'recipe': self.recipe.uid,
-            'test': self.test.to_json(),
-            'datestart': self.datestart.strftime(
-                "%Y-%m-%d %H:%M:%S") if self.datestart else None,
-            'result': self.get_result_display(),
-            'status': self.get_status_display(),
-            'statusbyuser': self.get_statusbyuser_display(),
-            'duration': self.duration,
-            'logs': self.logfiles(),
-            'links': self.test.get_external_links()
-        }
 
     def logfiles(self):
         return list(FileLog.objects.filter(task=self).values("path"))

@@ -42,16 +42,7 @@ class Comment(models.Model):
         if not tdate:
             tdate = currentDate()
         self.created_date = tdate
-        self.save()
-
-    def to_json(self):
-        return {
-            # 'job': self.job.to_json() if self.job else None,
-            'username': self.username,
-            'content': self.content,
-            'created_date': self.created_date.strftime("%Y-%m-%d %H:%M:%S"),
-            'action': self.get_action_display()
-        }
+        self.save()   
 
     def is_waived(self):
         return (self.action == self.ENUM_ACTION_WAIVED)

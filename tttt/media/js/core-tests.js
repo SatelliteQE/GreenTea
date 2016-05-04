@@ -1,50 +1,14 @@
-function onChangeDetail() {
-    /*$('.rTriangle, .pTriangle').hover(function(){
-        var td = $(this);
-        if(td.attr('popover-loaded') == null) {
-            var changesIDs = td.attr('data-params');
-            $.getJSON("/api/git-changes?ids=" + changesIDs, function(data){
-                var message = "<table>";
-                $.each(data.changes, function(i, change){
-                    message += '<tr><th colspan="3">'+change.test.name+' ('+change.version+')</th></tr><tr><td>&nbsp;</td><td>'+change.date+'</td><td>'+change.author.name+'</td></tr>';
-                });
-                message += "</table>";
-                if (data.changes && data.changes.length > 0) {
-                    td.attr('popover-loaded', 1)
-                      .popover({
-                        "html": true,
-                        "title": "Changes of the test",
-                        "placement": "auto bottom",
-                        "content": message,
-			}).popover("show");
-                }
-            });
-        } else {
-            td.popover("show");
-        }
-    }, function(){
-        $(this).popover("hide");
-    });*/
-}
-
-
 function initPage() {
 	// Set default disable buttons
 	$('.action-panel button', detailPanel.elm).prop('disabled', $('.recipe-list', detailPanel.elm).children('div').length == 0);
 
 	// Add autocomplete into name field
-	$('#id_username', detailPanel.elm).autocomplete({
-	    minLength: 0,
-	    source: function( request, response ) {
-	       $.getJSON("/api/owners?key=" + request.term, function(json){
-	        var res = [];
-	        for (ix in json.owners) {
-	          res[res.length] = json.owners[ix].name;
-	        }
-	        response(res);
-	      });
-	    },
-	});
+	var authors = getAuthor();
+	var list = [];
+	for (ix in authors) {
+		list.push({label: authors[ix].name+" - "+authors[ix].email, value: authors[ix].email})
+	}
+	$('#id_username', detailPanel.elm).autocomplete({minLength: 0, source: list});
 
 	// Save selected recipes into one hidden field.
 	$('.action-panel form', detailPanel.elm).submit(function(){
@@ -289,8 +253,7 @@ function setupAutoHeight(elm, h){
   )
 }
 
-function onLoad() {
-  onChangeDetail();
+function onLoad() {  
   onHoverTask();
   setupAutoHeight($("#byowner"), 300);
   setupAutoHeight($("#byrepo"), 150);
