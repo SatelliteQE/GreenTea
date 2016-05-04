@@ -9,7 +9,7 @@ from django.conf.urls import include, patterns, url
 from rest_framework import routers
 
 import views
-from apps.core.views import ApiView
+
 
 router = routers.DefaultRouter()
 router.register(r'author', views.AuthorViewSet)
@@ -26,7 +26,5 @@ router.register(r'test', views.TestViewSet)
 urlpatterns = patterns('',
                        url(r'^v1/', include(router.urls)),
                        url(r'^$', 'apps.api.views.performance',
-                           name='performance'),
-                       url(r'^(?P<action>[^/]+)$',
-                           ApiView.as_view(), name='api'),
+                           name='performance')
                        )

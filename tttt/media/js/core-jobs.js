@@ -6,18 +6,12 @@ function initPage() {
 	$('.action-panel button', detailPanel.elm).prop('disabled', $('.recipe-list', detailPanel.elm).children('div').length == 0);
 
 	// Add autocomplete into name field
-	$('#id_username', detailPanel.elm).autocomplete({
-	    minLength: 0,
-	    source: function( request, response ) {
-	       $.getJSON("/api/owners?key=" + request.term, function(json){
-		        var res = [];
-		        for (ix in json.owners) {
-		          res[res.length] = json.owners[ix].name;
-		        }
-				response(res);
-	      });
-	    },
-	});
+	var authors = getAuthor();
+	var list = [];
+	for (ix in authors) {
+		list.push({label: authors[ix].name+" - "+authors[ix].email, value: authors[ix].email})
+	}
+	$('#id_username', detailPanel.elm).autocomplete({minLength: 0, source: list});
 
 	// Save selected recipes into one hidden field.
 	$('.action-panel form', detailPanel.elm).submit(function(){
@@ -304,7 +298,16 @@ function previewRecipe(id) {
 
 
 function saveDetailTab(){
-	var tab = detailPanel.getTab(0);
+	var tab = detailPanel.getTab($(this).attr("data-id"));
+	if (tab != null && detailPanel.getIndexTab(tab) > 0) {
+		tab.delete();
+		previewRecipe.apply(this) 
+		return false;
+	}
+	if (tab.data.id == "preview") {
+		return false;
+	}
+	tab = detailPanel.getTab(0);
 	detailPanel.createDefaultTab();
 	tab.data.box_el.addClass('selected');
 	tab.open();
