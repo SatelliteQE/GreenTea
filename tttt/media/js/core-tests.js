@@ -207,7 +207,16 @@ function previewTask(id) {
 }
 
 function saveTaskPanel(){
-    var tab = detailPanel.getTab(0);
+	var tab = detailPanel.getTab($(this).attr("data-id"));
+	if (tab != null && detailPanel.getIndexTab(tab) > 0) {
+		tab.delete();
+		previewTask.apply(this) 
+		return false;
+	}
+	if (tab.data.id == "preview") {
+		return false;
+	}
+	tab = detailPanel.getTab(0);
 	detailPanel.createDefaultTab();
 	tab.data.box_el.addClass('selected');
 	tab.open();
