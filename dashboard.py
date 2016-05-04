@@ -107,8 +107,8 @@ class CustomIndexDashboard(Dashboard):
                     'external': True,
                 },
                 {
-                    'title': _('Spacewalk project'),
-                    'url': 'http://www.spacewalkproject.org/',
+                    'title': _('Green Tea Documentation'),
+                    'url': 'http://green-tea.readthedocs.io/en/latest/',
                     'external': True,
                 },
             ]
