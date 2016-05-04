@@ -1421,8 +1421,8 @@ class FileLog(models.Model):
         name = os.path.basename(self.absolute_path())
         try:
             es.delete(index=name.lower(), doc_type="log", id=self.id)
-        except:
-            pass
+        except Exception as e:
+            logger.error("delete index: %s" % e)
 
     def index(self):
         es = Elasticsearch(settings.ELASTICSEARCH, timeout=60)
@@ -1436,9 +1436,10 @@ class FileLog(models.Model):
             es.index(index=name.lower(), doc_type="log", id=self.id,
                     body={"content": content,
                         "job": self.recipe.job.id,
+                        "whiteboard": self.recipe.job.template.whiteboard,
                         "recipe": self.recipe.uid,
                         "period": self.recipe.job.schedule.id,
                         "task": self.task.uid if self.task else '',
-                        "path": file_path})
-        except:
-            pass
+                        "path": self.path})
+        except Exception as e:
+            logger.error("indexing: %s" % e)
