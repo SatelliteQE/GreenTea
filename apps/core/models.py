@@ -1324,10 +1324,11 @@ class FileLog(models.Model):
             except Task.DoesNotExist:
                 logger.warn("%d doesn't exists for %s" %
                            (int(task), self.path))
-        if settings.ELASTICSEARCH:
-            self.index()
 
         super(FileLog, self).save(*args, **kwargs)
+
+        if settings.ELASTICSEARCH:
+            self.index()
 
     @staticmethod
     def clean_old(days=settings.LOGFILE_LIFETIME):
@@ -1356,13 +1357,18 @@ class FileLog(models.Model):
         name = os.path.basename(file_path)
 
         try:
-            es.index(index=name.lower(), doc_type="log", id=self.id,
+            res = es.index(index=name.lower(), doc_type="log", id=self.id,
                     body={"content": content,
                         "job": self.recipe.job.id,
                         "whiteboard": self.recipe.job.template.whiteboard,
                         "recipe": self.recipe.uid,
-                        "period": self.recipe.job.schedule.id,
+                        "period": self.recipe.job.schedule.id if self.recipe.job.schedule else None,
                         "task": self.task.uid if self.task else '',
                         "path": self.path})
+            if res["created"]:
+                if str(self.id) != res["_id"]:
+                    logger.debug("file %s has incorect id %s" % (self.id, res["_id"]))
+            else:
+                logger.debug("the file %s was not created" % (self.id))
         except Exception as e:
             logger.debug("indexing: %s" % e)
