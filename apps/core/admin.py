@@ -87,6 +87,8 @@ class RecipeAdmin(admin.ModelAdmin):
     list_display = ("uid", "get_job_link", "whiteboard", "get_template",
                     "get_system_link", "result", "status", "resultrate")
     search_fields = ["uid", "whiteboard"]
+    raw_id_fields = ("job", "system", "distro", "parentrecipe")
+    #readonly_fields = ("job", "system", "distro")
     inlines = [TaskInLine]
 
     def get_system_link(self, obj):
@@ -101,7 +103,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("uid", "recipe", "test", "status", "duration", "result")
+    list_display = ("uid", "recipe", "test", "status", "duration", "datestart", "result")
     search_fields = ["uid"]
     raw_id_fields = ("recipe", "test")
 

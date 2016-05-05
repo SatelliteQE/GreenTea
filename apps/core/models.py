@@ -11,6 +11,7 @@ import re
 import urllib2
 import json
 from datetime import datetime, timedelta
+from dateutil.parser import parse
 
 import git
 from django.conf import settings
@@ -28,6 +29,8 @@ from apps.core.utils.date_helpers import currentDate, toUTC
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 from lib import gitconfig
 from elasticsearch import Elasticsearch
+
+from xml.dom.minidom import parseString
 
 
 logger = logging.getLogger("main")
@@ -1324,12 +1327,39 @@ class FileLog(models.Model):
                         self.task = Task.objects.get(uid=task)
             except Task.DoesNotExist:
                 logger.warn("%d doesn't exists for %s" %
-                           (int(task), self.path))
+                            (int(task), self.path))
 
         super(FileLog, self).save(*args, **kwargs)
 
         if settings.ELASTICSEARCH:
             self.index()
+        self.parse_journal()
+
+    def parse_journal(self):
+        if self.get_basename() != "journal.xml":
+            return False
+
+        def get_element_time(parser, value):
+            for it in parser.getElementsByTagName(value):
+                for item in it.childNodes:
+                    return parse(item.data)
+
+        file_path = self.absolute_path()
+        f = open(file_path)
+        content = f.read()
+        f.close()
+        parser = parseString(content)
+        starttime = get_element_time(parser, "starttime")
+        # endtime = get_element_time(parser, "endtime")
+
+        if self.task:
+            self.task.datestart = starttime
+            #self.task.endtime = endtime
+            self.task.save()
+        return starttime
+
+    def get_basename(self):
+        return os.path.basename(self.path)
 
     @staticmethod
     def clean_old(days=settings.LOGFILE_LIFETIME):
@@ -1343,7 +1373,7 @@ class FileLog(models.Model):
 
     def index_remove(self):
         es = Elasticsearch(settings.ELASTICSEARCH, timeout=60)
-        name = os.path.basename(self.absolute_path())
+        name = self.get_basename()
         try:
             es.delete(index=name.lower(), doc_type="log", id=self.id)
         except Exception as e:
@@ -1351,26 +1381,26 @@ class FileLog(models.Model):
 
     def index(self):
         es = Elasticsearch(settings.ELASTICSEARCH, timeout=60)
-        file_path = self.absolute_path()
-        f = open(file_path)
+        f = open(self.absolute_path())
         content = json.dumps(f.read())
         f.close()
-        name = os.path.basename(file_path)
+        name = self.get_basename()
 
         try:
             res = es.index(index=name.lower(), doc_type="log", id=self.id,
-                    body={"content": content,
-                        "job": self.recipe.job.id,
-                        "whiteboard": self.recipe.job.template.whiteboard,
-                        "recipe": self.recipe.uid,
-                        "period": self.recipe.job.schedule.id if self.recipe.job.schedule else None,
-                        "task": self.task.uid if self.task else '',
-                        "file_id": self.id,
-                        "path": self.path})
+                           body={"content": content,
+                                 "job": self.recipe.job.id,
+                                 "whiteboard": self.recipe.job.template.whiteboard,
+                                 "recipe": self.recipe.uid,
+                                 "period": self.recipe.job.schedule.id if self.recipe.job.schedule else None,
+                                 "task": self.task.uid if self.task else '',
+                                 "file_id": self.id,
+                                 "path": self.path})
             if res["created"]:
                 self.index_id = res["_id"]
                 if str(self.id) != res["_id"]:
-                    logger.debug("file %s has incorect id %s" % (self.id, res["_id"]))
+                    logger.debug("file %s has incorect id %s" %
+                                 (self.id, res["_id"]))
                 self.save()
             else:
                 logger.debug("the file %s was not created" % (self.id))
