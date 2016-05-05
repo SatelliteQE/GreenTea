@@ -1274,6 +1274,7 @@ class FileLog(models.Model):
                              related_name="logfiles")
     path = models.CharField(max_length=256, unique=True)
     created = models.DateTimeField(auto_now_add=True)
+    index_id = models.CharField(max_length=126, blank=True, null=True)
 
     def __unicode__(self):
         return "%s" % self.path
@@ -1364,10 +1365,13 @@ class FileLog(models.Model):
                         "recipe": self.recipe.uid,
                         "period": self.recipe.job.schedule.id if self.recipe.job.schedule else None,
                         "task": self.task.uid if self.task else '',
+                        "file_id": self.id,
                         "path": self.path})
             if res["created"]:
+                self.index_id = res["_id"]
                 if str(self.id) != res["_id"]:
                     logger.debug("file %s has incorect id %s" % (self.id, res["_id"]))
+                self.save()
             else:
                 logger.debug("the file %s was not created" % (self.id))
         except Exception as e:
