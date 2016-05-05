@@ -1345,7 +1345,7 @@ class FileLog(models.Model):
         try:
             es.delete(index=name.lower(), doc_type="log", id=self.id)
         except Exception as e:
-            logger.error("delete index: %s" % e)
+            logger.debug("delete index: %s" % e)
 
     def index(self):
         es = Elasticsearch(settings.ELASTICSEARCH, timeout=60)
@@ -1365,4 +1365,4 @@ class FileLog(models.Model):
                         "task": self.task.uid if self.task else '',
                         "path": self.path})
         except Exception as e:
-            logger.error("indexing: %s" % e)
+            logger.debug("indexing: %s" % e)
