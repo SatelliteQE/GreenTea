@@ -210,10 +210,10 @@ function saveTaskPanel(){
 	var tab = detailPanel.getTab($(this).attr("data-id"));
 	if (tab != null && detailPanel.getIndexTab(tab) > 0) {
 		tab.delete();
-		previewTask.apply(this) 
+		previewTask.apply(this)
 		return false;
 	}
-	if (tab.data.id == "preview") {
+	if (tab != null && tab.data.id == "preview") {
 		return false;
 	}
 	tab = detailPanel.getTab(0);
@@ -262,7 +262,7 @@ function setupAutoHeight(elm, h){
   )
 }
 
-function onLoad() {  
+function onLoad() {
   onHoverTask();
   setupAutoHeight($("#byowner"), 300);
   setupAutoHeight($("#byrepo"), 150);
