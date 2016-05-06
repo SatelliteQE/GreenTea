@@ -301,10 +301,10 @@ function saveDetailTab(){
 	var tab = detailPanel.getTab($(this).attr("data-id"));
 	if (tab != null && detailPanel.getIndexTab(tab) > 0) {
 		tab.delete();
-		previewRecipe.apply(this) 
+		previewRecipe.apply(this)
 		return false;
 	}
-	if (tab.data.id == "preview") {
+	if (tab != null && tab.data.id == "preview") {
 		return false;
 	}
 	tab = detailPanel.getTab(0);
