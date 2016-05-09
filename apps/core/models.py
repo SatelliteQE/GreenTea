@@ -274,6 +274,8 @@ class Git(models.Model):
             path_dir = "%s/%s" % (self.path_absolute, test.folder)
             if not os.path.exists(path_dir):
                 self.__getLog().warning("Test %s doesn't exists" % path_dir)
+                test.is_enable=False
+                test.save()
                 continue
             rows = git.log('--decorate=full',
                            '--since=%s.days' % checkDays,
