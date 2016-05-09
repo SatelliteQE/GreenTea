@@ -1282,7 +1282,7 @@ class FileLog(models.Model):
     path = models.CharField(max_length=256, null=True, blank=False)
     created = models.DateTimeField(auto_now_add=True)
     index_id = models.CharField(max_length=126, blank=True, null=True)
-    is_downdloaded = models.BooleanField(_("File is downlaod"), default=False)
+    is_downloaded = models.BooleanField(_("File is downlaod"), default=False)
     is_indexed = models.BooleanField(_("File is indexed"), default=False)
     to_removed = models.BooleanField(default=False)
     logger = logging.getLogger("indexing")

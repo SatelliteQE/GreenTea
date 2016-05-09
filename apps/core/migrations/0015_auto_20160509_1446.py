@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='filelog',
-            name='is_downdloaded',
+            name='is_downloaded',
             field=models.BooleanField(default=False),
         ),
         migrations.AddField(
