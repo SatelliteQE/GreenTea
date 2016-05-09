@@ -29,7 +29,7 @@ from apps.core.utils.date_helpers import currentDate, toUTC
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 from lib import gitconfig
 from elasticsearch import Elasticsearch
-
+from urlparse import urlparse
 from xml.dom.minidom import parseString
 
 
@@ -1275,15 +1275,22 @@ class FileLog(models.Model):
     recipe = models.ForeignKey(Recipe)
     task = models.ForeignKey(Task, blank=True, null=True,
                              related_name="logfiles")
-    path = models.CharField(max_length=256, unique=True)
+    #url = models.CharField(max_length=256, unique=True)
+    url = models.CharField(max_length=256, null=True, blank=False)
+    path = models.CharField(max_length=256, null=True, blank=False)
     created = models.DateTimeField(auto_now_add=True)
     index_id = models.CharField(max_length=126, blank=True, null=True)
+    is_downdloaded = models.BooleanField(_("File is downlaod"), default=False)
+    is_indexed = models.BooleanField(_("File is indexed"), default=False)
+    to_removed = models.BooleanField(default=False)
+    logger = logging.getLogger("indexing")
 
     def __unicode__(self):
         return "%s" % self.path
 
     def absolute_path(self):
-        return os.path.join(settings.STORAGE_ROOT, "./%s" % self.path)
+        return os.path.realpath(
+            os.path.join(settings.STORAGE_ROOT, "./%s" % self.path))
 
     def delete(self, *args, **kwargs):
         def clean_dir(path):
@@ -1304,7 +1311,7 @@ class FileLog(models.Model):
         if os.path.exists(file_path):
             os.remove(file_path)
         else:
-            logger.warning("the file %s doesn't exist" % file_path)
+            self.logger.warning("the file %s doesn't exist" % file_path)
         if settings.ELASTICSEARCH:
             self.index_remove()
         super(FileLog, self).delete(*args, **kwargs)
@@ -1314,14 +1321,15 @@ class FileLog(models.Model):
         # /beaker-logs/2016/03/12590/1259016/2554157/38992903/TESTOUT.log
         # /beaker-logs/2016/03/12590/1259016/2554157/install.log
         if not self.task:
+            logparse = urlparse(self.url)
             res = re.match(r'.*/%s/([0-9]+)/[^/]+$' %
-                           self.recipe.uid, self.path)
+                           self.recipe.uid, logparse.path)
             try:
                 if res:
                     task = res.group(1)
                     self.task = Task.objects.get(uid=task)
                 else:
-                    res = re.match(r'.*[+]/([0-9]+)/[^/]+$', self.path)
+                    res = re.match(r'.*[+]/([0-9]+)/[^/]+$', logparse.path)
                     if res:
                         task = res.group(1)
                         self.task = Task.objects.get(uid=task)
@@ -1330,16 +1338,6 @@ class FileLog(models.Model):
                             (int(task), self.path))
 
         super(FileLog, self).save(*args, **kwargs)
-
-        if settings.ELASTICSEARCH:
-            try:
-                self.index()
-            except Exception as e:
-                logger.info("indexing %s: %s" % (self.path, e))
-        try:
-            self.parse_journal()
-        except Exception as e:
-            logger.debug("parse log file: %s" % e)
 
     def parse_journal(self):
         if self.get_basename() != "journal.xml":
@@ -1384,6 +1382,8 @@ class FileLog(models.Model):
             es.delete(index=name.lower(), doc_type="log", id=self.id)
         except Exception as e:
             logger.debug("delete index: %s" % e)
+        self.is_indexed = False
+        self.save()
 
     def index(self):
         es = Elasticsearch(settings.ELASTICSEARCH, timeout=60)
@@ -1407,6 +1407,7 @@ class FileLog(models.Model):
                 if str(self.id) != res["_id"]:
                     logger.debug("file %s has incorect id %s" %
                                  (self.id, res["_id"]))
-                self.save()
+            self.is_indexed = True
+            self.save()
         except Exception as e:
             logger.debug("indexing: %s" % e)

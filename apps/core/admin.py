@@ -103,7 +103,8 @@ class RecipeAdmin(admin.ModelAdmin):
 
 
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("uid", "recipe", "test", "status", "duration", "datestart", "result")
+    list_display = ("uid", "recipe", "test", "status",
+                    "duration", "datestart", "result")
     search_fields = ["uid"]
     raw_id_fields = ("recipe", "test")
 
@@ -274,7 +275,8 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
 
 
 class FileLogAdmin(admin.ModelAdmin):
-    list_display = ("recipe", "task", "path", "created")
+    list_display = ("recipe", "task", "path", "created",
+                    "is_downdloaded", "is_indexed")
     raw_id_fields = ("recipe", "task")
 
 

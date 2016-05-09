@@ -99,7 +99,31 @@ class BeakerCommand():
             self.scheduleByJobTemplates(
                 filter, "".join(label), fullInfo, simulate, reserver)
 
-    def clean(self, **kwargs):
+    def checklogs(self, **kwargs):
+        logger.info("%d files to download" % FileLog.objects.filter(is_downdloaded=False).count())
+        logger.info("%d files to indexing" % FileLog.objects.filter(is_indexed=False).count())
+        for it in FileLog.objects.filter(is_downdloaded=False)[:100]:
+            b = Beaker()
+            logpath = b.downloadLog(it.url)
+            if not logpath:
+                # if file is not download then skip and not save object
+                continue
+            it.path = logpath
+            it.is_downdloaded = True
+            it.save()
+            try:
+                it.parse_journal()
+            except Exception as e:
+                logger.debug("parse log file: %s" % e)
+
+        if settings.ELASTICSEARCH:
+            for it in FileLog.objects.filter(is_downdloaded=True, is_indexed=False)[:100]:
+                try:
+                    it.index()
+                except Exception as e:
+                    logger.info("indexing %s: %s" % (it.path, e))
+
+
         FileLog.clean_old()
 
     def scheduleByJobTemplates(
@@ -192,7 +216,7 @@ class Command(BaseCommand):
                            '(J:12345) for identify of job. We can use more values')
         group.add_argument('--return2beaker-message', nargs=None, type=str,)
 
-        parser.add_argument('action', choices=("schedule", "reschedule", "return2beaker", "cancel", "clean"),
+        parser.add_argument('action', choices=("schedule", "reschedule", "return2beaker", "cancel", "checklogs"),
                             help='Action for beaker client')
 
     def handle(self, *args, **options):

@@ -25,7 +25,7 @@ def download_files_from_recipe(recipe):
     """
     function download log files from beaker by global filter 'backuplogs'
 
-    @param object(Recipe)  download all files from this recipe
+    @param object(Recipe)  download selected files from this recipe
 
     @return None
     """
@@ -34,12 +34,9 @@ def download_files_from_recipe(recipe):
     for url in listurls:
         namefile = os.path.basename(urlparse(url).path)
         if namefile in backuplogs:
-            logpath = b.downloadLog(url)
-            if not logpath:
-                # if file is not download then skip and not save object
-                continue
-            logfile = FileLog(path=logpath, recipe=recipe)
+            logfile = FileLog(url=url, recipe=recipe)
             logfile.save()
+
 
 @receiver(recipe_finished)
 def handle_recipe_finished(sender, **kwargs):
