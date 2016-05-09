@@ -9,7 +9,7 @@ def set_default_data(apps, schema_editor):
     FileLog = apps.get_model("core", "FileLog")
     for it in FileLog.objects.exclude(path=""):
         it.url=it.path
-        it.is_downdloaded=True
+        it.is_downloaded=True
         it.save()
 
 def unset_default_data(apps, schema_editor):

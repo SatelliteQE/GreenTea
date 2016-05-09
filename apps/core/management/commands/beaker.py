@@ -102,10 +102,10 @@ class BeakerCommand():
                 filter, "".join(label), fullInfo, simulate, reserver)
 
     def checklogs(self, **kwargs):
-        logger.info("%d files to download" % FileLog.objects.filter(is_downdloaded=False).count())
+        logger.info("%d files to download" % FileLog.objects.filter(is_downloaded=False).count())
         logger.info("%d files to indexing" % FileLog.objects.filter(is_indexed=False).count())
 
-        for it in FileLog.objects.filter(is_downdloaded=False)[:MAX_LOGS_IN_ONE_CHECK]:
+        for it in FileLog.objects.filter(is_downloaded=False)[:MAX_LOGS_IN_ONE_CHECK]:
             b = Beaker()
             logpath = b.downloadLog(it.url)
             if not logpath:
@@ -120,7 +120,7 @@ class BeakerCommand():
                 logger.debug("parse log file: %s" % e)
 
         if settings.ELASTICSEARCH:
-            for it in FileLog.objects.filter(is_downdloaded=True, is_indexed=False)[:MAX_LOGS_IN_ONE_CHECK]:
+            for it in FileLog.objects.filter(is_downloaded=True, is_indexed=False)[:MAX_LOGS_IN_ONE_CHECK]:
                 try:
                     it.index()
                 except Exception as e:
