@@ -120,7 +120,8 @@ class BeakerCommand():
                 logger.debug("parse log file: %s" % e)
 
         if settings.ELASTICSEARCH:
-            for it in FileLog.objects.filter(is_downloaded=True, is_indexed=False)[:MAX_LOGS_IN_ONE_CHECK]:
+            for it in FileLog.objects.filter(is_downloaded=True, is_indexed=False)\
+                            .order_by("-created")[:MAX_LOGS_IN_ONE_CHECK]:
                 try:
                     it.index()
                 except Exception as e:

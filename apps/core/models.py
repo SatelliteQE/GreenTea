@@ -1277,8 +1277,7 @@ class FileLog(models.Model):
     recipe = models.ForeignKey(Recipe)
     task = models.ForeignKey(Task, blank=True, null=True,
                              related_name="logfiles")
-    #url = models.CharField(max_length=256, unique=True)
-    url = models.CharField(max_length=256, null=True, blank=False)
+    url = models.CharField(max_length=256, unique=True)
     path = models.CharField(max_length=256, null=True, blank=False)
     created = models.DateTimeField(auto_now_add=True)
     index_id = models.CharField(max_length=126, blank=True, null=True)

@@ -2,7 +2,6 @@
 from __future__ import unicode_literals
 
 from django.db import migrations, models
-from django.db.models import Count
 
 def set_default_data(apps, schema_editor):
     #removed_duplicated(apps, schema_editor)
@@ -18,13 +17,6 @@ def unset_default_data(apps, schema_editor):
     for it in FileLog.objects.filter(path=""):
         it.path=it.url
         it.save()
-
-def removed_duplicated(apps, schema_editor):
-    FileLog = apps.get_model("core", "FileLog")
-    for obj in FileLog.objects.values('path').annotate(Count('id')).order_by().filter(id__count__gt=1):
-        for removed_duplicated in FileLog.objects.filter(path=obj["path"])[1:]:
-            removed_duplicated.delete()
-
 
 class Migration(migrations.Migration):
 
