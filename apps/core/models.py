@@ -1332,7 +1332,10 @@ class FileLog(models.Model):
         super(FileLog, self).save(*args, **kwargs)
 
         if settings.ELASTICSEARCH:
-            self.index()
+            try:
+                self.index()
+            except Exception as e:
+                logger.info("indexing %s: %s" % (self.path, e))
         try:
             self.parse_journal()
         except Exception as e:
@@ -1405,7 +1408,5 @@ class FileLog(models.Model):
                     logger.debug("file %s has incorect id %s" %
                                  (self.id, res["_id"]))
                 self.save()
-            else:
-                logger.debug("the file %s was not created" % (self.id))
         except Exception as e:
             logger.debug("indexing: %s" % e)
