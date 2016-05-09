@@ -1333,7 +1333,10 @@ class FileLog(models.Model):
 
         if settings.ELASTICSEARCH:
             self.index()
-        self.parse_journal()
+        try:
+            self.parse_journal()
+        except Exception as e:
+            logger.debug("parse log file: %s" % e)
 
     def parse_journal(self):
         if self.get_basename() != "journal.xml":
