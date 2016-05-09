@@ -15,9 +15,11 @@ from texttable import Texttable
 from apps.core.models import Job, JobTemplate, Recipe, FileLog
 from apps.core.utils.beaker import Beaker
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
+from django.conf import settings
 
 logger = logging.getLogger("main")
 
+MAX_LOGS_IN_ONE_CHECK = 100
 
 class BeakerCommand():
 
@@ -102,7 +104,8 @@ class BeakerCommand():
     def checklogs(self, **kwargs):
         logger.info("%d files to download" % FileLog.objects.filter(is_downdloaded=False).count())
         logger.info("%d files to indexing" % FileLog.objects.filter(is_indexed=False).count())
-        for it in FileLog.objects.filter(is_downdloaded=False)[:100]:
+
+        for it in FileLog.objects.filter(is_downdloaded=False)[:MAX_LOGS_IN_ONE_CHECK]:
             b = Beaker()
             logpath = b.downloadLog(it.url)
             if not logpath:
@@ -117,7 +120,7 @@ class BeakerCommand():
                 logger.debug("parse log file: %s" % e)
 
         if settings.ELASTICSEARCH:
-            for it in FileLog.objects.filter(is_downdloaded=True, is_indexed=False)[:100]:
+            for it in FileLog.objects.filter(is_downdloaded=True, is_indexed=False)[:MAX_LOGS_IN_ONE_CHECK]:
                 try:
                     it.index()
                 except Exception as e:
