@@ -15,6 +15,7 @@ from django.core.management.base import BaseCommand
 from apps.core.models import CheckProgress, Job
 from apps.core.utils.beaker import Beaker
 from apps.core.utils.date_helpers import currentDate
+from single_process import single_process
 
 logger = logging.getLogger("main")
 
@@ -55,7 +56,7 @@ class Command(BaseCommand):
         # print "args:", kwargs
         init(*args, **kwargs)
 
-
+@single_process
 def init(*args, **kwargs):
     progress = CheckProgress()
     bkr = Beaker()
