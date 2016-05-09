@@ -5,7 +5,7 @@ from django.db import migrations, models
 from django.db.models import Count
 
 def set_default_data(apps, schema_editor):
-    removed_duplicated(apps, schema_editor)
+    #removed_duplicated(apps, schema_editor)
     FileLog = apps.get_model("core", "FileLog")
     for it in FileLog.objects.exclude(path=""):
         it.url=it.path
@@ -13,7 +13,7 @@ def set_default_data(apps, schema_editor):
         it.save()
 
 def unset_default_data(apps, schema_editor):
-    removed_duplicated(apps, schema_editor)
+    #removed_duplicated(apps, schema_editor)
     FileLog = apps.get_model("core", "FileLog")
     for it in FileLog.objects.filter(path=""):
         it.path=it.url
@@ -23,8 +23,7 @@ def removed_duplicated(apps, schema_editor):
     FileLog = apps.get_model("core", "FileLog")
     for obj in FileLog.objects.values('path').annotate(Count('id')).order_by().filter(id__count__gt=1):
         for removed_duplicated in FileLog.objects.filter(path=obj["path"])[1:]:
-            print removed_duplicated.path
-            to_remove.delete()
+            removed_duplicated.delete()
 
 
 class Migration(migrations.Migration):
