@@ -105,9 +105,8 @@ class BeakerCommand():
         logger.info("%d files to indexing" % FileLog.objects.filter(is_indexed=False).count())
 
         b = Beaker()
-        #import pdb; pdb.set_trace()
         for it in FileLog.objects.filter(status_code=0)\
-                    .order_by("-created")[0:settings.MAX_LOGS_IN_ONE_CHECK]:
+                         .order_by("-created")[0:settings.MAX_LOGS_IN_ONE_CHECK]:
             it.status_code, logpath = b.downloadLog(it.url)
             if not logpath:
                 # if file is not download then skip and not save object
@@ -128,7 +127,6 @@ class BeakerCommand():
                     it.index()
                 except Exception as e:
                     logger.info("indexing %s: %s" % (it.path, e))
-
 
         FileLog.clean_old()
 

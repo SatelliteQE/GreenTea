@@ -27,8 +27,9 @@ class HomepageForm(forms.Form):
     page = forms.IntegerField(
         required=False
     )
+
     def get_params(self):
-        return "&amp;".join(["%s=%s" % (x,y) for x,y in self.cleaned_data.items()])
+        return "&amp;".join(["%s=%s" % (x, y) for x, y in self.cleaned_data.items()])
 
 
 class FilterForm(forms.Form):

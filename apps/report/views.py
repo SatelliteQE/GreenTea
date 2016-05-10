@@ -4,12 +4,12 @@
 # Author: Pavel Studenik <pstudeni@redhat.com>
 # Date: 3.2.2016
 
-from django.db.models import Count, Max
+from django.db.models import Count
 from django.views.generic import TemplateView, DetailView
 
 from apps.core.models import GroupTestTemplate, Task, Test
 from apps.report.models import ReportList, ExternalPage
-from apps.taskomatic.models import TaskPeriodList, TaskPeriodSchedule
+from apps.taskomatic.models import TaskPeriodList
 
 
 class ListId:

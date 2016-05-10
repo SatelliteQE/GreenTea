@@ -7,10 +7,10 @@
 import json
 
 from django.db import models
-from django.db.models import Count, permalink
+from django.db.models import permalink
 from apps.core.models import (EnumResult, JobTemplate, RecipeTemplate, Task,
-                              TaskTemplate, Test)
-from apps.taskomatic.models import TaskPeriodList, TaskPeriodSchedule
+                              Test)
+from apps.taskomatic.models import TaskPeriodSchedule
 
 
 class Report(models.Model):
@@ -62,9 +62,8 @@ class Score(models.Model):
             if task.test.id not in skips:
                 task.save()
                 skips.append(task.test.id)
-                counter+=1
+                counter += 1
         return counter, len(tasks)
-
 
 
 class ExternalPage(models.Model):

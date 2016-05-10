@@ -251,7 +251,7 @@ class TestsListView(TemplateView):
 
     def prepare_matrix(self, test_ids=[], periodschedules=[]):
         """Load info about  from DB and return it in template friendly object."""
-        out_dict = {}   # template friendly data structure
+        out_dict = {}  # template friendly data structure
         # Determine plain list of period schedule IDs
         periodschedule_ids = self.__get_period_ids(periodschedules)
         # Set list of tables and fields for the query and create initial
@@ -350,7 +350,7 @@ class TestsListView(TemplateView):
                         'uid': i.uid,
                         'id': i.id,
                         'result': i.get_result(),
-                        'status': i.status,#i.recipe.get_status(),
+                        'status': i.status,  # i.recipe.get_status(),
                         'is_running': i.recipe.is_running(),
                         'recipe__id': i.recipe.id,
                         'recipe__uid': i.recipe.uid,

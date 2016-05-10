@@ -88,7 +88,7 @@ class RecipeAdmin(admin.ModelAdmin):
                     "get_system_link", "result", "status", "resultrate")
     search_fields = ["uid", "whiteboard"]
     raw_id_fields = ("job", "system", "distro", "parentrecipe")
-    #readonly_fields = ("job", "system", "distro")
+    # readonly_fields = ("job", "system", "distro")
     inlines = [TaskInLine]
 
     def get_system_link(self, obj):

@@ -9,20 +9,15 @@
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import filters
-from rest_framework import pagination
 
 from apps.core.models import JobTemplate, Recipe, \
-    Task, Author, Arch, Distro, System, Job, Test
-from apps.core.views import base
+    Task, Author, Arch, Distro, System, Test
 from apps.waiver.models import Comment
 from models import Performance
 from filters import TaskFilter
 from serializers import JobTemplateSerializer, RecipeSerializer, \
     TaskSerializer, AuthorSerializer, ArchSerializer, \
-    DistroSerializer, SystemSerializer, JobSerializer, \
+    DistroSerializer, SystemSerializer, \
     CommentSerializer, TestSerializer
 
 

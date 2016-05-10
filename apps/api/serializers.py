@@ -3,7 +3,7 @@
 from rest_framework import serializers
 
 from apps.core.models import Job, JobTemplate, Recipe, Task, Test, Author, \
-    Arch, Distro, System, FileLog
+    Arch, Distro, System
 from apps.waiver.models import Comment
 
 
@@ -140,7 +140,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
         repository_url = serializers.CharField(source='get_reposituory_url')
         detail_url = serializers.CharField(source='get_detail_url')
-        #external_links = serializers.StringRelatedField(source='get_external_links')
+        # external_links = serializers.StringRelatedField(source='get_external_links')
 
     class InnerRecipeSerializer(RecipeSerializer):
         class Meta:

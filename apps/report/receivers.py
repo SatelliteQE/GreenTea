@@ -26,7 +26,8 @@ def recount_test_score(sender, **kwargs):
         score, created = Score.objects.get_or_create(
             test=task.test, schedule=task.recipe.job.schedule)
     except MultipleObjectsReturned:
-        logger.error("Exist so many records - test: %d, schedule: %s" % \
+        logger.error(
+            "Exist so many records - test: %d, schedule: %s" %
             (task.test.id, task.recipe.job.schedule))
         return
 

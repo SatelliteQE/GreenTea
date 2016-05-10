@@ -274,7 +274,7 @@ class Git(models.Model):
             path_dir = "%s/%s" % (self.path_absolute, test.folder)
             if not os.path.exists(path_dir):
                 self.__getLog().warning("Test %s doesn't exists" % path_dir)
-                test.is_enable=False
+                test.is_enable = False
                 test.save()
                 continue
             rows = git.log('--decorate=full',
@@ -985,10 +985,6 @@ class Recipe(models.Model):
     def __unicode__(self):
         return self.uid
 
-    def get_comment(self):
-        Comment.objects.filter(recipe=self, task__isnull=True)\
-            .order_by('-created_date')
-
     def get_template(self):
         return self.job.template
 
@@ -1356,9 +1352,9 @@ class FileLog(models.Model):
         starttime = get_element_time(parser, "starttime")
         # endtime = get_element_time(parser, "endtime")
 
-        if self.task:
+        if self.task and starttime:
             self.task.datestart = starttime
-            #self.task.endtime = endtime
+            # self.task.endtime = endtime
             self.task.save()
         return starttime
 

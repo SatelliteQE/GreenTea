@@ -25,6 +25,7 @@ class TaskPeriodScheduleAdmin(admin.ModelAdmin):
     list_display = ("title", "period", "counter", "date_create")
     search_fields = ("title", "id")
     list_filter = ("period", )
+
     def recount_score(modeladmin, request, queryset):
         for it in queryset:
             a, b = Score.recount_by_schedule(it)

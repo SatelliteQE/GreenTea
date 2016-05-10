@@ -56,6 +56,7 @@ class Command(BaseCommand):
         # print "args:", kwargs
         init(*args, **kwargs)
 
+
 @single_process
 def init(*args, **kwargs):
     progress = CheckProgress()
