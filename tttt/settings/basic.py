@@ -285,6 +285,8 @@ BEAKER_OWNER = None
 BEAKER_PASS = None
 BEAKER_JOB_GROUP = "greentea"
 
+MAX_LOGS_IN_ONE_CHECK = 1000
+
 BEAKER_DEFAULT_PACKAGES = (
     "vim", "gcc", "make", "nfs-utils", "wget", "libxml2-python",
 )

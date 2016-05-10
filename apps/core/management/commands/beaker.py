@@ -19,7 +19,6 @@ from django.conf import settings
 
 logger = logging.getLogger("main")
 
-MAX_LOGS_IN_ONE_CHECK = 100
 
 class BeakerCommand():
 
@@ -105,7 +104,7 @@ class BeakerCommand():
         logger.info("%d files to download" % FileLog.objects.filter(is_downloaded=False).count())
         logger.info("%d files to indexing" % FileLog.objects.filter(is_indexed=False).count())
 
-        for it in FileLog.objects.filter(is_downloaded=False)[:MAX_LOGS_IN_ONE_CHECK]:
+        for it in FileLog.objects.filter(is_downloaded=False)[:settings.MAX_LOGS_IN_ONE_CHECK]:
             b = Beaker()
             logpath = b.downloadLog(it.url)
             if not logpath:
@@ -121,7 +120,7 @@ class BeakerCommand():
 
         if settings.ELASTICSEARCH:
             for it in FileLog.objects.filter(is_downloaded=True, is_indexed=False)\
-                            .order_by("-created")[:MAX_LOGS_IN_ONE_CHECK]:
+                            .order_by("-created")[:settings.MAX_LOGS_IN_ONE_CHECK]:
                 try:
                     it.index()
                 except Exception as e:
