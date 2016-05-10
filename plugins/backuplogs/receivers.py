@@ -34,8 +34,9 @@ def download_files_from_recipe(recipe):
     for url in listurls:
         namefile = os.path.basename(urlparse(url).path)
         if namefile in backuplogs:
-            logfile = FileLog(url=url, recipe=recipe)
-            logfile.save()
+            logfile, created = FileLog.objects.get_or_create(url=url, recipe=recipe)
+            if created:
+                logfile.save()
 
 
 @receiver(recipe_finished)
