@@ -276,7 +276,7 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
 
 class FileLogAdmin(admin.ModelAdmin):
     list_display = ("recipe", "task", "path", "created",
-                    "is_downloaded", "is_indexed")
+                    "is_downloaded", "is_indexed", "status_code")
     raw_id_fields = ("recipe", "task")
 
 

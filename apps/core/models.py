@@ -534,11 +534,9 @@ class Test(models.Model):
         self.save()
 
     def save(self, *args, **kwargs):
-        model = self.__class__
-
         if not self.owner:
             self.owner = Author.parseAuthor("")
-        return super(model, self).save(*args, **kwargs)
+        return super(Test, self).save(*args, **kwargs)
 
     def get_external_links(self):
         if not self.external_links:
@@ -1284,6 +1282,7 @@ class FileLog(models.Model):
     is_downloaded = models.BooleanField(_("File is downlaod"), default=False)
     is_indexed = models.BooleanField(_("File is indexed"), default=False)
     to_removed = models.BooleanField(default=False)
+    status_code = models.SmallIntegerField(default=0)
     logger = logging.getLogger("indexing")
 
     def __unicode__(self):

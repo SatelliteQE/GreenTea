@@ -256,12 +256,12 @@ class Beaker:
             rawfile = urllib2.urlopen(logurl)
         except urllib2.HTTPError as e:
             logger.warning("urllib2: http %d: %s" % (e.code, logurl))
-            return
+            return e.code, None
         logger.debug("download logfile: %s" % logurl)
         of = open(logpath, 'wb')
         of.write(rawfile.read())
         of.close()
-        return logparse.path
+        return 200, logparse.path
 
     def listJobs(self, filter={}):
         """List and filter beaker jobs."""

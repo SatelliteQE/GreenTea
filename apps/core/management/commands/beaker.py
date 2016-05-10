@@ -101,17 +101,20 @@ class BeakerCommand():
                 filter, "".join(label), fullInfo, simulate, reserver)
 
     def checklogs(self, **kwargs):
-        logger.info("%d files to download" % FileLog.objects.filter(is_downloaded=False).count())
+        logger.info("%d files to download" % FileLog.objects.filter(status_code=0).count())
         logger.info("%d files to indexing" % FileLog.objects.filter(is_indexed=False).count())
 
-        for it in FileLog.objects.filter(is_downloaded=False)[:settings.MAX_LOGS_IN_ONE_CHECK]:
-            b = Beaker()
-            logpath = b.downloadLog(it.url)
+        b = Beaker()
+        #import pdb; pdb.set_trace()
+        for it in FileLog.objects.filter(status_code=0)\
+                    .order_by("-created")[0:settings.MAX_LOGS_IN_ONE_CHECK]:
+            it.status_code, logpath = b.downloadLog(it.url)
             if not logpath:
                 # if file is not download then skip and not save object
+                it.save()
                 continue
             it.path = logpath
-            it.is_downdloaded = True
+            it.is_downloaded = True
             it.save()
             try:
                 it.parse_journal()
@@ -120,7 +123,7 @@ class BeakerCommand():
 
         if settings.ELASTICSEARCH:
             for it in FileLog.objects.filter(is_downloaded=True, is_indexed=False)\
-                            .order_by("-created")[:settings.MAX_LOGS_IN_ONE_CHECK]:
+                            .order_by("-created")[0:settings.MAX_LOGS_IN_ONE_CHECK]:
                 try:
                     it.index()
                 except Exception as e:
