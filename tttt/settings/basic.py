@@ -233,7 +233,7 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
-        'elasticsearch.trace': {
+        'elasticsearch': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
@@ -249,6 +249,11 @@ LOGGING = {
             'handlers': ['log_to_stdout'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'backend': {
+            'level': 'ERROR',
+            'filters': ['require_debug_false'],
+            'class': 'django.utils.log.AdminEmailHandler'
         }
     }
 }

@@ -17,7 +17,7 @@ from apps.core.utils.beaker import Beaker
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 from django.conf import settings
 
-logger = logging.getLogger("main")
+logger = logging.getLogger("backend")
 
 
 class BeakerCommand():

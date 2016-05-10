@@ -17,7 +17,7 @@ from django.core.management.base import BaseCommand
 
 from apps.core.models import Git
 
-logger = logging.getLogger("main")
+logger = logging.getLogger("backend")
 
 
 class Command(BaseCommand):

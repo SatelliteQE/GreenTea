@@ -17,7 +17,7 @@ from apps.core.utils.beaker import Beaker
 from apps.core.utils.date_helpers import currentDate
 from single_process import single_process
 
-logger = logging.getLogger("main")
+logger = logging.getLogger("backend")
 
 
 class Command(BaseCommand):

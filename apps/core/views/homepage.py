@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count
 from django.views.generic import TemplateView
 
-from apps.core.models import CheckProgress, EnumResult, Task, TestHistory
+from apps.core.models import CheckProgress, EnumResult, Task, TestHistory, FileLog
 from apps.report.models import Score
 from apps.taskomatic.models import TaskPeriodList, TaskPeriodSchedule
 from apps.waiver.models import Comment
@@ -118,4 +118,9 @@ class HomePageView(TemplateView):
 
         context["schedules"] = TaskPeriodSchedule.objects.filter(
             id__in=ids).order_by("period")
+
+        context["files"] = {
+            "indexed": FileLog.objects.filter(is_indexed=False).count(),
+            "downloaded": FileLog.objects.filter(status_code=0).count()
+        }
         return context
