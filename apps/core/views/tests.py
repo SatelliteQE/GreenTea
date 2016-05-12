@@ -318,6 +318,7 @@ class TestsListView(TemplateView):
                         'data'][i.recipe.job.schedule.period_id]['data']:
                     out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id] = {
                         'template__whiteboard': i.recipe.job.template.whiteboard,
+                        'template__id': i.recipe.job.template.id,
                         'data': {},
                     }
                 # Popupate recipe (just general info common for more nightly

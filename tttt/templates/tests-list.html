@@ -80,7 +80,7 @@
         {% for job_label, job_data in periodschedule_data.data.items %}
             {% for recipe_label, recipe_data in job_data.data.items %}
                 <tr>
-                    <th title="Job's tmplate ID: {{ job_label }}">{% ifchanged job_label %}{{ job_data.template__whiteboard }}{% endifchanged %}</th>
+                    <th title="Job's tmplate ID: {{ job_label }}"><a href="{% url "beaker-xml" job_data.template__id %}">{% ifchanged job_label %}{{ job_data.template__whiteboard }}{% endifchanged %}</a></th>
                     <th>{{ recipe_label }}</th>
                     {% for schedule in periodschedules|keyvalue:periodschedule_id|dictsort:"counter" %}
                         {% if recipe_data.data|keyvalue:schedule.id %}
