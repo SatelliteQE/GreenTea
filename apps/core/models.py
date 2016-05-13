@@ -1367,7 +1367,7 @@ class FileLog(models.Model):
         logs = FileLog.objects.filter(created__lt=to_delete).order_by("created")
         logger.info("%d logs to prepare remove" % len(logs))
         # remove all file and dirs
-        for it in logs:
+        for it in logs[:settings.MAX_LOGS_IN_ONE_CHECK]:
             logger.debug("remove file %s" % it)
             it.delete()
 
