@@ -1364,7 +1364,7 @@ class FileLog(models.Model):
     @staticmethod
     def clean_old(days=settings.LOGFILE_LIFETIME):
         to_delete = datetime.now() - timedelta(days=days)
-        logs = FileLog.objects.filter(created__lt=to_delete)
+        logs = FileLog.objects.filter(created__lt=to_delete).order_by("created")
         logger.info("%d logs to prepare remove" % len(logs))
         # remove all file and dirs
         for it in logs:
