@@ -14,6 +14,7 @@ from apps.report.models import Score
 from apps.taskomatic.models import TaskPeriodList, TaskPeriodSchedule
 from apps.waiver.models import Comment
 from apps.core.forms import HomepageForm
+from elasticsearch import Elasticsearch
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,36 @@ class HomePageView(TemplateView):
     template_name = 'homepage.html'
     filters = {}
     forms = {}
+
+    def search(self):
+        query = self.filters.get("search")
+        if query:
+            es = Elasticsearch(settings.ELASTICSEARCH)
+
+            result = es.search(index="testout.log", body={
+                "query":
+                    {"match":
+                        {
+                            "content": {
+                                "query": "'%s'" % query,
+                                "type": "phrase",
+                            }
+                        }
+                    },
+                "sort":
+                    {"period": "desc"}
+                },
+                fields=("_id", "task", "path", "recipe", "period")
+            )
+            ids = [int(x["_id"]) for x in result["hits"]["hits"]]
+
+            dict_tmp = dict((x, None) for x in ids)
+            for it in FileLog.objects.filter(index_id__in=ids):
+                dict_tmp[it.id]=it
+            result["result"]=[]
+            for _id in ids:
+                result["result"].append(dict_tmp[_id])
+            return result
 
     def get_network_stas(self, **kwargs):
         def get_lab(hostname, num):
@@ -68,6 +99,9 @@ class HomePageView(TemplateView):
         context["forms"] = form
         self.filters = form.cleaned_data
         pag_type = self.request.GET.get('type')
+
+        if settings.ELASTICSEARCH:
+            context['search'] = self.search()
 
         try:
             context['progress'] = CheckProgress.objects.order_by(

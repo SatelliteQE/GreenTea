@@ -15,6 +15,40 @@
   </div>
 </div>
 <p>In queue: {{files.indexed}} to indexing and {{files.downloaded}} to downloading.</p>
+
+<form action="./" method="GET">
+<div class="row">
+  <div class="col-lg-6">
+  </div>
+  <div class="input-group">
+      {{ forms.search }}
+      <span class="input-group-btn">
+        <button type="submit" class="btn btn-default" type="button">Search</button>
+      </span>
+  </div>
+</div>
+</form>
+
+{% if search %}
+<h1>Search </h1>
+tatal: {{ search.hits.total }}
+
+<table class="table table-striped">
+    {% for it in search.result %}
+    <tr>
+      {% if it %}
+      <td>{{ it.recipe.job.schedule }}</td>
+      <td><a href="{{ it.task.test.get_absolute_url }}">{{ it.task.test }}</a></td>
+      <td>{{ it.created }}</td>
+      <td><a class="octicon octicon-file-text openInModalWindow" href="{{ it.get_absolute_url }}"></a></td>
+      {% else %}
+      <td colspan="4" align="center">missing in db</td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
 {% if schedules %}
 <h1>Score </h1>
 <ul class="nav nav-tabs">
@@ -32,7 +66,7 @@
     </tr>
     {% for it in score.object_list %}
     <tr>
-      <td width="50%"><a href="{% url 'tests-list' %}?test_id={{it.test.id}}">{{it.test}}</a></td>
+      <td width="50%"><a href="{{it.test.get_absolute_url}}">{{it.test}}</a></td>
       <td>{{it.score}}</td>
       <td>{{it.rate|floatformat:2}}</td>
       <td>

@@ -517,7 +517,7 @@ class Test(models.Model):
         return self.name == other.name and self.git == other.git
 
     def get_absolute_url(self):
-        return "?search=%s" % self.name
+        return "%s?test_id=%s" % (reverse("tests-list"), self.id)
 
     def get_detail_url(self):
         return "%s" % reverse("test-detail", args=[self.id])
@@ -1287,6 +1287,9 @@ class FileLog(models.Model):
     def absolute_path(self):
         return os.path.realpath(
             os.path.join(settings.STORAGE_ROOT, "./%s" % self.path))
+
+    def get_absolute_url(self):
+        return "%s%s" % (settings.STORAGE_URL, self.path)
 
     def delete(self, *args, **kwargs):
         def clean_dir(path):

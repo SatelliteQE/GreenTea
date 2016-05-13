@@ -17,6 +17,9 @@ class HomepageForm(forms.Form):
         ("rate", "rate"),
         ("score", "score")
     )
+    def __init__(self, *args, **kwargs):
+        super(HomepageForm, self).__init__(*args, **kwargs)
+        self.fields['search'].widget.attrs['class'] = 'form-control'
     order = forms.ChoiceField(
         choices=ORDER_CHOICES,
         required=False
@@ -25,6 +28,9 @@ class HomepageForm(forms.Form):
         required=False
     )
     page = forms.IntegerField(
+        required=False
+    )
+    search = forms.CharField(
         required=False
     )
 
