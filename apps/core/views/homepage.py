@@ -154,7 +154,7 @@ class HomePageView(TemplateView):
             id__in=ids).order_by("period")
 
         context["files"] = {
-            "indexed": FileLog.objects.filter(is_indexed=False).count(),
+            "indexed": FileLog.objects.filter(is_indexed=False, is_downloaded=True).count(),
             "downloaded": FileLog.objects.filter(status_code=0).count()
         }
         return context
