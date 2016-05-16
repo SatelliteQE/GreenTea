@@ -18,6 +18,25 @@ from elasticsearch import Elasticsearch
 
 logger = logging.getLogger(__name__)
 
+class PaganatorSearch:
+    def __init__(self, count_objs):
+        self.objects = range(count_objs/10)
+
+    def page(self, page):
+        self.actual_page = page
+        if page == 1:
+            self.has_previous = False
+        else:
+            self.has_previous = True
+            self.previous_page_number = page + 1
+
+        if len(self.objects) < page:
+            self.has_next = False
+        else:
+            self.has_next = True
+            self.next_page_number = page +1
+        return self
+
 
 class HomePageView(TemplateView):
     template_name = 'homepage.html'
@@ -26,6 +45,8 @@ class HomePageView(TemplateView):
 
     def search(self):
         query = self.filters.get("search")
+        page = self.filters.get("page")
+        if not page: page = 1
         if query:
             es = Elasticsearch(settings.ELASTICSEARCH)
 
@@ -40,9 +61,11 @@ class HomePageView(TemplateView):
                         }
                     },
                 "sort":
-                    {"period": "desc"}
+                    {"period": "desc"},
+                "from": 10 * (page - 1),
+                "size": 10
                 },
-                fields=("_id", "task", "path", "recipe", "period")
+                fields=("_id", "task", "path", "recipe", "period"),
             )
             ids = [int(x["_id"]) for x in result["hits"]["hits"]]
 
@@ -52,6 +75,8 @@ class HomePageView(TemplateView):
             result["result"]=[]
             for _id in ids:
                 result["result"].append(dict_tmp[_id])
+            sp = PaganatorSearch(result["hits"]["total"])
+            result["paginator"] = sp.page(page)
             return result
 
     def get_network_stas(self, **kwargs):

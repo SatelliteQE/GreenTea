@@ -47,6 +47,15 @@ tatal: {{ search.hits.total }}
     </tr>
     {% endfor %}
 </table>
+
+<ul class="pagination">
+  {% if search.paginator.has_previous %}<li><a href="?search={{forms.cleaned_data.search}}&amp;page={{search.paginator.previous_page_number }}">&laquo;</a></li>{% else %}<li class="disabled" ><span>&laquo;</span></li>
+  {%endif%}
+
+  {% if search.paginator.has_next %}<li><a href="?search={{forms.cleaned_data.search}}&amp;page={{ search.paginator.next_page_number }}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>
+  {%endif%}
+</ul>
+
 {% endif %}
 
 {% if schedules %}
