@@ -183,7 +183,7 @@ function render_tasklist(tasks) {
         message += '<td>'+result+'</td>';
         message += '<td>'+task.test.name+'&nbsp&nbsp'+
                    '<a class="glyphicon glyphicon-link" href="tests.html?search='+encodeURI(task.test.name)+'#T:'+task.uid+'" title="Test detail"></a>&nbsp;&nbsp;'+
-                   '<a href="https://' + BEAKER_SERVER + '/recipes/'+task.recipe+'#task'+task.uid+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>';
+                   '<a href="https://' + BEAKER_SERVER + '/recipes/'+task.recipe.uid+'#task'+task.uid+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>';
 		if (task.logfiles.length > 0) {
 			for (var ix in task.logfiles) {
 				if (task.logfiles[ix].endsWith('TESTOUT.log')) {
