@@ -204,8 +204,9 @@ class Git(models.Model):
             folder = os.path.dirname(mkFile)
             info = self.__parseMakefile("%s/%s" % (self.path_absolute, mkFile))
             if 'Name' not in info:
-                self.__getLog().warning("The test '%s' doesn't contain"
-                                        " Name in Makefile" % folder)
+                self.__getLog()\
+                    .warning("The test '%s' doesn't contain the 'Name' "
+                             "attribute in Makefile" % folder)
                 continue
             owner = Author.parseAuthor(info.get('Owner'))
             name = re.sub('\s+.*', '', info.get('Name'))
@@ -264,7 +265,7 @@ class Git(models.Model):
             self.__getLog().warning("repository %s is empty (0 tests)" % self.name)
         else:
             self.__getLog().info(
-                "repository %s contiants %d tests" %
+                "The repository '%s' contiants %d tests" %
                 (self.name, len(tests)))
         for test in tests:
             if not test.folder:
