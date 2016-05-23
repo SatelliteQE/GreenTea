@@ -1387,7 +1387,7 @@ class FileLog(models.Model):
     def index(self):
         es = Elasticsearch(settings.ELASTICSEARCH, timeout=60)
         f = open(self.absolute_path())
-        content = json.dumps(f.read())
+        content = json.dumps(f.read(settings.ELASTICSEARCH_MAX_SIZE))
         f.close()
         name = self.get_basename()
 
