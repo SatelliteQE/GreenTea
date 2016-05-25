@@ -240,18 +240,18 @@ LOGGING = {
             'class': 'django.utils.log.AdminEmailHandler',
             'include_html': True,
         },
-        'logfile': {
-            'level': 'ERROR',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filename': ROOT_PATH + '/log/error.log',
-            'formatter': 'verbose'
-        },
-        'infofile': {
-            'level': 'INFO',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filename': ROOT_PATH + '/log/info.log',
-            # 'formatter': 'verbose'
-        },
+        # 'logfile': {
+        #     'level': 'ERROR',
+        #     'class': 'logging.handlers.WatchedFileHandler',
+        #     'filename': ROOT_PATH + '/log/error.log',
+        #     'formatter': 'verbose'
+        # },
+        # 'infofile': {
+        #     'level': 'INFO',
+        #     'class': 'logging.handlers.WatchedFileHandler',
+        #     'filename': ROOT_PATH + '/log/info.log',
+        #     # 'formatter': 'verbose'
+        # },
         'elasticsearch': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
@@ -267,13 +267,13 @@ LOGGING = {
     },
     'loggers': {
         'django.request': {
-            'handlers': ['console', 'logfile', 'mail_admins'],
+            'handlers': ['console', 'mail_admins'],
             'level': 'ERROR',
             'propagate': False,
         },
     },
     'root': {
-        'handlers': ['console', 'infofile', 'logfile', 'mail_admins'],
+        'handlers': ['console', 'mail_admins'],
         'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
     },
 }
