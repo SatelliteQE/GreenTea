@@ -1295,7 +1295,7 @@ class FileLog(models.Model):
     def delete(self, *args, **kwargs):
         def clean_dir(path):
             path_dir = os.path.dirname(path)
-            if path_dir == path:
+            if path_dir == path or not path_dir:
                 return
             absolute_path = os.path.join(
                 settings.STORAGE_ROOT, "./%s" % path_dir)
