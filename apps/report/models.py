@@ -98,7 +98,8 @@ class ReportList:
         er = EnumResult()
         pass_test = Score.objects.filter(
             schedule__in=self.period_ids,
-            rate__gt=1.9
+            rate__gte=-0.1 # pass test is from -2 to 0
+            # -0.1 > pass, other is warning
         ).values("test__id")
         test_ids = [x["test__id"] for x in pass_test]
 
