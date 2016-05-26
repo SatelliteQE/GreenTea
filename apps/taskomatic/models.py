@@ -10,9 +10,10 @@
 import logging
 import shlex
 import time
+import sys
 import traceback
 from datetime import datetime, timedelta
-from StringIO import StringIO
+from cStringIO import StringIO
 
 from croniter import croniter
 from django.conf import settings
@@ -37,7 +38,8 @@ class TaskPeriodList:
             filters["date_create__lt"] = datetime.now() - timedelta(history)
         return TaskPeriodSchedule.objects.values("period", "period__title",)\
             .filter(**filters)\
-            .annotate(max_id=Max("id"), counter_id=Max("counter"), dcount=Count("period"))
+            .annotate(max_id=Max("id"), counter_id=Max("counter"),
+                      dcount=Count("period"))
 
 
 class TaskPeriodSchedule(models.Model):
@@ -154,7 +156,7 @@ class Task(models.Model):
         return data
 
     def run(self, errorHandler=None):
-        t1 = datetime.now()
+        t1 = timezone.now()
         self.status = self.STATUS_ENUM_INPROGRESS  # set status "in progress"
         self.save()
         params = [it.strip() for it in self.common_params.split()]
@@ -163,25 +165,38 @@ class Task(models.Model):
         if errorHandler:
             errorHandler.flush()
 
+        out = StringIO()
+        formatter = logging.Formatter('[%(levelname)s] %(message)s')
+        handler = logging.StreamHandler(stream=out)
+        handler.setFormatter(formatter)
+        handler.setLevel(logging.DEBUG)
+        logging.getLogger('').addHandler(handler)
+        old = (sys.stdout, sys.stderr)
+        sys.stdout = out
+        sys.stderr = out
         try:
             params = shlex.split(self.common_params)
-            out = StringIO()
             management.call_command(
-                self.common, *params, stdout=out, verbosity=3)
+                self.common, *params, verbosity=3, stdout=out,
+                interactive=False)
+            self.exit_result += out.getvalue() + "\n"
             self.status = self.STATUS_ENUM_DONE  # set status "done"
-            out.seek(0)
-            self.exit_result += out.read()
+            sys.stdout, sys.stderr = old            
         except Exception as e:
             self.exit_result = traceback.format_exc()
             self.status = self.STATUS_ENUM_ERROR  # set status "error"
             logger.exception(e)
+        finally:
+            sys.stdout, sys.stderr = old
+            logging.getLogger('').removeHandler(handler)
+            out.close()
         # Get all errors from logger
         if errorHandler:
             for er in errorHandler.flush():
                 self.exit_result += er.getMessage() + "\n"
         # --- END RUN --- #
 
-        t0 = datetime.now()
+        t0 = timezone.now()
         t2 = t0 - t1
         self.time_long = t2.seconds + t2.microseconds / 1000000.0
         self.date_run = t0
@@ -205,14 +220,14 @@ class Taskomatic:
         tPeriods = TaskPeriod.objects.filter(is_enable=True)
         for period in tPeriods:
             if not period.date_last:
-                period.date_last = datetime.now()
+                period.date_last = timezone.now()
                 period.save()
             last_check = toLocalZone(period.date_last)
             citer = croniter(period.cron, last_check)
             next_date = citer.get_next()
             if next_date < time.time():
                 period.createTask()
-                period.date_last = datetime.now()
+                period.date_last = timezone.now()
                 period.save()
 
     def checkTasks(self):
@@ -227,7 +242,8 @@ class Taskomatic:
     def cleanOldTasks(self):
         # delete old tasks with status DONE, keep only last 300 tasks
         [it.delete() for it in Task.objects
-            .filter(status=Task.STATUS_ENUM_DONE).order_by("-date_run")[settings.MAX_TASKOMATIC_HISTORY:]]
+            .filter(status=Task.STATUS_ENUM_DONE)
+            .order_by("-date_run")[settings.MAX_TASKOMATIC_HISTORY:]]
 
     # @single_process
     def run(self):

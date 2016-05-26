@@ -1,6 +1,7 @@
 # Django settings for tttt project.
 
 import os
+import sys
 
 from django.conf import global_settings
 
@@ -211,51 +212,70 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
     },
     'formatters': {
+        'verbose': {
+            'format': '%(asctime)s %(levelname)s %(module)s.%(funcName)s'
+                      '(line no. %(lineno)d): %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
         'simple': {
-            'format': '%(levelname)s %(message)s'
+            'format': '%(levelname)s %(module)s.%(funcName)s(%(lineno)d): '
+                      '%(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
         },
     },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
+            'class': 'django.utils.log.AdminEmailHandler',
+            'include_html': True,
         },
-        'log_to_stdout': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'simple',
-        },
+        # 'logfile': {
+        #     'level': 'ERROR',
+        #     'class': 'logging.handlers.WatchedFileHandler',
+        #     'filename': ROOT_PATH + '/log/error.log',
+        #     'formatter': 'verbose'
+        # },
+        # 'infofile': {
+        #     'level': 'INFO',
+        #     'class': 'logging.handlers.WatchedFileHandler',
+        #     'filename': ROOT_PATH + '/log/info.log',
+        #     # 'formatter': 'verbose'
+        # },
         'elasticsearch': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
         },
+        'console': {
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            'stream': sys.stdout,
+        },
     },
     'loggers': {
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['console', 'mail_admins'],
             'level': 'ERROR',
-            'propagate': True,
+            'propagate': False,
         },
-        'main': {
-            'handlers': ['log_to_stdout'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'backend': {
-            'level': 'ERROR',
-            'filters': ['require_debug_false'],
-            'class': 'django.utils.log.AdminEmailHandler'
-        }
-    }
+    },
+    'root': {
+        'handlers': ['console', 'mail_admins'],
+        'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+    },
 }
 
 KRB5_TEST_USER = "username"
@@ -271,7 +291,7 @@ LOGIN_REDIRECT_URL = '/'
 if int(os.environ.get("DDD", 0)) > 0:
     # LOGGING['loggers']['commands']['handlers'] = ['console', ]
     # LOGGING['loggers']['commands']['propagate'] = False
-    LOGGING['root']['handlers'].append('console')
+    # LOGGING['root']['handlers'].append('console')
 
     # Enabling django-debug-toolbar..."
     MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) \
