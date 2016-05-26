@@ -1,5 +1,4 @@
 python-psycopg2
-python-pexpect
 gitweb-caching
 source-highlight
 highlight
