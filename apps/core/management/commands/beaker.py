@@ -9,7 +9,7 @@ import logging
 import time
 
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models import Max
+from django.db.models import Max, Count
 from texttable import Texttable
 
 from apps.core.models import Job, JobTemplate, Recipe, FileLog
@@ -102,7 +102,8 @@ class BeakerCommand():
 
     def checklogs(self, **kwargs):
         logger.info("%d files to download" % FileLog.objects.filter(status_code=0).count())
-        logger.info("%d files to indexing" % FileLog.objects.filter(is_indexed=False).count())
+        logger.info("%d files to indexing" % FileLog.objects.filter(is_indexed=False, is_downloaded=True).count())
+        logger.info("status: %s" % FileLog.objects.values("status_code").annotate(counter=Count("status_code")))
 
         b = Beaker()
         for it in FileLog.objects.filter(status_code=0)\
