@@ -1,10 +1,15 @@
 import datetime
 import re
+import os
+import posixpath
+import stat
+import urllib
 
 from django import template
 from django.template.defaultfilters import stringfilter
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
+from django.conf import settings
 
 register = template.Library()
 
@@ -55,3 +60,12 @@ def diffsec(date1, date2):
 @register.filter()
 def htmlentities(s):
     return mark_safe(escape(s).encode('ascii', 'xmlcharrefreplace'))
+
+
+@register.simple_tag
+def staticfile(path):
+    normalized_path = posixpath.normpath(urllib.unquote(path)).lstrip('/')
+    absolute_path = os.path.join(settings.ROOT_PATH, 'tttt', normalized_path)    
+    if absolute_path:
+        return '%s?v=%s' % (path, os.stat(absolute_path)[stat.ST_MTIME])
+    return path

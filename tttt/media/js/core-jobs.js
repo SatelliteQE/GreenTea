@@ -62,8 +62,16 @@ function initPage() {
 
     var uid = window.location.hash.substring(1);
 	if (uid.match(/^R:[0-9]+/) != null) {
-		previewRecipe(uid);
-	}
+		//previewRecipe(uid);
+		var sElm = $("td[id='"+uid+"']");
+        previewRecipe.apply(sElm.get(0), [null, true])
+        saveDetailTab.apply(sElm.get(0))
+        $('html, body').animate({
+	        scrollTop: sElm.offset().top - 200
+        }, {
+            duration: 2000,
+	    });
+    }
 }
 
 function render_progressbar(data) {
@@ -240,25 +248,18 @@ function loadTasks(id, filter) {
 	});
 }
 
-function previewRecipe(id) {
+function previewRecipe(id, synced) {
 	$('.dashboard-jobs td').removeClass('hover');
-	var api_url = "/api/v1/recipe/";
-	if (!isNumber(id) && (id+"").match(/^R:[0-9]+/) != null) {
-		// This is situation, when we open detail via UID.
-		api_url += ("?uid="+id).replace('R:','');
-		var sElm = $("td[id='"+id+"']");
-		$('html, body').animate({
-	        scrollTop: sElm.offset().top - 200
-	    }, 2000);
-	} else{
-		if (!isNumber(id)) {
-			id = $(this).attr("data-id");
-  		}
-		$(this).addClass('hover');
-		api_url += id + "/";
-    }
+	if (!isNumber(id)) {
+		id = $(this).attr("data-id");
+	}
+	$(this).addClass('hover');
     if(id) {
-        $.getJSON(api_url, function(data) {
+        var fce = $.getJSON;
+        if (synced == true) {
+            fce = getSyncJSON
+        }
+        fce("/api/v1/recipe/"+id+"/", function(data) {
 			if (data.previous == null && data.results !=null) {
 				// This is situation, when we open detail via UID.
 				if (data.results.length == 0) {
@@ -304,7 +305,7 @@ function saveDetailTab(){
 		previewRecipe.apply(this)
 		return false;
 	}
-	if (tab != null && tab.data.id == "preview") {
+	if (tab != null && tab.data.id == "preview") {        
 		return false;
 	}
 	tab = detailPanel.getTab(0);
@@ -341,8 +342,9 @@ function onHoverRecipe() {
 }
 
 function onLoad() {
-  initPage();
-  onHoverRecipe();
+    onHoverRecipe();
+    initPage();
+    //onHoverRecipe();
 }
 
 $(document).ready(onLoad);
