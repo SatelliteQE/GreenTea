@@ -1308,11 +1308,11 @@ class FileLog(models.Model):
                     os.rmdir(absolute_path)
             clean_dir(path_dir)
 
-        file_path = self.absolute_path()
-        clean_dir(self.path)
-
-        if os.path.exists(file_path):
-            os.remove(file_path)
+        if self.is_downloaded:
+            file_path = self.absolute_path()
+            clean_dir(self.path)
+            if os.path.exists(file_path):
+                os.remove(file_path)
         else:
             self.logger.warning("the file %s doesn't exist" % file_path)
         if settings.ELASTICSEARCH:
@@ -1379,6 +1379,8 @@ class FileLog(models.Model):
             it.delete()
 
     def index_remove(self):
+        if not self.is_indexed:
+            return
         es = Elasticsearch(settings.ELASTICSEARCH, timeout=60)
         name = self.get_basename()
         try:
