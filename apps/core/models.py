@@ -1313,8 +1313,8 @@ class FileLog(models.Model):
             clean_dir(self.path)
             if os.path.exists(file_path):
                 os.remove(file_path)
-        else:
-            self.logger.warning("the file %s doesn't exist" % file_path)
+            else:
+                self.logger.warning("the file %s doesn't exist" % file_path)
         if settings.ELASTICSEARCH:
             self.index_remove()
         super(FileLog, self).delete(*args, **kwargs)
