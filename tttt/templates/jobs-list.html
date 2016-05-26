@@ -4,7 +4,7 @@
 {% block title %}- Job Trends{% endblock %}
 
 {% block header %}
-<script src="/media/js/core-jobs.js"></script>
+<script src="{%  staticfile "/media/js/core-jobs.js" %}"></script>
 {% endblock %}
 
 {% block content %}
@@ -27,7 +27,7 @@
   <li role="presentation" {%if not actualtag%}class="active" {% endif %}><a href="{% url "jobs-list" %}">All</a></li>
   {% for tag in tags %}
   <li role="presentation" {%if actualtag == tag.slug %}class="active" {% endif %}><a href="{% url "jobs-list" %}?tag={{tag.slug}}">{{ tag }}</a></li>
-  
+
   {% endfor %}
 </ul>
 

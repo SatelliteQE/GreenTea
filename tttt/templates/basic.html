@@ -1,3 +1,4 @@
+{% load core_extras %}
 <!DOCTYPE html>
 <html>
   <head>
@@ -8,19 +9,19 @@
     <link rel="stylesheet" href="/media/lib/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/media/lib/bootstrap/dist/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="/media/lib/octicons/octicons.css">
-    <link rel="stylesheet" href="/media/css/basic.css">
+    <link rel="stylesheet" href="{%  staticfile "/media/css/basic.css" %}">
     <script src="/media/js/jquery-1.10.1.min.js"></script>
     <script src="/media/js/jquery.cookie.js"></script>
     <script src="/media/js/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="/media/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     <link rel="shortcut icon" href="/media/images/shortcut.ico">
-    <script src="/media/js/functions.js"></script>
+    <script src="{%  staticfile "/media/js/functions.js" %}"></script>
     <script language="javascript">
     {% for key, value in conf.items %}
       var {{ key }}="{{ value }}";
     {% endfor %}
     </script>
-    <script src="/media/js/tttt.js"></script>
+    <script src="{%  staticfile "/media/js/tttt.js" %}"></script>
     {% block header %}{% endblock %}
   </head>
   <body>
