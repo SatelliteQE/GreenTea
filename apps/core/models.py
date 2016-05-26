@@ -1294,8 +1294,11 @@ class FileLog(models.Model):
 
     def delete(self, *args, **kwargs):
         def clean_dir(path):
+            if path == None:
+                self.logger.warning("This file is not download %s" % self.id)
+                return
             path_dir = os.path.dirname(path)
-            if path_dir == path or not path_dir:
+            if path_dir == path:
                 return
             absolute_path = os.path.join(
                 settings.STORAGE_ROOT, "./%s" % path_dir)
