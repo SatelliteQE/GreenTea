@@ -28,13 +28,13 @@ class PaganatorSearch:
             self.has_previous = False
         else:
             self.has_previous = True
-            self.previous_page_number = page + 1
+            self.previous_page_number = page - 1
 
         if len(self.objects) < page:
             self.has_next = False
         else:
             self.has_next = True
-            self.next_page_number = page +1
+            self.next_page_number = page + 1
         return self
 
 
