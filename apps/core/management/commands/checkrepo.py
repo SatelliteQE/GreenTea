@@ -46,10 +46,9 @@ class Command(BaseCommand):
                 git.log = logger
                 if git:
                     try:
-                        logger.info("Checking GIT %s" % repo)
+                        logger.info("Checking the GIT '%s' repo" % repo)
                         git.refresh()
                         git.updateInformationsAboutTests()
-                        git.checkHistory()
                     except Exception:
                         logger.exception("Problem with git %s" % repo)
                 else:
