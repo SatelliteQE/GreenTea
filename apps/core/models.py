@@ -19,6 +19,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.db import models
+from django.db.models import Q
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
@@ -27,7 +28,6 @@ from taggit.managers import TaggableManager
 from apps.core.signals import recipe_changed, recipe_finished
 from apps.core.utils.date_helpers import currentDate, toUTC
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
-from lib import gitconfig
 from elasticsearch import Elasticsearch
 from urlparse import urlparse
 from xml.dom.minidom import parseString
@@ -150,7 +150,9 @@ class Git(models.Model):
     path_absolute = None
     cmd = None
     log = None
-    groups = None
+    __groups = None
+    __cache_tests_path = None
+    __cache_tests_name = None
 
     def __unicode__(self):
         return self.name
@@ -160,20 +162,17 @@ class Git(models.Model):
         """
             Create/load Git object based git repository (folder)
         """
-        config = gitconfig.config("%s/.git/config" % folder)
-        for it in config.list:
-            if it.startswith("remote.origin.url"):
-                url = re.sub(r'.*(@|//)', '', it)
-                name = os.path.basename(folder)
-                oGit, new = Git.objects.get_or_create(url=url, defaults={
-                    "name": name
-                })
-                oGit.path_absolute = folder
-                if not new and oGit.name != name:
-                    oGit.name = name
-                    oGit.save()
-                return oGit
-        return None
+        cmd = git.cmd.Git(folder)
+        url = re.sub(r'.*(@|//)', '', cmd.config('remote.origin.url')).strip()
+        name = os.path.basename(folder)
+        oGit, new = Git.objects.get_or_create(url=url, defaults={
+            "name": name
+        })
+        oGit.path_absolute = folder
+        if not new and oGit.name != name:
+            oGit.name = name
+            oGit.save()
+        return oGit
 
     def refresh(self):
         """
@@ -193,51 +192,87 @@ class Git(models.Model):
                 return
             counter -= 1
 
+    def __load_test_cache(self):
+        tests = Test.objects.filter(git=self)\
+            .select_related('owner')\
+            .exclude(Q(folder__isnull=True) | Q(folder__exact=''))\
+            .order_by('folder')
+        self.__cache_tests_path = \
+            {row.folder: row for row in tests}
+        self.__cache_tests_name = {row.name: row for row in tests}
+        return list(tests)
+
+    def getTestFromPath(self, path):
+        if self.__cache_tests_path is None:
+            self.__load_test_cache()
+        return self.__cache_tests_path.get(path)
+
+    def getTestFromName(self, name):
+        if self.__cache_tests_name is None:
+            self.__load_test_cache()
+        return self.__cache_tests_name.get(name)
+
+    def getTestFromNameRegEx(self, reg):
+        if self.__cache_tests_name is None:
+            self.__load_test_cache()
+        for name in self.__cache_tests_name:
+            if reg.match(name):
+                return self.__cache_tests_name.get(name)
+
     def updateInformationsAboutTests(self):
         """
           Update informations about tests from Makefiles.
         """
+        old_tests = self.__load_test_cache()
+        number_of_tests = len(old_tests)
         git = self.__getGitCmd()
         # git ls-files --full-name *Makefile
         mkFiles = git.ls_files('--full-name', '*Makefile')
         for mkFile in mkFiles.splitlines():
             folder = os.path.dirname(mkFile)
             info = self.__parseMakefile("%s/%s" % (self.path_absolute, mkFile))
+            name = None
             if 'Name' not in info:
                 self.__getLog()\
-                    .warning("The test '%s' doesn't contain the 'Name' "
-                             "attribute in Makefile" % folder)
+                    .warning("The test '%s:%s' doesn't contain the 'Name' "
+                             "attribute in Makefile" % (self.name, folder))
                 continue
-            owner = Author.parseAuthor(info.get('Owner'))
-            name = re.sub('\s+.*', '', info.get('Name'))
-            test = None
-            tests = Test.objects.filter(folder=folder, git=self).order_by('id')
-            if len(tests) > 0:
-                test = tests[0]
-                test.name = name
-                if len(tests) > 1:
-                    # This is here, because we have got more records in DB for
-                    # the one test, when the name of test was changed.
-                    testH = TestHistory.objects.filter(test=test)
-                    for it in tests[1:]:
-                        for it2 in TestHistory.objects.filter(test=it):
-                            if it2 in testH:
-                                it2.delete()
-                            else:
-                                it2.test = test
-                                it2.save()
-                        deps = Test.objects.filter(dependencies=it)
-                        for it3 in deps:
-                            it3.dependencies.remove(it)
-                            if test not in it3.dependencies:
-                                it3.dependencies.append(test)
-                            it3.save()
-                        it.delete()
             else:
-                test, status = Test.objects.get_or_create(name=name, defaults={
-                                                          "git": self})
-            test.owner = owner
-            test.folder = folder
+                name = re.sub('\s+.*', '', info.get('Name'))
+            test = self.getTestFromPath(folder)
+            if test is None:
+                test = self.getTestFromName(name)
+                if test is not None:
+                    # The test has bad folder
+                    test.folder = folder
+                    self.__getLog()\
+                        .warning("The folder '%s:%s' and attribute Name '%s' "
+                                 "of test are inconsistent" %
+                                 (self.name, folder, name))
+            new = False
+            if test is None:
+                test = self.__try_to_get_removed_test(folder)
+                if test is not None:
+                    # The test was move to new place
+                    test.folder = folder
+                else:
+                    # This test is really new
+                    new = True
+                    test = Test(name=name, git=self, folder=folder)
+                    test.owner = Author.parseAuthor(info.get('Owner'))
+                    # test.save()
+                    self.__getLog()\
+                        .info("The new test '%s' was find in folder '%s:%s'."
+                              % (name, self.name, folder))
+            if not new:
+                if test in old_tests:
+                    old_tests.remove(test)
+                # This is old
+                owner = Author.passiveParseAuthor(info.get('Owner'))
+                if test.owner.email != owner.get('email', test.owner.email):
+                    # changed owner
+                    test.owner = Author.parseAuthor(info.get('Owner'))
+                test.name = name
             if 'Description' in info and \
                     test.description != info.get('Description'):
                 test.description = info.get('Description')
@@ -245,52 +280,31 @@ class Git(models.Model):
                 test.time = info.get('TestTime')
             if 'Type' in info and test.type != info.get('Type'):
                 test.type = info.get('Type')
+            test.save()
             if 'RunFor' in info:
                 self.__updateGroups(test, info.get('RunFor'))
             self.__updateDependences(test, info.get('RhtsRequires'))
             test.save()
-
-    def checkHistory(self):
-        """
-          Check history of known tests
-        """
-        git = self.__getGitCmd()
-        # git log --decorate=full --since=1 --simplify-by-decoration /
-        #         --pretty=%H|%aN|%ae|%ai|%d --follow HEAD
-        checkDays = int(settings.CHECK_COMMMITS_PREVIOUS_DAYS)
-        if not checkDays:
-            checkDays = 1
-        tests = Test.objects.filter(git=self, is_enable=True).only('folder')
-        if len(tests) == 0:
-            self.__getLog().warning("repository %s is empty (0 tests)" % self.name)
+        # deactivate deleted tests
+        if len(old_tests) > 0.5*number_of_tests:
+            self.__getLog().warning(
+                "Probably is there something wrong with repo '%s'!!!\n"
+                "We want tu deactivate more then 50% of tests. Skipped."
+                % self.name)
         else:
-            self.__getLog().info(
-                "The repository '%s' contiants %d tests" %
-                (self.name, len(tests)))
-        for test in tests:
-            if not test.folder:
-                self.__getLog().warning("The GIT folder for test '%s'"
-                                        " is not declared." % test.name)
-                continue
-            path_dir = "%s/%s" % (self.path_absolute, test.folder)
-            if not os.path.exists(path_dir):
-                self.__getLog().warning("Test %s doesn't exists" % path_dir)
-                test.is_enable = False
-                test.save()
-                continue
-            rows = git.log('--decorate=full',
-                           '--since=%s.days' % checkDays,
-                           '--simplify-by-decoration',
-                           '--pretty=%H|%aN|%ae|%ai|%d',
-                           '--follow',
-                           'HEAD',
-                           "%s" % path_dir)\
-                .split('\n')
-            self.__saveCommits(test, rows)
+            for test in old_tests:
+                if test.is_enable:
+                    test.is_enable = False
+                    test.save()
+                    self.__getLog().info("The test '%s:%s' was disabled."
+                                         % (self.name, test.name))
+        # Check all new commits in this git repo
+        self.__check_history()
 
     def __getGitCmd(self):
         if not self.path_absolute:
-            raise Exception("Missing the absolute path to repository")
+            raise Exception("Missing the absolute path to repository '%s'" %
+                            self.name)
         if not self.cmd:
             self.cmd = git.cmd.Git(self.path_absolute)
         return self.cmd
@@ -338,76 +352,159 @@ class Git(models.Model):
         return self.__getMakefileInfo(rows, self.__getVariables(rows))
 
     def __updateGroups(self, test, row):
-        if not self.groups:
-            self.groups = list()
-            for it in GroupOwner.objects.all():
-                self.groups.append(it)
-        res = list()
-        if isinstance(row, list):
-            row = " ".join(row)
-        for it in self.groups:
-            if row.find(it.name) >= 0:
-                res.append(it)
-        if len(res) > 0:
-            # Remove unsupported groups
-            for group in test.groups.all():
-                if group not in res:
-                    test.groups.remove(group)
-                else:
-                    res.remove(group)
-            # Add new groups
-            for group in res:
-                test.groups.add(group)
+        if isinstance(row, str):
+            row = row.split()
+        if not self.__groups:
+            self.__groups = {it.name.lower():
+                             it for it in GroupOwner.objects.all()}
+        new_grups = list()
+        for it in row:
+            if it not in self.__groups:
+                # self.__getLog().warning(
+                #     "This group '%s' in test '%s' doesn't exist." %
+                #     (it, test.folder))
+                continue
+            new_grups.append(self.__groups.get(it))
+        # Remove unsupported groups
+        for group in test.groups.all():
+            if group not in new_grups:
+                test.groups.remove(group)
+                self.__getLog().debug(
+                    "Removed the old group '%s' from test '%s'."
+                    % (group.name, test.name))
+            else:
+                new_grups.remove(group)
+        # Add new groups
+        for group in new_grups:
+            test.groups.add(group)
+            self.__getLog().debug(
+                "Added a new group '%s' to test '%s'."
+                % (group.name, test.name))
 
     def __updateDependences(self, test, rows):
+        if isinstance(rows, str):
+            rows = rows.split()
         if not rows:
             rows = list()
-        dependencies = list()
-        for row in rows:
-            depName = re.sub(r'(test\(|\))', '', row).strip()
-            depTest = Test.objects.filter(name__endswith=depName).only('name',
-                                                                       'git')
-            if len(depTest) > 0 and depTest[0] not in dependencies:
-                dependencies.append(depTest[0])
         dep_old = list(test.dependencies.all())
-        # Adding new dependencies
-        for dep in dependencies:
-            if dep == test:
+        dep_new = list()
+        for row in rows:
+            depName = re.sub(r'(test\(|\))', '', row)
+            if depName == row:
+                # This dependence is not a test, it is probably classic package
                 continue
-            if dep in dep_old:
-                dep_old.remove(dep)
-            else:
-                test.dependencies.add(dep)
+            depName = depName.strip()
+            depTest = self.getTestFromName(depName)
+            if depTest is None:
+                # This dependence is probably from different repo
+                depTest = Test.objects.filter(name__endswith=depName)\
+                              .only('name', 'git', 'is_enable')[:1]
+                if len(depTest) == 0:
+                    # This dependence does not exist
+                    self.__getLog().warning(
+                        "This test '%s' has got a non-existing dependence '%s'"
+                        % (test.name, depName))
+                    continue
+                else:
+                    depTest = depTest[0]
+            dep_new.append(depTest)
+
         # Removing old/unsupported dependencies
         for dep in dep_old:
-            test.dependencies.remove(dep)
+            if dep not in dep_new:
+                test.dependencies.remove(dep)
+                self.__getLog().debug(
+                    "Removed the old dependence '%s' from test '%s'."
+                    % (dep.name, test.name))
+            else:
+                dep_new.remove(dep)
+        # Adding new dependencies
+        for dep in dep_new:
+            if dep == test:
+                self.__getLog().warning(
+                    "This test '%s' has got as a dependence itself."
+                    % test.name)
+                continue
+            if dep not in dep_old:
+                if not dep.is_enable:
+                    self.__getLog().warning(
+                        "This dependence '%s' of the test '%s' is disabled."
+                        % (dep.name, test.name))
+                    continue
+                self.__getLog().debug(
+                    "Added a new dependence '%s' to test '%s'."
+                    % (dep.name, test.name))
+                test.dependencies.add(dep)
 
-    def __saveCommits(self, test, rows):
+    def __try_to_get_removed_test(self, folder):
+        """
+            This method try to find the test fromwhere was test moved.
+        """
+        git = self.__getGitCmd()
+        # git log --follow --summary -M -- '*/Makefile'
+        checkDays = int(settings.CHECK_COMMMITS_PREVIOUS_DAYS)
+        if not checkDays:
+            checkDays = 1
+        output = git.log('--since=%s.days' % checkDays,
+                         '--summary', '-M', '--name-status',
+                         '--pretty=%H',
+                         '--follow', 'HEAD',
+                         '%s/Makefile' % folder)
+        res = re.search(
+            r'.*R\d+\s+(?P<to>[^\s]+)/Makefile\s+(?P<from>[^\s]+)/Makefile.*',
+            output, re.M)
+        if res:
+            return self.getTestFromPath(res.group('from'))
+
+    def __check_history(self):
+        git = self.__getGitCmd()
+        checkDays = int(settings.CHECK_COMMMITS_PREVIOUS_DAYS)
+        if not checkDays:
+            checkDays = 1
+        # git log --decorate=full --since=1 --simplify-by-decoration /
+        #         --pretty=%H|%aN|%ae|%ai|%d --follow HEAD  <folder>
+        rows = git.log('--decorate=full',
+                       '--since=%s.days' % checkDays,
+                       '--simplify-by-decoration',
+                       '--pretty=%H|%aN|%ae|%ai|%d',
+                       '--follow', 'HEAD',
+                       ".").split('\n')
+        for row in rows:
+            if len(row.strip()) > 0:
+                self.__saveCommits(row)
+
+    def __saveCommits(self, row):
         # 1731d5af22c22469fa7b181d1e33cd52731619a0|Jiri Mikulka|
         # jmikulka@redhat.com|2013-01-31 17:45:06 +0100|
         # (tag: RHN-Satellite-CoreOS-RHN-Satellite-Other-Sanity-spacewalk-
         #   create-channel-1_0-2)
-        testName = test.name
-        if testName.startswith('/'):
-            testName = testName[1:]
-        testName = test.name.replace('/', '-')
-        for row in rows:
-            if len(row) == 0:
-                continue
-            data = dict()
+        try:
             chash, name, email, date, tag = row.split('|')
-            if tag:
-                res = re.search(r".*%s-([0-9\_\-]+)[^0-9\_\-].*" % testName,
-                                tag)
-                if res:
-                    data['version'] = res.group(1)
+        except:
+            self.__getLog().error("Bad format of commit log in repo '%s':\n%s"
+                                  % (self.name, row))
+            return
+        if tag:
             author, status = Author.objects\
                 .get_or_create(email=email, defaults={"name": name})
-            data['author'] = author
-            data['date'] = toUTC(date)
-            commit, status = TestHistory.objects\
-                .get_or_create(commit=chash, test=test, defaults=data)
-            return commit
+            res = re.findall(r'tag:\s+([^\s]+?)-([0-9\_\-]+)[^0-9\_\-]', row)
+            for it in res:
+                tagName, version = it
+                testName = "/%s" % tagName.replace('-', '.')
+                test = self.getTestFromNameRegEx(re.compile(testName))
+                if test is None:
+                    self.__getLog().warning(
+                        "This test '%s' was not found." % testName)
+                    continue
+                data = dict()
+                data['author'] = author
+                data['date'] = toUTC(date)
+                data['version'] = version
+                commit, status = TestHistory.objects\
+                    .get_or_create(commit=chash, test=test, defaults=data)
+                if status:
+                    self.__getLog().debug("Added new commit for test '%s'."
+                                          % test.name)
 
     def get_count(self):
         return len(Test.objects.filter(git__id=self.id))
@@ -442,36 +539,39 @@ class Author(models.Model):
             return None
 
     @staticmethod
-    def parseAuthor(row):
+    def passiveParseAuthor(row):
         """
            Parse author from line "name <email@exmaple.com>"
+           return dict
         """
         rr = re.search(r"((?P<name>[^@<]*)(\s|$)\s*)?"
                        r"<?((?P<email>[A-z0-9_\.\+]+"
                        r"@[A-z0-9_\.]+\.[A-z]{2,3}))?>?", row)
-        name = None
-        email = None
+        if rr is None:
+            return None
+        res = dict()
         # Parse owner
-        if rr and rr.group('name'):
-            name = rr.group('name').strip()
-        if rr and rr.group('email'):
-            email = rr.group('email').strip()
-        # Tring find by email
-        if email and not name:
-            auths = Author.objects.filter(email=email)\
-                          .exclude(name=Author.DEFAULT_AUTHOR[0])
+        if rr.group('name'):
+            res['name'] = rr.group('name').strip()
+        if rr.group('email'):
+            res['email'] = rr.group('email').strip()
+        return res
+
+    @staticmethod
+    def parseAuthor(row):
+        """
+           Parse author from line "name <email@exmaple.com>"
+           return object
+        """
+        res = Author.passiveParseAuthor(row)
+        if res is not None:
+            auths = Author.objects.filter(**res)
             if len(auths) > 0:
                 return auths[0]
-        # Tring find by name
-        if not email and name:
-            auths = Author.objects.filter(name=name)\
-                          .exclude(email=Author.DEFAULT_AUTHOR[1])
-            if len(auths) > 0:
-                return auths[0]
-        if not email:
-            email = Author.DEFAULT_AUTHOR[1]
-        if not name:
-            name = Author.DEFAULT_AUTHOR[0]
+        else:
+            res = dict()
+        email = res.get('email', Author.DEFAULT_AUTHOR[1])
+        name = res.get('name', Author.DEFAULT_AUTHOR[0])
         owner, status = Author.objects\
             .get_or_create(email=email, defaults={'name': name})
         return owner
@@ -494,8 +594,9 @@ class Test(models.Model):
     git = models.ForeignKey(Git, blank=True, null=True, db_index=True)
     owner = models.ForeignKey(Author, blank=True, null=True, db_index=True)
     description = models.TextField(blank=True, null=True)
-    external_links = models.TextField(blank=True, null=True,
-                                      help_text="external links which separated by ';'")
+    external_links = models.TextField(
+        blank=True, null=True,
+        help_text="external links which separated by ';'")
     dependencies = models.ManyToManyField("Test", blank=True)
     time = models.CharField(max_length=6, blank=True, null=True)
     type = models.CharField(max_length=32, blank=True, null=True)
@@ -511,7 +612,11 @@ class Test(models.Model):
         return self.name
 
     def __eq__(self, other):
-        if not isinstance(other, self.__class__):
+        #if not isinstance(other, self.__class__):
+    #        return False
+        if not isinstance(other, models.Model):
+            return False
+        if self._meta.concrete_model != other._meta.concrete_model:
             return False
         if self.id and other.id:
             return self.id == other.id
