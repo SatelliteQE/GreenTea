@@ -18,6 +18,7 @@ from elasticsearch import Elasticsearch
 
 logger = logging.getLogger(__name__)
 
+
 class PaganatorSearch:
     def __init__(self, count_objs):
         self.objects = range(count_objs/10)

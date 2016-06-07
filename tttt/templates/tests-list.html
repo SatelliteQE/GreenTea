@@ -58,6 +58,7 @@
             <a href="{{ test_data.get_reposituory_url }}" class="testInfo octicon octicon-mark-github" title="The source code of test"></a>
         {% endif %}
         <a href="{{ test_data.get_detail_url }}" class="testInfo glyphicon glyphicon-list-alt" title="Detail of the test"></a>
+        <a href="{% url 'admin:core_test_change' test_data.test_id %}" class="testInfo glyphicon glyphicon-edit" title="Edit test"></a>
         {% if test_data.test__groups  %}
             <span class="testGroups" title="Groups">{{ test_data.test__groups__name|join:", " }}</span>
         {% endif %}

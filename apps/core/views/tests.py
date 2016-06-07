@@ -287,6 +287,7 @@ class TestsListView(TemplateView):
                     out_dict[i.test.id] = {
                         'id': i.id,
                         'name': i.test.name,
+                        'test_id': i.test.id,
                         'owner__name': i.test.owner.name,
                         'owner__email': i.test.owner.email,
                         'get_absolute_url': i.test.get_absolute_url(),
