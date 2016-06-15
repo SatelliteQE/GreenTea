@@ -7,17 +7,32 @@ Green Tea
 =========
 
 Green Tea is tools for automation testing (quality assurance). The service collects data from beaker's jobs, saves it to database and creates statistic for users.
-Project is open source and it is available on https://github.com/SatelliteQE/GreenTea/wiki
+Project is open source and it is available on https://github.com/SatelliteQE/GreenTea/
 
-Contents:
+
+Quickstarts
+-----------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
+
+   Docker
+
+
+Table of Contents
+-----------------
+
+.. toctree::
+   :maxdepth: 1
+
+   Download
+   Install
+   Configuration
 
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
