@@ -91,7 +91,7 @@ class BeakerCommand():
 
             filter = {"id__in": template_ids}
             self.scheduleByJobTemplates(
-                filter, label, fullInfo, simulate, reserver)
+                filter, label, fullInfo, simulate, reserver, counter)
 
         if kwargs.get("schedule_label"):
             period_label = kwargs.get("schedule_label")
