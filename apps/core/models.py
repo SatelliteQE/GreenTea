@@ -1077,7 +1077,7 @@ class Recipe(models.Model):
     )
     job = models.ForeignKey(Job, related_name="recipes")
     uid = models.CharField("Recipe ID", max_length=12, unique=True)
-    whiteboard = models.CharField("Whiteboard", max_length=64)
+    whiteboard = models.CharField("Whiteboard", max_length=64, blank=True, null=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=UNKNOW)
     result = models.SmallIntegerField(choices=RESULT_CHOICES, default=UNKNOW)
     resultrate = models.FloatField(default=-1.)
