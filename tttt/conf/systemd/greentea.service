@@ -2,19 +2,20 @@
 # copy file to /etc/systemd/system/greentea.service
 
 [Unit]
-Description=Green Tea
-After=syslog.target
+Description=The Green Tea Automation
+# After=httpd.service
 
 [Service]
-ExecStart=uwsgi -x /etc/uwsgi.d/tttt.conf
-# Requires systemd version 211 or newer
-RuntimeDirectory=uwsgi
-Restart=always
-KillSignal=SIGQUIT
 Type=notify
+ExecStart=/usr/sbin/uwsgi -x /etc/uwsgi.d/tttt.conf
+ExecReload=/usr/sbin/uwsgi --reload /run/greentea.pid
+ExecStop=/usr/sbin/uwsgi --stop /run/greentea.pid
+KillSignal=SIGQUIT
 StandardError=syslog
-NotifyAccess=all
-PIDFile = /run/greentea.pid
+TimeoutStartSec=5sec
+TimeoutStopSec=5sec
+PIDFile=/run/greentea.pid
 
 [Install]
 WantedBy=multi-user.target
+
