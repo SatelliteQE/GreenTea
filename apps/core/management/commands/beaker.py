@@ -74,6 +74,7 @@ class BeakerCommand():
         simulate = kwargs.get("simulate")
         reserver = kwargs.get("reserve")
         fullInfo = kwargs.get("fullInfo")
+        counter = kwargs.get("counter")
 
         if kwargs.get("list"):
             tp = TaskPeriod.objects.all()
@@ -98,7 +99,7 @@ class BeakerCommand():
             if not label:
                 label = period_label
             self.scheduleByJobTemplates(
-                filter, "".join(label), fullInfo, simulate, reserver)
+                filter, "".join(label), fullInfo, simulate, reserver, counter)
 
     def checklogs(self, **kwargs):
         logger.info("%d files to download" % FileLog.objects.filter(status_code=0).count())
@@ -132,7 +133,7 @@ class BeakerCommand():
         FileLog.clean_old()
 
     def scheduleByJobTemplates(
-            self, filter, label, fullInfo, simulate, reserve):
+            self, filter, label, fullInfo, simulate, reserve, counter=None):
         jobTs = JobTemplate.objects.filter(**filter).distinct()
         logger.info("%s JobTemplates are prepared." % len(jobTs))
         if fullInfo:
@@ -148,11 +149,14 @@ class BeakerCommand():
         count = TaskPeriodSchedule.objects.filter(
             period=period).aggregate(Max('counter')).get("counter__max")
 
-        schedule = TaskPeriodSchedule.objects.create(
-            title=label,
-            period=period,
-            counter=count + 1 if count is not None else 0,
-        )
+        if counter:
+            schedule = TaskPeriodSchedule.objects.get(title=label, counter=counter)
+        else:
+            schedule = TaskPeriodSchedule.objects.create(
+                title=label,
+                period=period,
+                counter=count + 1 if count is not None else 0,
+            )
 
         for jobT in jobTs:
             job = ""
@@ -201,6 +205,7 @@ class Command(BaseCommand):
         group.add_argument('--template-file', nargs='+', type=str)
         group.add_argument('--schedule-label', nargs='+', type=str)
         group.add_argument('--label', nargs=None, type=str)
+        group.add_argument('--counter', nargs=None, type=int)
         group.add_argument('--list', action='store_true', default=False)
 
         group = parser.add_argument_group("cancel")
