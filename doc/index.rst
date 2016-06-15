@@ -16,7 +16,7 @@ Quickstarts
 .. toctree::
    :maxdepth: 1
 
-   Docker
+   docker
 
 
 Table of Contents
@@ -25,9 +25,9 @@ Table of Contents
 .. toctree::
    :maxdepth: 1
 
-   Download
-   Install
-   Configuration
+   download
+   install
+   configuration
 
 
 
