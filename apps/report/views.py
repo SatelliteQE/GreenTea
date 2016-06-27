@@ -5,10 +5,10 @@
 # Date: 3.2.2016
 
 from django.db.models import Count
-from django.views.generic import TemplateView, DetailView
+from django.views.generic import DetailView, TemplateView
 
 from apps.core.models import GroupTestTemplate, Task, Test
-from apps.report.models import ReportList, ExternalPage
+from apps.report.models import ExternalPage, ReportList
 from apps.taskomatic.models import TaskPeriodList
 
 

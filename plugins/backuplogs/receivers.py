@@ -6,9 +6,10 @@
 # Year: 2015
 
 import logging
-import re
 import os
+import re
 from urlparse import urlparse
+
 from django.dispatch import receiver
 
 from apps.core.models import FileLog, Task
@@ -34,7 +35,8 @@ def download_files_from_recipe(recipe):
     for url in listurls:
         namefile = os.path.basename(urlparse(url).path)
         if namefile in backuplogs:
-            logfile, created = FileLog.objects.get_or_create(url=url, recipe=recipe)
+            logfile, created = FileLog.objects.get_or_create(
+                url=url, recipe=recipe)
             if created:
                 logfile.save()
 

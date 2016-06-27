@@ -17,6 +17,7 @@ class HomepageForm(forms.Form):
         ("rate", "rate"),
         ("score", "score")
     )
+
     def __init__(self, *args, **kwargs):
         super(HomepageForm, self).__init__(*args, **kwargs)
         self.fields['search'].widget.attrs['class'] = 'form-control'
@@ -35,7 +36,8 @@ class HomepageForm(forms.Form):
     )
 
     def get_params(self):
-        return "&amp;".join(["%s=%s" % (x, y) for x, y in self.cleaned_data.items()])
+        return "&amp;".join(["%s=%s" % (x, y)
+                             for x, y in self.cleaned_data.items()])
 
 
 class FilterForm(forms.Form):

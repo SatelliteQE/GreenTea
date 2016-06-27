@@ -42,7 +42,7 @@ class Comment(models.Model):
         if not tdate:
             tdate = currentDate()
         self.created_date = tdate
-        self.save()   
+        self.save()
 
     def is_waived(self):
         return (self.action == self.ENUM_ACTION_WAIVED)

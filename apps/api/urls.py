@@ -10,7 +10,6 @@ from rest_framework import routers
 
 import views
 
-
 router = routers.DefaultRouter()
 router.register(r'author', views.AuthorViewSet)
 router.register(r'jobtemplate', views.JobTemplateViewSet)

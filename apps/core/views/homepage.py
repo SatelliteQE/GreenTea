@@ -8,20 +8,22 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Count
 from django.views.generic import TemplateView
+from elasticsearch import Elasticsearch
 
-from apps.core.models import CheckProgress, EnumResult, Task, TestHistory, FileLog
+from apps.core.forms import HomepageForm
+from apps.core.models import (CheckProgress, EnumResult, FileLog, Task,
+                              TestHistory)
 from apps.report.models import Score
 from apps.taskomatic.models import TaskPeriodList, TaskPeriodSchedule
 from apps.waiver.models import Comment
-from apps.core.forms import HomepageForm
-from elasticsearch import Elasticsearch
 
 logger = logging.getLogger(__name__)
 
 
 class PaganatorSearch:
+
     def __init__(self, count_objs):
-        self.objects = range(count_objs/10)
+        self.objects = range(count_objs / 10)
 
     def page(self, page):
         self.actual_page = page
@@ -47,7 +49,8 @@ class HomePageView(TemplateView):
     def search(self):
         query = self.filters.get("search")
         page = self.filters.get("page")
-        if not page: page = 1
+        if not page:
+            page = 1
         if query:
             es = Elasticsearch(settings.ELASTICSEARCH)
 
@@ -60,20 +63,20 @@ class HomePageView(TemplateView):
                                 "type": "phrase",
                             }
                         }
-                    },
+                     },
                 "sort":
                     {"period": "desc"},
                 "from": 10 * (page - 1),
                 "size": 10
-                },
+            },
                 fields=("_id", "task", "path", "recipe", "period"),
             )
             ids = [int(x["_id"]) for x in result["hits"]["hits"]]
 
             dict_tmp = dict((x, None) for x in ids)
             for it in FileLog.objects.filter(index_id__in=ids):
-                dict_tmp[it.id]=it
-            result["result"]=[]
+                dict_tmp[it.id] = it
+            result["result"] = []
             for _id in ids:
                 result["result"].append(dict_tmp[_id])
             sp = PaganatorSearch(result["hits"]["total"])

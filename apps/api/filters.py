@@ -6,6 +6,7 @@
 # Date: 4.4.2016
 
 from django_filters import Filter, FilterSet
+
 from apps.core.models import Task
 
 

@@ -8,6 +8,8 @@ import json
 
 from django.db import models
 from django.db.models import permalink
+from taggit.models import Tag
+
 from apps.core.models import (EnumResult, JobTemplate, RecipeTemplate, Task,
                               Test)
 from apps.taskomatic.models import TaskPeriodSchedule
@@ -29,10 +31,15 @@ class Report(models.Model):
 class Score(models.Model):
     test = models.ForeignKey(Test, db_index=True)
     schedule = models.ForeignKey(TaskPeriodSchedule, db_index=True)
+    schedule = models.ForeignKey(TaskPeriodSchedule, db_index=True)
     score = models.IntegerField(default=0)
     rate = models.FloatField(default=0)
     count = models.IntegerField(default=0)
     result = models.TextField(blank=True)
+    tag = models.ForeignKey(Tag, db_index=True, null=True, blank=True)
+
+    def __unicode__(self):
+        return "%s" % (self.test)
 
     class Meta:
         app_label = "report"
@@ -98,7 +105,7 @@ class ReportList:
         er = EnumResult()
         pass_test = Score.objects.filter(
             schedule__in=self.period_ids,
-            rate__gte=-0.1 # pass test is from -2 to 0
+            rate__gte=-0.1  # pass test is from -2 to 0
             # -0.1 > pass, other is warning
         ).values("test__id")
         test_ids = [x["test__id"] for x in pass_test]

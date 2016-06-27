@@ -72,13 +72,15 @@ tatal: {{ search.hits.total }}
         <th>Test</th>
         <th><a href="?order=score&amp;schedule={{forms.cleaned_data.schedule}}&amp;page={{score.number}}">Score</a></th>
         <th><a href="?order=rate&amp;schedule={{forms.cleaned_data.schedule}}&amp;page={{score.number}}">Rate</a></th>
+        <th>Tag</th>
         <th>Results</th>
     </tr>
     {% for it in score.object_list %}
     <tr>
-      <td width="50%"><a href="{{it.test.get_absolute_url}}">{{it.test}}</a></td>
+      <td width="50%"><a href="{{it.test.get_absolute_url}}" title="id: {{it.id}}">{{it.test}}</a></td>
       <td>{{it.score}}</td>
       <td>{{it.rate|floatformat:2}}</td>
+      <td>{{it.tag|default:""}}</td>
       <td>
         <div class="progress" style="margin:0px" title="{{it.get_result}}">
           <div class="progress-bar progress-bar-danger" style="width: {{it.get_result_percent.fail}}%">

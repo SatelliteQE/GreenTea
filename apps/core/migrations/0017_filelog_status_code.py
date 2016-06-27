@@ -3,14 +3,17 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+
 def status_code(apps, schema_editor):
     FileLog = apps.get_model("core", "FileLog")
     for it in FileLog.objects.filter(is_downloaded=True):
         it.status_code = 200
         it.save()
 
+
 def skip(apps, schema_editor):
     pass
+
 
 class Migration(migrations.Migration):
 

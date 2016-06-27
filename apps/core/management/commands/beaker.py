@@ -8,14 +8,14 @@
 import logging
 import time
 
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
-from django.db.models import Max, Count
+from django.db.models import Count, Max
 from texttable import Texttable
 
-from apps.core.models import Job, JobTemplate, Recipe, FileLog
+from apps.core.models import FileLog, Job, JobTemplate, Recipe
 from apps.core.utils.beaker import Beaker
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
-from django.conf import settings
 
 logger = logging.getLogger("backend")
 
@@ -102,9 +102,19 @@ class BeakerCommand():
                 filter, "".join(label), fullInfo, simulate, reserver, counter)
 
     def checklogs(self, **kwargs):
-        logger.info("%d files to download" % FileLog.objects.filter(status_code=0).count())
-        logger.info("%d files to indexing" % FileLog.objects.filter(is_indexed=False, is_downloaded=True).count())
-        logger.info("status: %s" % FileLog.objects.values("status_code").annotate(counter=Count("status_code")))
+        logger.info(
+            "%d files to download" %
+            FileLog.objects.filter(
+                status_code=0).count())
+        logger.info(
+            "%d files to indexing" %
+            FileLog.objects.filter(
+                is_indexed=False,
+                is_downloaded=True).count())
+        logger.info(
+            "status: %s" %
+            FileLog.objects.values("status_code").annotate(
+                counter=Count("status_code")))
 
         b = Beaker()
         for it in FileLog.objects.filter(status_code=0)\
@@ -124,7 +134,7 @@ class BeakerCommand():
 
         if settings.ELASTICSEARCH:
             for it in FileLog.objects.filter(is_downloaded=True, is_indexed=False)\
-                            .order_by("-created")[0:settings.MAX_LOGS_IN_ONE_CHECK]:
+                    .order_by("-created")[0:settings.MAX_LOGS_IN_ONE_CHECK]:
                 try:
                     it.index()
                 except Exception as e:
@@ -150,7 +160,8 @@ class BeakerCommand():
             period=period).aggregate(Max('counter')).get("counter__max")
 
         if counter:
-            schedule = TaskPeriodSchedule.objects.get(title=label, counter=counter)
+            schedule = TaskPeriodSchedule.objects.get(
+                title=label, counter=counter)
         else:
             schedule = TaskPeriodSchedule.objects.create(
                 title=label,

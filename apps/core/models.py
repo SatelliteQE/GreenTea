@@ -5,15 +5,17 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
+import json
 import logging
 import os
 import re
 import urllib2
-import json
 from datetime import datetime, timedelta
-from dateutil.parser import parse
+from urlparse import urlparse
+from xml.dom.minidom import parseString
 
 import git
+from dateutil.parser import parse
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
@@ -23,15 +25,12 @@ from django.db.models import Q
 from django.template import Context, Template
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+from elasticsearch import Elasticsearch
 from taggit.managers import TaggableManager
 
 from apps.core.signals import recipe_changed, recipe_finished
 from apps.core.utils.date_helpers import currentDate, toUTC
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
-from elasticsearch import Elasticsearch
-from urlparse import urlparse
-from xml.dom.minidom import parseString
-
 
 logger = logging.getLogger("main")
 
@@ -286,7 +285,7 @@ class Git(models.Model):
             self.__updateDependences(test, info.get('RhtsRequires'))
             test.save()
         # deactivate deleted tests
-        if len(old_tests) > 0.5*number_of_tests:
+        if len(old_tests) > 0.5 * number_of_tests:
             self.__getLog().warning(
                 "Probably is there something wrong with repo '%s'!!!\n"
                 "We want tu deactivate more then 50% of tests. Skipped."
@@ -612,8 +611,8 @@ class Test(models.Model):
         return self.name
 
     def __eq__(self, other):
-        #if not isinstance(other, self.__class__):
-    #        return False
+        # if not isinstance(other, self.__class__):
+        #        return False
         if not isinstance(other, models.Model):
             return False
         if self._meta.concrete_model != other._meta.concrete_model:
@@ -1077,7 +1076,11 @@ class Recipe(models.Model):
     )
     job = models.ForeignKey(Job, related_name="recipes")
     uid = models.CharField("Recipe ID", max_length=12, unique=True)
-    whiteboard = models.CharField("Whiteboard", max_length=64, blank=True, null=True)
+    whiteboard = models.CharField(
+        "Whiteboard",
+        max_length=64,
+        blank=True,
+        null=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=UNKNOW)
     result = models.SmallIntegerField(choices=RESULT_CHOICES, default=UNKNOW)
     resultrate = models.FloatField(default=-1.)
@@ -1399,7 +1402,7 @@ class FileLog(models.Model):
 
     def delete(self, *args, **kwargs):
         def clean_dir(path):
-            if path == None:
+            if path is None:
                 self.logger.warning("This file is not download %s" % self.id)
                 return
             path_dir = os.path.dirname(path)
@@ -1476,7 +1479,8 @@ class FileLog(models.Model):
     @staticmethod
     def clean_old(days=settings.LOGFILE_LIFETIME):
         to_delete = datetime.now() - timedelta(days=days)
-        logs = FileLog.objects.filter(created__lt=to_delete).order_by("created")
+        logs = FileLog.objects.filter(
+            created__lt=to_delete).order_by("created")
         logger.info("%d logs to prepare remove" % len(logs))
         # remove all file and dirs
         for it in logs[:settings.MAX_LOGS_IN_ONE_CHECK]:

@@ -14,6 +14,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='recipe',
             name='whiteboard',
-            field=models.CharField(max_length=64, null=True, verbose_name=b'Whiteboard', blank=True),
+            field=models.CharField(
+                max_length=64,
+                null=True,
+                verbose_name=b'Whiteboard',
+                blank=True),
         ),
     ]

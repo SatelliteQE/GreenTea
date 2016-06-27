@@ -9,11 +9,11 @@
 
 import logging
 import shlex
-import time
 import sys
+import time
 import traceback
-from datetime import datetime, timedelta
 from cStringIO import StringIO
+from datetime import datetime, timedelta
 
 from croniter import croniter
 from django.conf import settings
@@ -22,7 +22,9 @@ from django.db import models
 from django.db.models import Count, Max
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+
 from apps.core.utils.date_helpers import toLocalZone
+
 # from single_process import single_process
 
 
@@ -36,10 +38,10 @@ class TaskPeriodList:
         filters = {}
         if history > 0:
             filters["date_create__lt"] = datetime.now() - timedelta(history)
-        return TaskPeriodSchedule.objects.values("period", "period__title",)\
+        data = TaskPeriodSchedule.objects.values("period_id")\
             .filter(**filters)\
-            .annotate(max_id=Max("id"), counter_id=Max("counter"),
-                      dcount=Count("period"))
+            .annotate(max_id=Max("id")).order_by("period")
+        return data
 
 
 class TaskPeriodSchedule(models.Model):
@@ -49,6 +51,9 @@ class TaskPeriodSchedule(models.Model):
         _('Date of create'),
         default=timezone.now)
     counter = models.BigIntegerField(default=0)
+
+    class Meta:
+        ordering = ["period_id", "counter"]
 
     def __unicode__(self):
         return "[%d] %s" % (self.counter, self.title)
@@ -181,7 +186,7 @@ class Task(models.Model):
                 interactive=False)
             self.exit_result += out.getvalue() + "\n"
             self.status = self.STATUS_ENUM_DONE  # set status "done"
-            sys.stdout, sys.stderr = old            
+            sys.stdout, sys.stderr = old
         except Exception as e:
             self.exit_result = traceback.format_exc()
             self.status = self.STATUS_ENUM_ERROR  # set status "error"

@@ -3,20 +3,23 @@ from __future__ import unicode_literals
 
 from django.db import migrations, models
 
+
 def set_default_data(apps, schema_editor):
     #removed_duplicated(apps, schema_editor)
     FileLog = apps.get_model("core", "FileLog")
     for it in FileLog.objects.exclude(path=""):
-        it.url=it.path
-        it.is_downloaded=True
+        it.url = it.path
+        it.is_downloaded = True
         it.save()
+
 
 def unset_default_data(apps, schema_editor):
     #removed_duplicated(apps, schema_editor)
     FileLog = apps.get_model("core", "FileLog")
     for it in FileLog.objects.filter(path=""):
-        it.path=it.url
+        it.path = it.url
         it.save()
+
 
 class Migration(migrations.Migration):
 

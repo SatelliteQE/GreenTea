@@ -2,12 +2,13 @@
 
 from rest_framework import serializers
 
-from apps.core.models import Job, JobTemplate, Recipe, Task, Test, Author, \
-    Arch, Distro, System
+from apps.core.models import (Arch, Author, Distro, Job, JobTemplate, Recipe,
+                              System, Task, Test)
 from apps.waiver.models import Comment
 
 
 class ResultField(serializers.Field):
+
     def get_attribute(self, obj):
         return obj.get_result_display()
 
@@ -16,6 +17,7 @@ class ResultField(serializers.Field):
 
 
 class StatusField(serializers.Field):
+
     def get_attribute(self, obj):
         return obj.get_status_display()
 
@@ -24,6 +26,7 @@ class StatusField(serializers.Field):
 
 
 class StatusByUserField(serializers.Field):
+
     def get_attribute(self, obj):
         return obj.get_statusbyuser_display()
 
@@ -32,44 +35,52 @@ class StatusByUserField(serializers.Field):
 
 
 class JobTemplateSerializer(serializers.HyperlinkedModelSerializer):
+
     class Meta:
         model = JobTemplate
         fields = ('id', 'whiteboard', 'is_enable', 'position')
 
 
 class ArchSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Arch
 
 
 class DistroSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Distro
 
 
 class SystemSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = System
 
 
 class JobSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Job
     date = serializers.DateTimeField('%Y-%m-%d %X')
 
 
 class CommentSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Comment
     created_date = serializers.DateTimeField('%Y-%m-%d %X')
 
 
 class AuthorSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Author
 
 
 class TestSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Test
     repository_url = serializers.CharField(source='get_reposituory_url')
@@ -78,10 +89,12 @@ class TestSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Recipe
 
     class InnerTaskSerializer(serializers.ModelSerializer):
+
         class Meta:
             model = Task
             fields = ('id', 'result', 'status', 'statusbyuser', 'test_name',
@@ -122,17 +135,19 @@ class RecipeSerializer(serializers.ModelSerializer):
         if (o_job):
             o_recipe = Recipe.objects.filter(job=o_job,
                                              whiteboard=recipe.whiteboard)\
-                                     .values('id')[:1]
+                .values('id')[:1]
             if (o_recipe):
                 return o_recipe[0]
         return None
 
 
 class TaskSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Task
 
     class InnerTestSerializer(serializers.ModelSerializer):
+
         class Meta:
             model = Test
             fields = ('id', 'name', 'owner', 'repository_url', 'detail_url',
@@ -143,6 +158,7 @@ class TaskSerializer(serializers.ModelSerializer):
         # external_links = serializers.StringRelatedField(source='get_external_links')
 
     class InnerRecipeSerializer(RecipeSerializer):
+
         class Meta:
             model = Recipe
             exclude = ('tasks', )

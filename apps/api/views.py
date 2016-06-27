@@ -10,15 +10,15 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
 
-from apps.core.models import JobTemplate, Recipe, \
-    Task, Author, Arch, Distro, System, Test
+from apps.core.models import (Arch, Author, Distro, JobTemplate, Recipe,
+                              System, Task, Test)
 from apps.waiver.models import Comment
-from models import Performance
 from filters import TaskFilter
-from serializers import JobTemplateSerializer, RecipeSerializer, \
-    TaskSerializer, AuthorSerializer, ArchSerializer, \
-    DistroSerializer, SystemSerializer, \
-    CommentSerializer, TestSerializer
+from models import Performance
+from serializers import (ArchSerializer, AuthorSerializer, CommentSerializer,
+                         DistroSerializer, JobTemplateSerializer,
+                         RecipeSerializer, SystemSerializer, TaskSerializer,
+                         TestSerializer)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

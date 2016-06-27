@@ -6,11 +6,18 @@
 
 from django.contrib import admin
 
-from models import Report, ExternalPage
+from models import ExternalPage, Report, Score
 
 
 class ReportAdmin(admin.ModelAdmin):
     filter_horizontal = ('jobs',)
 
+
+class ScoreAdmin(admin.ModelAdmin):
+    list_display = ["test", "score", "rate", "schedule"]
+    search_fields = ["test__name"]
+
+
 admin.site.register(Report, ReportAdmin)
 admin.site.register(ExternalPage)
+admin.site.register(Score, ScoreAdmin)

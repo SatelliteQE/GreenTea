@@ -14,6 +14,10 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='filelog',
             name='task',
-            field=models.ForeignKey(related_name='logfiles', blank=True, to='core.Task', null=True),
+            field=models.ForeignKey(
+                related_name='logfiles',
+                blank=True,
+                to='core.Task',
+                null=True),
         ),
     ]

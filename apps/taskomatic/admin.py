@@ -1,8 +1,9 @@
 import logging
+
 from django.contrib import admin
 
-from models import Task, TaskPeriod, TaskPeriodSchedule
 from apps.report.models import Score
+from models import Task, TaskPeriod, TaskPeriodSchedule
 
 logger = logging.getLogger("main")
 
@@ -29,7 +30,9 @@ class TaskPeriodScheduleAdmin(admin.ModelAdmin):
     def recount_score(modeladmin, request, queryset):
         for it in queryset:
             a, b = Score.recount_by_schedule(it)
-        logger.info("Run %d recounts score %d tests (from %d tasks)" % (it.id, a, b))
+        logger.info(
+            "Run %d recounts score %d tests (from %d tasks)" %
+            (it.id, a, b))
     recount_score.short_description = "Recount score for selected runs"
     actions = [recount_score]
 

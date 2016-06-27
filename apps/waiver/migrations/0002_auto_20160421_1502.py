@@ -14,11 +14,19 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='comment',
             name='recipe',
-            field=models.ForeignKey(related_name='comments', blank=True, to='core.Recipe', null=True),
+            field=models.ForeignKey(
+                related_name='comments',
+                blank=True,
+                to='core.Recipe',
+                null=True),
         ),
         migrations.AlterField(
             model_name='comment',
             name='task',
-            field=models.ForeignKey(related_name='comments', blank=True, to='core.Task', null=True),
+            field=models.ForeignKey(
+                related_name='comments',
+                blank=True,
+                to='core.Task',
+                null=True),
         ),
     ]

@@ -11,11 +11,11 @@ from optparse import make_option
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
+from single_process import single_process
 
 from apps.core.models import CheckProgress, Job
 from apps.core.utils.beaker import Beaker
 from apps.core.utils.date_helpers import currentDate
-from single_process import single_process
 
 logger = logging.getLogger("backend")
 
