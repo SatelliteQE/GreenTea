@@ -196,7 +196,7 @@ class TestsListView(TemplateView):
                      periodschedules)
         return periodschedules
 
-    def __get_test_ids(self):
+    def __get_tests(self):
         """Return filtered tests to be shown on tests.html"""
         testFilter = {}
         # testFilter['task__recipe__job__template__is_enable'] = True
@@ -223,7 +223,7 @@ class TestsListView(TemplateView):
             'groups__name',
         ]
         tests = Test.objects.filter(**testFilter).select_related(*relations).only(*fields).order_by("id")
-        logger.debug("TestsListView.__get_test_ids returns: %s" % tests)
+        logger.debug("TestsListView.__get_tests returns: %s" % tests)
         return tests
 
     def get_context_data(self, **kwargs):
@@ -234,18 +234,18 @@ class TestsListView(TemplateView):
         # Determine task period schedules we are going to use
         periodschedules = self.__get_period_tree()
         # Determine all available test IDs filtered by our filters
-        test_ids_all = self.__get_test_ids()
+        tests_all = self.__get_tests()
         # Trim test IDs as per paginator
-        paginator = Paginator(test_ids_all, settings.PAGINATOR_OBJECTS_ONPAGE)
-        test_ids = paginator.page(int(self.request.GET.get('page', 1)))
+        paginator = Paginator(tests_all, settings.PAGINATOR_OBJECTS_ONPAGE)
+        tests = paginator.page(int(self.request.GET.get('page', 1)))
         # Load and reorder data about tests
         data = self.prepare_matrix(
-            test_ids=test_ids, periodschedules=periodschedules)
+            tests=tests, periodschedules=periodschedules)
         # Return page
         context.update({
             'data': data,
             'periodschedules': periodschedules,
-            'test_ids': test_ids,
+            'tests': tests,
             'paginator': paginator,
             'progress': CheckProgress.objects.all().aggregate(Max('datestart'))['datestart__max'],
             'owners': Author.objects.filter(is_enabled=True).annotate(dcount=Count('test')).order_by("-dcount"),
@@ -254,7 +254,7 @@ class TestsListView(TemplateView):
         })
         return context
 
-    def prepare_matrix(self, test_ids=[], periodschedules=[]):
+    def prepare_matrix(self, tests=[], periodschedules=[]):
         """Load info about  from DB and return it in template friendly object."""
         out_dict = {}  # template friendly data structure
         # Determine plain list of period schedule IDs
@@ -278,30 +278,30 @@ class TestsListView(TemplateView):
         filters = {}
         filters['recipe__job__schedule__id__in'] = periodschedule_ids
         # Now process all the tests
-        for test_id in test_ids:
-            filters['test_id'] = test_id.id
+        for test in tests:
+            filters['test_id'] = test.id
             data = Task.objects.filter(
                 **filters).select_related(*relations).only(*fields)
             # Reorder data into tempate friendly data structure
             # Popupate tests (no matter if runs in given periodschedules
             # exists - we are interested in empty tests as well)
-            if test_id.id not in out_dict:
-                out_dict[test_id.id] = {
-                    'name': test_id.name,
-                    'test_id': test_id.id,
-                    'owner__name': test_id.owner.name,
-                    'owner__email': test_id.owner.email,
-                    'get_absolute_url': test_id.get_absolute_url(),
-                    'get_reposituory_url': test_id.get_reposituory_url(),
-                    'get_detail_url': test_id.get_detail_url(),
+            if test.id not in out_dict:
+                out_dict[test.id] = {
+                    'name': test.name,
+                    'test_id': test.id,
+                    'owner__name': test.owner.name,
+                    'owner__email': test.owner.email,
+                    'get_absolute_url': test.get_absolute_url(),
+                    'get_reposituory_url': test.get_reposituory_url(),
+                    'get_detail_url': test.get_detail_url(),
                     'test__groups__name': [],
                     'data': {},
                 }
             # Populate test's groups
-            if test_id.groups.name not in out_dict[
-                    test_id.id]['test__groups__name']:
-                out_dict[test_id.id]['test__groups__name'].append(
-                    test_id.groups.name)
+            if test.groups.name not in out_dict[
+                    test.id]['test__groups__name']:
+                out_dict[test.id]['test__groups__name'].append(
+                    test.groups.name)
             for i in data:
                 # Populate period schedules (because one test can run in 'Daily
                 # automation' and 'Weekly automation' and...)
