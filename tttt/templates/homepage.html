@@ -159,7 +159,7 @@ tatal: {{ search.hits.total }}
 {% for it in history.object_list %}
     <tr>
         <td>{{it.author.name}}</td>
-        <td><a target="_new" href="{% url 'tests-list' %}{{it.test.get_absolute_url}}">{{it.test}}</a></td>
+        <td><a target="_new" href="{{it.test.get_absolute_url}}">{{it.test}}</a></td>
         <td>{{it.date}}</td>
         <td><a target="_new" href="{{ it.get_absolute_url }}">{{it.commit|slice:':15'}}</a></td>
     </tr>
