@@ -196,7 +196,7 @@ class TestsListView(TemplateView):
                      periodschedules)
         return periodschedules
 
-    def __get_test_ids(self):
+    def __get_tests(self):
         """Return filtered tests to be shown on tests.html"""
         testFilter = {}
         # testFilter['task__recipe__job__template__is_enable'] = True
@@ -215,10 +215,15 @@ class TestsListView(TemplateView):
         # TODO: Why are we ordering these?
         # TODO: Cant we somehow limit this query to return only count of items
         #       per paginator settings
-        tests = Test.objects.filter(**testFilter).only("id").values("id")
-        # this just makes the list uniqe
-        tests = sorted(set(it['id'] for it in tests))
-        logger.debug("TestsListView.__get_test_ids returns: %s" % tests)
+        relations = ['owner', 'git']
+        fields = [
+            'id', 'name', 'folder',
+            'owner__id', 'owner__name', 'owner__email',
+            'git__id', 'git__localurl',
+            'groups__name',
+        ]
+        tests = Test.objects.filter(**testFilter).select_related(*relations).only(*fields).order_by("id")
+        logger.debug("TestsListView.__get_tests returns: %s" % tests)
         return tests
 
     def get_context_data(self, **kwargs):
@@ -229,18 +234,18 @@ class TestsListView(TemplateView):
         # Determine task period schedules we are going to use
         periodschedules = self.__get_period_tree()
         # Determine all available test IDs filtered by our filters
-        test_ids_all = self.__get_test_ids()
+        tests_all = self.__get_tests()
         # Trim test IDs as per paginator
-        paginator = Paginator(test_ids_all, settings.PAGINATOR_OBJECTS_ONPAGE)
-        test_ids = paginator.page(int(self.request.GET.get('page', 1)))
+        paginator = Paginator(tests_all, settings.PAGINATOR_OBJECTS_ONPAGE)
+        tests = paginator.page(int(self.request.GET.get('page', 1)))
         # Load and reorder data about tests
         data = self.prepare_matrix(
-            test_ids=test_ids, periodschedules=periodschedules)
+            tests=tests, periodschedules=periodschedules)
         # Return page
         context.update({
             'data': data,
             'periodschedules': periodschedules,
-            'test_ids': test_ids,
+            'tests': tests,
             'paginator': paginator,
             'progress': CheckProgress.objects.all().aggregate(Max('datestart'))['datestart__max'],
             'owners': Author.objects.filter(is_enabled=True).annotate(dcount=Count('test')).order_by("-dcount"),
@@ -249,7 +254,7 @@ class TestsListView(TemplateView):
         })
         return context
 
-    def prepare_matrix(self, test_ids=[], periodschedules=[]):
+    def prepare_matrix(self, tests=[], periodschedules=[]):
         """Load info about  from DB and return it in template friendly object."""
         out_dict = {}  # template friendly data structure
         # Determine plain list of period schedule IDs
@@ -257,14 +262,11 @@ class TestsListView(TemplateView):
         # Set list of tables and fields for the query and create initial
         # version of the filter (filter by "test_id" will be added later
         # in the loop below)
-        relations = ['test', 'test__owner', 'test__git', 'recipe',
+        relations = ['test', 'recipe',
                      'recipe__arch', 'recipe__distro', 'recipe__job',
                      'recipe__job__template', 'recipe__job__schedule']
         fields = [
-            'test__id', 'test__name', 'test__folder',
-            'test__owner__id', 'test__owner__name', 'test__owner__email',
-            'test__git__id', 'test__git__localurl',
-            'test__groups__name',
+            'test_id',
             'id', 'uid', 'result', 'status', 'statusbyuser', 'alias',
             'recipe__id', 'recipe__uid', 'recipe__status', 'recipe__resultrate', 'recipe__whiteboard', 'recipe__statusbyuser',
             'recipe__arch__name', 'recipe__result',
@@ -275,89 +277,90 @@ class TestsListView(TemplateView):
         ]
         filters = {}
         filters['recipe__job__schedule__id__in'] = periodschedule_ids
-        # Now process all the tests
-        for test_id in test_ids:
-            filters['test_id'] = test_id
-            data = Task.objects.filter(
-                **filters).select_related(*relations).only(*fields)
-            # Reorder data into tempate friendly data structure
-            for i in data:
-                # Popupate tests
-                if i.test.id not in out_dict:
-                    out_dict[i.test.id] = {
-                        'id': i.id,
-                        'name': i.test.name,
-                        'test_id': i.test.id,
-                        'owner__name': i.test.owner.name,
-                        'owner__email': i.test.owner.email,
-                        'get_absolute_url': i.test.get_absolute_url(),
-                        'get_reposituory_url': i.test.get_reposituory_url(),
-                        'get_detail_url': i.test.get_detail_url(),
-                        'test__groups__name': [],
-                        'data': {},
-                    }
-                # Populate test's groups
-                if i.test.groups.name not in out_dict[
-                        i.test.id]['test__groups__name']:
-                    out_dict[i.test.id]['test__groups__name'].append(
-                        i.test.groups.name)
-                # Populate period schedules (because one test can run in 'Daily
-                # automation' and 'Weekly automation' and...)
-                if i.recipe.job.schedule.period_id not in out_dict[
-                        i.test.id]['data']:
-                    title = ''
-                    for p in periodschedules[i.recipe.job.schedule.period_id]:
-                        if p['id'] == i.recipe.job.schedule.id:
-                            title = p['period__title']
-                            break
-                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id] = {
-                        'title': title,
-                        'data': {},
-                    }
-                # Popupate job (just general info common for more nightly runs)
-                if i.recipe.job.template.id not in out_dict[i.test.id][
-                        'data'][i.recipe.job.schedule.period_id]['data']:
-                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id] = {
-                        'template__whiteboard': i.recipe.job.template.whiteboard,
-                        'template__id': i.recipe.job.template.id,
-                        'data': {},
-                    }
-                # Popupate recipe (just general info common for more nightly
-                # runs)
-                tmp = {
-                    "arch": i.recipe.arch.name,
-                    "distro": i.recipe.distro.name,
-                    "distro_label": i.recipe.distro.name,
-                    "whiteboard": i.recipe.whiteboard,
-                    "alias": i.alias,
+        filters['test_id__in'] = [test.id for test in tests]
+        # Now add all the tests info into the output data
+        for test in tests:
+            # Popupate tests (no matter if runs in given periodschedules
+            # exists - we are interested in empty tests as well)
+            if test.id not in out_dict:
+                out_dict[test.id] = {
+                    'name': test.name,
+                    'test_id': test.id,
+                    'owner__name': test.owner.name,
+                    'owner__email': test.owner.email,
+                    'get_absolute_url': test.get_absolute_url(),
+                    'get_reposituory_url': test.get_reposituory_url(),
+                    'get_detail_url': test.get_detail_url(),
+                    'test__groups__name': [],
+                    'data': {},
                 }
-                recipe_matcher = render_label(
-                    tmp, i.recipe.job.template.grouprecipes)
-                if recipe_matcher not in out_dict[i.test.id]['data'][
-                        i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data']:
-                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher] = {
-                        'data': {},
-                    }
-                # Populate schedule
-                if i.recipe.job.schedule.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id][
-                        'data'][i.recipe.job.template.id]['data'][recipe_matcher]['data']:
-                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id] = {
-                        'counter': i.recipe.job.schedule.counter,
-                        'data': {},
-                    }
-                # Populate task (i.e. test run)
-                if i.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][
-                        i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data']:
-                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data'][i.id] = {
-                        'uid': i.uid,
-                        'id': i.id,
-                        'result': i.get_result(),
-                        'status': i.status,  # i.recipe.get_status(),
-                        'is_running': i.recipe.is_running(),
-                        'recipe__id': i.recipe.id,
-                        'recipe__uid': i.recipe.uid,
-                        'recipe__result': i.recipe.get_result(),
-                        'recipe__resultrate': i.recipe.resultrate,
-                        'recipe__job__uid': i.recipe.job.uid,
-                    }
+            # Populate test's groups
+            if test.groups.name not in out_dict[
+                    test.id]['test__groups__name']:
+                out_dict[test.id]['test__groups__name'].append(
+                    test.groups.name)
+        # Finally execute the query
+        data = Task.objects.filter(
+            **filters).select_related(*relations).only(*fields)
+        # Reorder data into tempate friendly data structure
+        for i in data:
+            # Populate period schedules (because one test can run in 'Daily
+            # automation' and 'Weekly automation' and...)
+            if i.recipe.job.schedule.period_id not in out_dict[
+                    i.test.id]['data']:
+                title = ''
+                for p in periodschedules[i.recipe.job.schedule.period_id]:
+                    if p['id'] == i.recipe.job.schedule.id:
+                        title = p['period__title']
+                        break
+                out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id] = {
+                    'title': title,
+                    'data': {},
+                }
+            # Popupate job (just general info common for more nightly runs)
+            if i.recipe.job.template.id not in out_dict[i.test.id][
+                    'data'][i.recipe.job.schedule.period_id]['data']:
+                out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id] = {
+                    'template__whiteboard': i.recipe.job.template.whiteboard,
+                    'template__id': i.recipe.job.template.id,
+                    'data': {},
+                }
+            # Popupate recipe (just general info common for more nightly
+            # runs)
+            tmp = {
+                "arch": i.recipe.arch.name,
+                "distro": i.recipe.distro.name,
+                "distro_label": i.recipe.distro.name,
+                "whiteboard": i.recipe.whiteboard,
+                "alias": i.alias,
+            }
+            recipe_matcher = render_label(
+                tmp, i.recipe.job.template.grouprecipes)
+            if recipe_matcher not in out_dict[i.test.id]['data'][
+                    i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data']:
+                out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher] = {
+                    'data': {},
+                }
+            # Populate schedule
+            if i.recipe.job.schedule.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id][
+                    'data'][i.recipe.job.template.id]['data'][recipe_matcher]['data']:
+                out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id] = {
+                    'counter': i.recipe.job.schedule.counter,
+                    'data': {},
+                }
+            # Populate task (i.e. test run)
+            if i.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][
+                    i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data']:
+                out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data'][i.id] = {
+                    'uid': i.uid,
+                    'id': i.id,
+                    'result': i.get_result(),
+                    'status': i.status,  # i.recipe.get_status(),
+                    'is_running': i.recipe.is_running(),
+                    'recipe__id': i.recipe.id,
+                    'recipe__uid': i.recipe.uid,
+                    'recipe__result': i.recipe.get_result(),
+                    'recipe__resultrate': i.recipe.resultrate,
+                    'recipe__job__uid': i.recipe.job.uid,
+                }
         return out_dict
