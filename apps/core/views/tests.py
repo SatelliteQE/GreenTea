@@ -215,9 +215,14 @@ class TestsListView(TemplateView):
         # TODO: Why are we ordering these?
         # TODO: Cant we somehow limit this query to return only count of items
         #       per paginator settings
-        tests = Test.objects.filter(**testFilter).only("id").values("id")
-        # this just makes the list uniqe
-        tests = sorted(set(it['id'] for it in tests))
+        relations = ['owner', 'git']
+        fields = [
+            'id', 'name', 'folder',
+            'owner__id', 'owner__name', 'owner__email',
+            'git__id', 'git__localurl',
+            'groups__name',
+        ]
+        tests = Test.objects.filter(**testFilter).select_related(*relations).only(*fields).order_by("id")
         logger.debug("TestsListView.__get_test_ids returns: %s" % tests)
         return tests
 
@@ -257,14 +262,11 @@ class TestsListView(TemplateView):
         # Set list of tables and fields for the query and create initial
         # version of the filter (filter by "test_id" will be added later
         # in the loop below)
-        relations = ['test', 'test__owner', 'test__git', 'recipe',
+        relations = ['test', 'recipe',
                      'recipe__arch', 'recipe__distro', 'recipe__job',
                      'recipe__job__template', 'recipe__job__schedule']
         fields = [
-            'test__id', 'test__name', 'test__folder',
-            'test__owner__id', 'test__owner__name', 'test__owner__email',
-            'test__git__id', 'test__git__localurl',
-            'test__groups__name',
+            'test_id',
             'id', 'uid', 'result', 'status', 'statusbyuser', 'alias',
             'recipe__id', 'recipe__uid', 'recipe__status', 'recipe__resultrate', 'recipe__whiteboard', 'recipe__statusbyuser',
             'recipe__arch__name', 'recipe__result',
@@ -277,30 +279,30 @@ class TestsListView(TemplateView):
         filters['recipe__job__schedule__id__in'] = periodschedule_ids
         # Now process all the tests
         for test_id in test_ids:
-            filters['test_id'] = test_id
+            filters['test_id'] = test_id.id
             data = Task.objects.filter(
                 **filters).select_related(*relations).only(*fields)
             # Reorder data into tempate friendly data structure
+            # Popupate tests (no matter if runs in given periodschedules
+            # exists - we are interested in empty tests as well)
+            if test_id.id not in out_dict:
+                out_dict[test_id.id] = {
+                    'name': test_id.name,
+                    'test_id': test_id.id,
+                    'owner__name': test_id.owner.name,
+                    'owner__email': test_id.owner.email,
+                    'get_absolute_url': test_id.get_absolute_url(),
+                    'get_reposituory_url': test_id.get_reposituory_url(),
+                    'get_detail_url': test_id.get_detail_url(),
+                    'test__groups__name': [],
+                    'data': {},
+                }
+            # Populate test's groups
+            if test_id.groups.name not in out_dict[
+                    test_id.id]['test__groups__name']:
+                out_dict[test_id.id]['test__groups__name'].append(
+                    test_id.groups.name)
             for i in data:
-                # Popupate tests
-                if i.test.id not in out_dict:
-                    out_dict[i.test.id] = {
-                        'id': i.id,
-                        'name': i.test.name,
-                        'test_id': i.test.id,
-                        'owner__name': i.test.owner.name,
-                        'owner__email': i.test.owner.email,
-                        'get_absolute_url': i.test.get_absolute_url(),
-                        'get_reposituory_url': i.test.get_reposituory_url(),
-                        'get_detail_url': i.test.get_detail_url(),
-                        'test__groups__name': [],
-                        'data': {},
-                    }
-                # Populate test's groups
-                if i.test.groups.name not in out_dict[
-                        i.test.id]['test__groups__name']:
-                    out_dict[i.test.id]['test__groups__name'].append(
-                        i.test.groups.name)
                 # Populate period schedules (because one test can run in 'Daily
                 # automation' and 'Weekly automation' and...)
                 if i.recipe.job.schedule.period_id not in out_dict[
