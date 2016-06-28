@@ -277,12 +277,9 @@ class TestsListView(TemplateView):
         ]
         filters = {}
         filters['recipe__job__schedule__id__in'] = periodschedule_ids
-        # Now process all the tests
+        filters['test_id__in'] = [test.id for test in tests]
+        # Now add all the tests info into the output data
         for test in tests:
-            filters['test_id'] = test.id
-            data = Task.objects.filter(
-                **filters).select_related(*relations).only(*fields)
-            # Reorder data into tempate friendly data structure
             # Popupate tests (no matter if runs in given periodschedules
             # exists - we are interested in empty tests as well)
             if test.id not in out_dict:
@@ -302,64 +299,68 @@ class TestsListView(TemplateView):
                     test.id]['test__groups__name']:
                 out_dict[test.id]['test__groups__name'].append(
                     test.groups.name)
-            for i in data:
-                # Populate period schedules (because one test can run in 'Daily
-                # automation' and 'Weekly automation' and...)
-                if i.recipe.job.schedule.period_id not in out_dict[
-                        i.test.id]['data']:
-                    title = ''
-                    for p in periodschedules[i.recipe.job.schedule.period_id]:
-                        if p['id'] == i.recipe.job.schedule.id:
-                            title = p['period__title']
-                            break
-                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id] = {
-                        'title': title,
-                        'data': {},
-                    }
-                # Popupate job (just general info common for more nightly runs)
-                if i.recipe.job.template.id not in out_dict[i.test.id][
-                        'data'][i.recipe.job.schedule.period_id]['data']:
-                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id] = {
-                        'template__whiteboard': i.recipe.job.template.whiteboard,
-                        'template__id': i.recipe.job.template.id,
-                        'data': {},
-                    }
-                # Popupate recipe (just general info common for more nightly
-                # runs)
-                tmp = {
-                    "arch": i.recipe.arch.name,
-                    "distro": i.recipe.distro.name,
-                    "distro_label": i.recipe.distro.name,
-                    "whiteboard": i.recipe.whiteboard,
-                    "alias": i.alias,
+        # Finally execute the query
+        data = Task.objects.filter(
+            **filters).select_related(*relations).only(*fields)
+        # Reorder data into tempate friendly data structure
+        for i in data:
+            # Populate period schedules (because one test can run in 'Daily
+            # automation' and 'Weekly automation' and...)
+            if i.recipe.job.schedule.period_id not in out_dict[
+                    i.test.id]['data']:
+                title = ''
+                for p in periodschedules[i.recipe.job.schedule.period_id]:
+                    if p['id'] == i.recipe.job.schedule.id:
+                        title = p['period__title']
+                        break
+                out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id] = {
+                    'title': title,
+                    'data': {},
                 }
-                recipe_matcher = render_label(
-                    tmp, i.recipe.job.template.grouprecipes)
-                if recipe_matcher not in out_dict[i.test.id]['data'][
-                        i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data']:
-                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher] = {
-                        'data': {},
-                    }
-                # Populate schedule
-                if i.recipe.job.schedule.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id][
-                        'data'][i.recipe.job.template.id]['data'][recipe_matcher]['data']:
-                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id] = {
-                        'counter': i.recipe.job.schedule.counter,
-                        'data': {},
-                    }
-                # Populate task (i.e. test run)
-                if i.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][
-                        i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data']:
-                    out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data'][i.id] = {
-                        'uid': i.uid,
-                        'id': i.id,
-                        'result': i.get_result(),
-                        'status': i.status,  # i.recipe.get_status(),
-                        'is_running': i.recipe.is_running(),
-                        'recipe__id': i.recipe.id,
-                        'recipe__uid': i.recipe.uid,
-                        'recipe__result': i.recipe.get_result(),
-                        'recipe__resultrate': i.recipe.resultrate,
-                        'recipe__job__uid': i.recipe.job.uid,
-                    }
+            # Popupate job (just general info common for more nightly runs)
+            if i.recipe.job.template.id not in out_dict[i.test.id][
+                    'data'][i.recipe.job.schedule.period_id]['data']:
+                out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id] = {
+                    'template__whiteboard': i.recipe.job.template.whiteboard,
+                    'template__id': i.recipe.job.template.id,
+                    'data': {},
+                }
+            # Popupate recipe (just general info common for more nightly
+            # runs)
+            tmp = {
+                "arch": i.recipe.arch.name,
+                "distro": i.recipe.distro.name,
+                "distro_label": i.recipe.distro.name,
+                "whiteboard": i.recipe.whiteboard,
+                "alias": i.alias,
+            }
+            recipe_matcher = render_label(
+                tmp, i.recipe.job.template.grouprecipes)
+            if recipe_matcher not in out_dict[i.test.id]['data'][
+                    i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data']:
+                out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher] = {
+                    'data': {},
+                }
+            # Populate schedule
+            if i.recipe.job.schedule.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id][
+                    'data'][i.recipe.job.template.id]['data'][recipe_matcher]['data']:
+                out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id] = {
+                    'counter': i.recipe.job.schedule.counter,
+                    'data': {},
+                }
+            # Populate task (i.e. test run)
+            if i.id not in out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][
+                    i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data']:
+                out_dict[i.test.id]['data'][i.recipe.job.schedule.period_id]['data'][i.recipe.job.template.id]['data'][recipe_matcher]['data'][i.recipe.job.schedule.id]['data'][i.id] = {
+                    'uid': i.uid,
+                    'id': i.id,
+                    'result': i.get_result(),
+                    'status': i.status,  # i.recipe.get_status(),
+                    'is_running': i.recipe.is_running(),
+                    'recipe__id': i.recipe.id,
+                    'recipe__uid': i.recipe.uid,
+                    'recipe__result': i.recipe.get_result(),
+                    'recipe__resultrate': i.recipe.resultrate,
+                    'recipe__job__uid': i.recipe.job.uid,
+                }
         return out_dict
