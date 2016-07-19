@@ -4,7 +4,9 @@
 # Author: Pavel Studenik <pstudeni@redhat.com>
 # Date: 3.2.2016
 
-from django.db.models import Count
+from datetime import datetime, timedelta
+
+from django.db.models import Count, Avg
 from django.views.generic import DetailView, TemplateView
 
 from apps.core.models import GroupTestTemplate, Task, Test
@@ -58,6 +60,10 @@ class ReportListView(TemplateView):
             "group__name").annotate(dcount=Count("group")).order_by("-dcount")
         context["repotest"] = Test.objects.values("git__name").annotate(
             dcount=Count("git")).order_by("-dcount")
+        context["testlengths"] = Task.objects.filter(
+            datestart__gte=datetime.now()+timedelta(hours=-168)).values(
+            "test__name").annotate(avg_duration=Avg('duration')).order_by(
+            "-avg_duration")
 
         running_ids = ListId.running(ids)
         repotask = Test.objects.filter(id__in=running_ids).values(

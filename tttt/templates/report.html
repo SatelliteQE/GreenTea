@@ -53,6 +53,21 @@
     </table>
   </div>
 </div>
+<div class="row">
+  <div class="col-md-6">
+    <table class="table table-striped">
+        <tr>
+            <th>Test</th><th>Average run time</th>
+        </tr>
+        {% for it in testlengths %}
+          <tr>
+            <td>{{ it.test__name }}</td>
+            <td>{{ it.avg_duration }}</td>
+          </tr>
+        {% endfor %}
+    </table>
+  </div>
+</div>
 {% endif %}
 
 {% if nonrun %}
