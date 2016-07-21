@@ -1,5 +1,6 @@
 {% extends "basic.html" %}
 {% load gitweb %}
+{% load listutil %}
 
 {% block title %}- Reports{% endblock %}
 
@@ -53,16 +54,32 @@
     </table>
   </div>
 </div>
+<h2>Longest running tests</h2>
 <div class="row">
   <div class="col-md-6">
     <table class="table table-striped">
         <tr>
-            <th>Test</th><th>Average run time</th>
+            <th>Test</th><th>Average run time</th><th>Runs</th>
         </tr>
-        {% for it in testlengths %}
+        {% for it in testlengths|partition:"2"|first %}
           <tr>
             <td>{{ it.test__name }}</td>
-            <td>{{ it.avg_duration }}</td>
+            <td>{{ it.avg_duration|floatformat:2 }}</td>
+            <td>{{ it.runs }}</td>
+          </tr>
+        {% endfor %}
+    </table>
+  </div>
+  <div class="col-md-6">
+    <table class="table table-striped">
+        <tr>
+            <th>Test</th><th>Average run time</th><th>Runs</th>
+        </tr>
+        {% for it in testlengths|partition:"2"|last %}
+          <tr>
+            <td>{{ it.test__name }}</td>
+            <td>{{ it.avg_duration|floatformat:2 }}</td>
+            <td>{{ it.runs }}</td>
           </tr>
         {% endfor %}
     </table>
