@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 
 from django.db.models import Count, Avg
 from django.views.generic import DetailView, TemplateView
+from django.conf import settings
 
 from apps.core.models import GroupTestTemplate, Task, Test
 from apps.report.models import ExternalPage, ReportList
@@ -60,10 +61,13 @@ class ReportListView(TemplateView):
             "group__name").annotate(dcount=Count("group")).order_by("-dcount")
         context["repotest"] = Test.objects.values("git__name").annotate(
             dcount=Count("git")).order_by("-dcount")
-        context["testlengths"] = Task.objects.filter(
-            datestart__gte=datetime.now()+timedelta(hours=-168)).values(
-            "test__name").annotate(avg_duration=Avg('duration')).order_by(
-            "-avg_duration")
+        context["testlengths"] = \
+            Task.objects.filter(recipe__job__schedule__date_create__gte=datetime.now() +
+                                timedelta(hours=-settings
+                                .LONGEST_RUNNING_PERIOD))\
+            .values("test__name").annotate(avg_duration=Avg('duration'))\
+            .annotate(runs=Count('test_id'))\
+            .order_by("-avg_duration")[0:2*settings.LONGEST_RUNNING_COLUMN_LENGTH+1]
 
         running_ids = ListId.running(ids)
         repotask = Test.objects.filter(id__in=running_ids).values(

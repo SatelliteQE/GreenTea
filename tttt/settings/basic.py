@@ -368,3 +368,7 @@ REST_FRAMEWORK = {
 }
 ELASTICSEARCH = ()
 ELASTICSEARCH_MAX_SIZE = 10**6  # 10MB
+
+# Time period for which average run time of tests should be computed, in hours
+LONGEST_RUNNING_PERIOD = 168
+LONGEST_RUNNING_COLUMN_LENGTH = 15
