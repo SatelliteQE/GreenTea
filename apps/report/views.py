@@ -65,7 +65,7 @@ class ReportListView(TemplateView):
             Task.objects.filter(recipe__job__schedule__date_create__gte=datetime.now() +
                                 timedelta(hours=-settings
                                 .LONGEST_RUNNING_PERIOD))\
-            .values("test__name").annotate(avg_duration=Avg('duration'))\
+            .values("test__name","test__id").annotate(avg_duration=Avg('duration'))\
             .annotate(runs=Count('test_id'))\
             .order_by("-avg_duration")[0:2*settings.LONGEST_RUNNING_COLUMN_LENGTH+1]
 

@@ -54,7 +54,7 @@
     </table>
   </div>
 </div>
-<h2>Longest running tests</h2>
+<h1>Longest running tests</h1>
 <div class="row">
   <div class="col-md-6">
     <table class="table table-striped">
@@ -63,7 +63,7 @@
         </tr>
         {% for it in testlengths|partition:"2"|first %}
           <tr>
-            <td>{{ it.test__name }}</td>
+            <td><a href="/tests.html?test_id={{ it.test__id }}">{{ it.test__name }}</a></td>
             <td>{{ it.avg_duration|floatformat:2 }}</td>
             <td>{{ it.runs }}</td>
           </tr>
@@ -77,7 +77,7 @@
         </tr>
         {% for it in testlengths|partition:"2"|last %}
           <tr>
-            <td>{{ it.test__name }}</td>
+            <td><a href="/tests.html?test_id={{ it.test__id }}">{{ it.test__name }}</a></td>
             <td>{{ it.avg_duration|floatformat:2 }}</td>
             <td>{{ it.runs }}</td>
           </tr>
