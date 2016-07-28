@@ -211,6 +211,8 @@ class TestsListView(TemplateView):
             testFilter["groups__id"] = self.filters.get('group_id')
         if 'test_id' in self.filters:
             testFilter["id"] = self.filters.get('test_id')
+        # only list enabled tests
+        testFilter["is_enable"] = True
         # Load all the Test-s
         # TODO: Why are we ordering these?
         # TODO: Cant we somehow limit this query to return only count of items
