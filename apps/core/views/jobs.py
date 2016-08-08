@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.db import connection
 from django.db.models import Count
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
 from taggit.models import Tag
 
@@ -37,7 +37,10 @@ class JobListObject:
         self.plans = {}
 
     def set_history(self, value=0):
-        self.history_back = int(value)
+        try:
+            self.history_back = int(value)
+        except ValueError:
+            raise Http404
 
     def create_matrix(self):
         for plan in self.schedules:
