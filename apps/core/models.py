@@ -1061,6 +1061,7 @@ class Recipe(models.Model):
     SCHEDULED = 8
     PROCESSED = 9
     RESERVED = 10
+    INSTALLING = 11
     STATUS_CHOICES = (
         (UNKNOW, u"Unknow"),
         (NEW, u"New"),
@@ -1072,7 +1073,8 @@ class Recipe(models.Model):
         (ABORTED, u"Aborted"),
         (CANCELLED, u"Cancelled"),
         (PROCESSED, u"Processed"),
-        (RESERVED, u"Reserved")
+        (RESERVED, u"Reserved"),
+        (INSTALLING, u"Installing")
     )
     job = models.ForeignKey(Job, related_name="recipes")
     uid = models.CharField("Recipe ID", max_length=12, unique=True)
@@ -1116,7 +1118,7 @@ class Recipe(models.Model):
             self.status = [it[0]
                            for it in self.STATUS_CHOICES if it[1] == value][0]
         except IndexError:
-            logger.error("IndexError: status %s %s %s" %
+            logger.error("IndexError: status '%s' (actual status: %s) %s" %
                          (value, self.status, self.STATUS_CHOICES))
             return
 
