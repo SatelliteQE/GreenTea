@@ -14,7 +14,7 @@
 	    {% if recipe and recipe.is_running %}<span class="glyphicon glyphicon-star" title="System is still runnig."></span>{% endif %}
 	    {% if recipe.reschedule %}<span class="glyphicon glyphicon-refresh" title="Rescheduled {{recipe.reschedule|length}} time(s) - {{recipe.reschedule}}"></span>{% endif %}
 	    </div>
-	    <div class="icons-br">{% if recipe %}<a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ recipe.uid }}" class="glyphicon glyphicon-tripledot" title="Link to Beaker.">...</a>{% endif %}</div>
+	    <div class="icons-br">{% if recipe %}<a href="https://{{ conf.BEAKER_SERVER }}/recipes/{{ recipe.uid }}#tasks" class="glyphicon glyphicon-tripledot" title="Link to Beaker.">...</a>{% endif %}</div>
 	   {% if recipe %}<span class="perc">{{ recipe.resultrate|floatformat:"1" }}&nbsp;%</span>{% endif %}
 	   </div>
     </td>
