@@ -666,7 +666,10 @@ class TestHistory(models.Model):
     def get_absolute_url(self):
         # FIXME maybe create url from db record
         # for example: return self.test.git.url % self.commit
-        return "%s/commitdiff/%s" % (self.test.git.localurl, self.commit)
+        default_str = "%s/commitdiff/%s"
+        if hasattr(settings, "EXTERNAL_GIT_VIEWER"):
+            default_str = settings.EXTERNAL_GIT_VIEWER
+        return default_str % (self.test.git.localurl, self.commit)
 
 
 class System(models.Model):
