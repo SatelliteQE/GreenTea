@@ -811,7 +811,7 @@ class RecipeTemplate(models.Model, ObjParams):
     hostname = models.CharField(
         max_length=255, blank=True, help_text="Set to '= system42.beaker.example.com' if you want your recipe to run on exactly this system")
     hvm = models.BooleanField(_("Support virtualizaion"), default=False)
-    params = models.TextField(_("Parameters"), blank=True)
+    params = models.TextField(_("extra XML parameter"), blank=True)
     distro = models.ForeignKey(DistroTemplate)
     is_virtualguest = models.BooleanField(default=False)
     virtualhost = models.ForeignKey("RecipeTemplate", null=True, blank=True,
