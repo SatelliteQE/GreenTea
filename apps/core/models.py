@@ -817,7 +817,8 @@ class RecipeTemplate(models.Model, ObjParams):
     virtualhost = models.ForeignKey("RecipeTemplate", null=True, blank=True,
                                     related_name="virtualguests")
     schedule = models.CharField(
-        _("Schedule period"), max_length=255, blank=True)
+        _("Schedule period"), max_length=255, blank=True,
+        help_text="For example: s390x: 0,2,4; x86_64: 1,3,5,6")
 
     def __unicode__(self):
         name = self.name
