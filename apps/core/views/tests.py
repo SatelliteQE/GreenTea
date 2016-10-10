@@ -243,6 +243,7 @@ class TestsListView(TemplateView):
         # Load and reorder data about tests
         data = self.prepare_matrix(
             tests=tests, periodschedules=periodschedules)
+        urlstring = ["%s=%s" % (key, it) for key, it in self.filters.items() if it]
         # Return page
         context.update({
             'data': data,
@@ -253,6 +254,7 @@ class TestsListView(TemplateView):
             'owners': Author.objects.filter(is_enabled=True).annotate(dcount=Count('test')).order_by("-dcount"),
             'repos': Git.objects.all().order_by('name'),
             'groups': GroupOwner.objects.all().order_by('name'),
+            'urlstring': "&amp;".join(urlstring),
         })
         return context
 
