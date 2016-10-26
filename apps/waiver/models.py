@@ -6,7 +6,7 @@
 
 from django.db import models
 
-from apps.core.models import Job, Recipe, Task
+from apps.core.models import Job, Recipe, Task, Test
 from apps.core.utils.date_helpers import currentDate
 
 
@@ -26,6 +26,7 @@ class Comment(models.Model):
                                related_name='comments')
     task = models.ForeignKey(Task, blank=True, null=True,
                              related_name='comments')
+    test = models.ForeignKey(Test, blank=True, null=True)
     username = models.CharField(max_length=32)
     content = models.TextField()
     created_date = models.DateTimeField(auto_now_add=True)

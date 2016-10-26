@@ -1376,7 +1376,7 @@ class Event(models.Model):
     dateend = models.DateTimeField(default=timezone.now, null=True, blank=True)
 
     def __unicode__(self):
-        return "%s (%s - %s)" % (self.title, self.datestart, self.dateend)
+        return "%s" % (self.title)
 
     def get_alert(self):
         return filter(lambda x: x[0] == self.alert, self.ENUM_ALERT)[0][1]

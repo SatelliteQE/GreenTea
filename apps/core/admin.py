@@ -280,6 +280,10 @@ class FileLogAdmin(admin.ModelAdmin):
     raw_id_fields = ("recipe", "task")
 
 
+class EventAdmin(admin.ModelAdmin):
+    list_display = ("title", "datestart", "dateend", "alert", "is_enabled")
+
+
 admin.site.register(Job, JobAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(PhaseResult)
@@ -288,7 +292,7 @@ admin.site.register(Test, TestAdmin)
 admin.site.register(Task, TaskAdmin)
 admin.site.register(System)
 admin.site.register(Arch)
-admin.site.register(Event)
+admin.site.register(Event, EventAdmin)
 admin.site.register(Distro)
 admin.site.register(Git, GitAdmin)
 admin.site.register(Author, AuthorAdmin)
