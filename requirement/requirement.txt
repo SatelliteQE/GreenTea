@@ -19,4 +19,4 @@ texttable
 BeautifulSoup4
 single_process
 markdown
-djangorestframework
+djangorestframework < 3.5

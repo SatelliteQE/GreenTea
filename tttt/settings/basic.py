@@ -293,13 +293,12 @@ if int(os.environ.get("DDD", 0)) > 0:
     # LOGGING['root']['handlers'].append('console')
 
     # Enabling django-debug-toolbar..."
-    MIDDLEWARE_CLASSES = ('debug_toolbar.middleware.DebugToolbarMiddleware',) \
-        + MIDDLEWARE_CLASSES
+    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
 
     DEBUG_TOOLBAR_CONFIG = {
         'INTERCEPT_REDIRECTS': False,
     }
-    INSTALLED_APPS += 'debug_toolbar'
+    INSTALLED_APPS += ('debug_toolbar',)
 
 
 # beaker settings
