@@ -155,19 +155,18 @@ class Beaker:
             return True
         # if system status is reserved
         try:
-            # from returns import return_reservation
-            # status = return_reservation(int(recipe.uid))
             status = self.systemRelease(recipe)
-            self.parse_job(recipe.job.uid)
+            # self.parse_job(recipe.job.uid)
             return (status == -1)
         except ImportError:
             logger.warning("No module named bkr.client")
 
     def systemRelease(self, recipe):
+        # set wathdog to 0 and system will be releasen in following seconds
         if not isinstance(recipe, Recipe):
             msg = "This type is not supported: %s %s" % (recipe, type(recipe))
             raise TypeError(msg)
-        return self.execute("system-release", recipe.system.hostname)
+        return self.execute("watchdog-extend", "R:%s --by 0" % recipe.uid)
 
     def scheduleFromContent(self, xmlcontent):
         logger.error("Method is not implemented")
