@@ -37,8 +37,8 @@ class BeakerCommand():
                 logger.info("R:%s recipes was returned to beaker."
                             % recipe.uid)
             else:
-                logger.info("Problem with returning to beaker (R:%s)."
-                            % recipe.uid)
+                logger.info("Problem with returning to beaker (R:%s) with exit code %s."
+                            % (recipe.uid, res))
             self.beaker.systemRelease(recipe)
 
     def reschedule(self, reschedule_job, *argvs, **kwargs):

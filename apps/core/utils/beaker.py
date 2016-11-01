@@ -157,7 +157,7 @@ class Beaker:
         try:
             status = self.systemRelease(recipe)
             # self.parse_job(recipe.job.uid)
-            return (status == -1)
+            return (status == 0)
         except ImportError:
             logger.warning("No module named bkr.client")
 
