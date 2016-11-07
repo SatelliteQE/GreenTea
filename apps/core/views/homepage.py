@@ -45,16 +45,16 @@ class HomePageView(TemplateView):
     template_name = 'homepage.html'
     filters = {}
     forms = {}
+    es = Elasticsearch(settings.ELASTICSEARCH)
 
     def search(self):
         query = self.filters.get("search")
         page = self.filters.get("page")
+
         if not page:
             page = 1
         if query:
-            es = Elasticsearch(settings.ELASTICSEARCH)
-
-            result = es.search(index="testout.log", body={
+            result = self.es.search(index="testout.log", body={
                 "query":
                     {"match":
                         {
@@ -69,7 +69,7 @@ class HomePageView(TemplateView):
                 "from": 10 * (page - 1),
                 "size": 10
             },
-                fields=("_id", "task", "path", "recipe", "period"),
+                stored_fields=("_id", "task", "path", "recipe", "period"),
             )
             ids = [int(x["_id"]) for x in result["hits"]["hits"]]
 
@@ -130,8 +130,9 @@ class HomePageView(TemplateView):
         pag_type = self.request.GET.get('type')
 
         if settings.ELASTICSEARCH:
+            if self.es.ping():
+                context["elasticsearch"] = self.es.info()
             context['search'] = self.search()
-
         try:
             context['progress'] = CheckProgress.objects.order_by(
                 "-datestart")[0]
