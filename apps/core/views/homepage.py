@@ -45,7 +45,6 @@ class HomePageView(TemplateView):
     template_name = 'homepage.html'
     filters = {}
     forms = {}
-    es = Elasticsearch(settings.ELASTICSEARCH)
 
     def search(self):
         query = self.filters.get("search")
@@ -130,6 +129,7 @@ class HomePageView(TemplateView):
         pag_type = self.request.GET.get('type')
 
         if settings.ELASTICSEARCH:
+            self.es = Elasticsearch(settings.ELASTICSEARCH)
             if self.es.ping():
                 context["elasticsearch"] = self.es.info()
             context['search'] = self.search()
