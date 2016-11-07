@@ -69,7 +69,7 @@ class HomePageView(TemplateView):
                 "from": 10 * (page - 1),
                 "size": 10
             },
-                stored_fields=("_id", "task", "path", "recipe", "period"),
+                fields=("_id", "task", "path", "recipe", "period"),
             )
             ids = [int(x["_id"]) for x in result["hits"]["hits"]]
 
