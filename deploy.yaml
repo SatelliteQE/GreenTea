@@ -4,11 +4,11 @@
   ###gather_facts: no
   vars:
     homedir: "/data/greentea/web"
+    greentea_user: "greentea"
     django_settings: "tttt.settings.production"
     elasticsearch: "elasticsearch.docker"
     elasticsearch_data_storage: "/usr/share/elasticsearch/data/"
   tasks:
-    
     ## Elasticseach instance ###
     # only one instance of elastic search can be created
     - name: "Destroy running version of elasticsearch"
@@ -45,12 +45,30 @@
         source env/bin/activate
         python manage.py collectstatic --noinput
       become: yes
-      become_user: greentea
+      become_user: "{{ greentea_user }}"
       args:
         chdir: "{{ homedir }}"
       tags:
         - update
         - deploy
+
+    - name: "Backup database"
+      shell: |
+        DB_NAME=$( python -c "from {{ django_settings }} import DATABASES; print DATABASES['default']['NAME']" )
+        DB_HOST=$( python -c "from {{ django_settings }} import DATABASES; print DATABASES['default']['HOST']" )
+        DB_USER=$( python -c "from {{ django_settings }} import DATABASES; print DATABASES['default']['USER']" )
+        pg_dump "$DB_NAME" -U "$DB_USER" -h "$DB_HOST" | gzip > tttt.db.gz
+      become: yes
+      become_user: "{{ greentea_user }}"
+      args:
+        chdir: "{{ homedir }}"
+      tags:
+        - backup_db
+
+    - name: "Fetch backup database"
+      fetch: src=tttt.db.gz dest=tttt.db.gz flat=yes
+      tags:
+        - backup_db
 
     - name: "Migrate database schema"
       shell: |
@@ -61,6 +79,9 @@
       become_user: greentea
       args:
         chdir: "{{ homedir }}"
+      tags:
+        - deploy
+        - migrate
 
     - name: "Start uwsgi instance of Django"
       shell:
