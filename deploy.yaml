@@ -1,0 +1,82 @@
+---
+- hosts: all
+  remote_user: root
+  ###gather_facts: no
+  vars:
+    homedir: "/data/greentea/web"
+    django_settings: "tttt.settings.production"
+    elasticsearch: "elasticsearch.docker"
+    elasticsearch_data_storage: "/usr/share/elasticsearch/data/"
+  tasks:
+    
+    ## Elasticseach instance ###
+    # only one instance of elastic search can be created
+    - name: "Destroy running version of elasticsearch"
+      shell: |
+        docker stop "{{elasticsearch}}"
+        docker rm "{{elasticsearch}}"
+      tags:
+        - renew
+        - renew-elasticserach
+      register: out
+    - debug: var=out.stdout_lines
+
+    - name: "Create new Elasticsearch in Docker"
+      shell: |
+        docker run -d -p 9200:9200 -p 9300:9300 -v "{{elasticsearch_data_storage}}":"{{elasticsearch_data_storage}}" --name "{{elasticsearch}}" -h "{{elasticsearch}}" elasticsearch:2
+      tags:
+        - renew
+        - renew-elasticserach
+
+    ## Grean tea instance ###
+    - name: "Stop uwsgi instance of Django"
+      shell:
+        uwsgi --stop /run/greentea.pid
+      tags:
+        - deploy
+        - restart
+        - stop
+
+    - name: "Update project from Github"
+      shell: |
+        export DJANGO_SETTINGS_MODULE="{{ django_settings }}"
+        git reset --hard HEAD
+        git pull
+        source env/bin/activate
+        python manage.py collectstatic --noinput
+      become: yes
+      become_user: greentea
+      args:
+        chdir: "{{ homedir }}"
+      tags:
+        - update
+        - deploy
+
+    - name: "Migrate database schema"
+      shell: |
+        export DJANGO_SETTINGS_MODULE="{{ django_settings }}"
+        source env/bin/activate
+        python manage.py migrate --noinput
+      become: yes
+      become_user: greentea
+      args:
+        chdir: "{{ homedir }}"
+
+    - name: "Start uwsgi instance of Django"
+      shell:
+        uwsgi -x /etc/uwsgi.d/tttt.conf
+      tags:
+        - deploy
+        - restart
+        - start
+
+    - name: "Check if pid exists and application runs"
+      shell:
+        ps aux | grep $(cat /run/greentea.pid) | grep -v grep
+
+      tags:
+        - deploy
+        - restart
+        - start
+...
+

@@ -53,3 +53,11 @@ Basic information for first use you can find on public wiki [wiki:start](https:/
 ## How to setup project
 
 Information about setting you find on wiki page [wiki:setup](https://github.com/SatelliteQE/GreenTea/wiki/Setup)
+
+## Ansible
+
+For managing of project is possible to use Ansible. Script contains tags deploy, update, stop, start and restart.
+
+```
+ansible-playbook -i config/hosts.ini deploy.yaml --tags "deploy" -v
+```
