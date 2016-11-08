@@ -1519,6 +1519,8 @@ class FileLog(models.Model):
                                  "job": self.recipe.job.id,
                                  "whiteboard": self.recipe.job.template.whiteboard,
                                  "recipe": self.recipe.uid,
+                                 "datestart": self.task.datestart,
+                                 "duration": self.task.duration,
                                  "period": self.recipe.job.schedule.id if self.recipe.job.schedule else None,
                                  "task": self.task.uid if self.task else '',
                                  "file_id": self.id,
