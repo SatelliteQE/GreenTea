@@ -27,6 +27,7 @@
       tags:
         - renew
         - renew-elasticserach
+        - elasticserach
 
     ## Grean tea instance ###
     - name: "Stop uwsgi instance of Django"

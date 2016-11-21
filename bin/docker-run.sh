@@ -40,6 +40,7 @@ echo "BEAKER_PASS=\"$BEAKER_PASS\"" >> $HOME/tttt/settings/local.py
 # Run all services of Green Tea
 schedule & # Schedule jobs
 check & # Check all running jobs
+
 # Run main web service
-python $HOME/manage.py runserver 0.0.0.0:8000
+uwsgi --http :8000 --wsgi-file tttt/wsgi.py
 

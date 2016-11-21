@@ -9,6 +9,7 @@ django-crispy-forms
 GitPython
 python-dateutil
 elasticsearch
+uwsgi
 pytz
 lxml
 fabric
