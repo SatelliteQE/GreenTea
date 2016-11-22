@@ -8,6 +8,8 @@
     django_settings: "tttt.settings.production"
     elasticsearch: "elasticsearch.docker"
     elasticsearch_data_storage: "/usr/share/elasticsearch/data/"
+  environment:
+    DJANGO_SETTINGS_MODULE: "{{ django_settings }}"
   tasks:
     ## Elasticseach instance ###
     # only one instance of elastic search can be created
@@ -40,7 +42,6 @@
 
     - name: "Update project from Github"
       shell: |
-        export DJANGO_SETTINGS_MODULE="{{ django_settings }}"
         git reset --hard HEAD
         git pull
         source env/bin/activate
@@ -73,7 +74,6 @@
 
     - name: "Migrate database schema"
       shell: |
-        export DJANGO_SETTINGS_MODULE="{{ django_settings }}"
         source env/bin/activate
         python manage.py migrate --noinput
       become: yes
