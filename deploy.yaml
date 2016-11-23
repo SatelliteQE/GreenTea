@@ -42,6 +42,7 @@
 
     - name: "Update project from Github"
       shell: |
+        git fetch
         git reset --hard HEAD
         git pull
         source env/bin/activate
