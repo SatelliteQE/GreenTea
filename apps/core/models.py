@@ -811,7 +811,8 @@ class RecipeTemplate(models.Model, ObjParams):
     hostname = models.CharField(
         max_length=255, blank=True, help_text="Set to '= system42.beaker.example.com' if you want your recipe to run on exactly this system")
     hvm = models.BooleanField(_("Support virtualizaion"), default=False)
-    params = models.TextField(_("extra XML parameter"), blank=True)
+    params = models.TextField(_("Extra XML parameter"), blank=True)
+    packages = models.CharField(_("Extra packages"), max_length=256, help_text="Separate by white space. For example: vim xen")
     distro = models.ForeignKey(DistroTemplate)
     is_virtualguest = models.BooleanField(default=False)
     virtualhost = models.ForeignKey("RecipeTemplate", null=True, blank=True,
@@ -840,6 +841,10 @@ class RecipeTemplate(models.Model, ObjParams):
 
     def archs(self):
         return ", ".join([it.name for it in self.get_arch()])
+
+    def get_extra_packages(self):
+        default_packages = list(settings.BEAKER_DEFAULT_PACKAGES)
+        return self.packages.split() + default_packages
 
     def get_tasks(self):
         return self.tasks.filter(test__is_enable=True).select_related(

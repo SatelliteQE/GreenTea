@@ -252,7 +252,10 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (('get_jobtemplate_link', 'jobtemplate'), 'name', ('distro', 'arch',), 'hvm', ('is_virtualguest', 'virtualhost'),
-                       'role', 'memory', 'disk', 'hostname', 'params', 'schedule')
+                       'role', 'memory', 'disk', 'hostname', 'packages', 'params',)
+        }),
+        ('Schdule plan', {
+            'fields': ('schedule',),
         }),
         ('Kernel options', {
             'fields': ('kernel_options', 'kernel_options_post', 'ks_meta',),

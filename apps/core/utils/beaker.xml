@@ -50,7 +50,7 @@
       <autopick random="false"/>
       <watchdog panic="None"/>
       <packages>
-        {% for package in default_packages %}
+        {% for package in r.get_extra_packages %}
         <package name="{{ package }}"/>
         {% endfor %}
         {% if r.virtualguests.all %}
