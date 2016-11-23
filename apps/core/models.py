@@ -809,10 +809,13 @@ class RecipeTemplate(models.Model, ObjParams):
     disk = models.CharField(
         max_length=255, blank=True, help_text="Value is in GB")
     hostname = models.CharField(
-        max_length=255, blank=True, help_text="Set to '= system42.beaker.example.com' if you want your recipe to run on exactly this system")
+        max_length=255, blank=True,
+        help_text="Set to '= system42.beaker.example.com' if you want your recipe to run on exactly this system")
     hvm = models.BooleanField(_("Support virtualizaion"), default=False)
     params = models.TextField(_("Extra XML parameter"), blank=True)
-    packages = models.CharField(_("Extra packages"), max_length=256, help_text="Separate by white space. For example: vim xen")
+    packages = models.CharField(
+        _("Extra packages"), max_length=256, blank=True,
+        help_text="Separate by white space. For example: vim xen")
     distro = models.ForeignKey(DistroTemplate)
     is_virtualguest = models.BooleanField(default=False)
     virtualhost = models.ForeignKey("RecipeTemplate", null=True, blank=True,
