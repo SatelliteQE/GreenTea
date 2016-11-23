@@ -32,11 +32,23 @@
         - elasticserach
 
     ## Grean tea instance ###
+    - name: "Upgrade pip packages"
+      shell: |
+        source env/bin/activate
+        pip install --upgrade -r requirement/requirement.txt
+      become: yes
+      become_user: greentea
+      args:
+        chdir: "{{ homedir }}"
+      tags:
+        - upgrade
+
     - name: "Stop uwsgi instance of Django"
       shell:
         uwsgi --stop /run/greentea.pid
       tags:
         - deploy
+        - upgrade
         - restart
         - stop
 
@@ -90,6 +102,7 @@
         uwsgi -x /etc/uwsgi.d/tttt.conf
       tags:
         - deploy
+        - upgrade
         - restart
         - start
 
@@ -99,6 +112,7 @@
 
       tags:
         - deploy
+        - upgrade
         - restart
         - start
 ...
