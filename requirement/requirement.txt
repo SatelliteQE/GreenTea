@@ -4,7 +4,7 @@ django-debug-toolbar
 django-taggit
 django-reversion < 1.9
 django-widget-tweaks
-django-filter
+django-filter < 1.0
 django-crispy-forms
 GitPython
 python-dateutil
@@ -20,4 +20,4 @@ texttable
 BeautifulSoup4
 single_process
 markdown
-djangorestframework < 3.5
+djangorestframework
