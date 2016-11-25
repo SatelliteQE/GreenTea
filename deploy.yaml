@@ -32,6 +32,21 @@
         - renew-elasticserach
         - elasticserach
 
+    - name: "Update project from Github"
+      shell: |
+        git fetch
+        git reset --hard HEAD
+        git pull
+        source env/bin/activate
+        python manage.py collectstatic --noinput
+      become: yes
+      become_user: "{{ greentea_user }}"
+      args:
+        chdir: "{{ homedir }}"
+      tags:
+        - update
+        - deploy
+
     ## Grean tea instance ###
     - name: "Upgrade pip packages"
       shell: |
@@ -54,21 +69,6 @@
         - upgrade
         - restart
         - stop
-
-    - name: "Update project from Github"
-      shell: |
-        git fetch
-        git reset --hard HEAD
-        git pull
-        source env/bin/activate
-        python manage.py collectstatic --noinput
-      become: yes
-      become_user: "{{ greentea_user }}"
-      args:
-        chdir: "{{ homedir }}"
-      tags:
-        - update
-        - deploy
 
     - name: "Backup database"
       shell: |
