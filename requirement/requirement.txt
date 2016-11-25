@@ -8,7 +8,7 @@ django-filter < 1.0
 django-crispy-forms
 GitPython
 python-dateutil
-elasticsearch
+elasticsearch<3
 uwsgi
 pytz
 lxml

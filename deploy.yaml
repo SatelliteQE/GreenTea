@@ -25,6 +25,7 @@
 
     - name: "Create new Elasticsearch in Docker"
       shell: |
+        docker pull elasticsearch:2
         docker run -d -p 9200:9200 -p 9300:9300 -v "{{elasticsearch_data_storage}}":"{{elasticsearch_data_storage}}" --name "{{elasticsearch}}" -h "{{elasticsearch}}" elasticsearch:2
       tags:
         - renew
@@ -35,6 +36,8 @@
     - name: "Upgrade pip packages"
       shell: |
         source env/bin/activate
+        pip freeze > /tmp/update.pip.now
+        pip freeze | diff  /tmp/update.pip.now - >> pip-upgrade.log
         pip install --upgrade -r requirement/requirement.txt
       become: yes
       become_user: greentea
