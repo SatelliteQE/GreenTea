@@ -735,6 +735,7 @@ class JobTemplate(models.Model):
 
     def clone(self):
         recipes = list(self.trecipes.all())
+        tags = self.tags.all()
         self.pk = None
         label = "Clone %s" % self.whiteboard
         tmp_label = "%s" % label
@@ -748,6 +749,8 @@ class JobTemplate(models.Model):
         self.save()
         for recipe in recipes:
             recipe.clone(self)
+        for it in tags:
+            self.tags.add(str(it))
 
     def check_set_recipe(self):
         """
