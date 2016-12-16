@@ -1,4 +1,4 @@
-FROM fedora:23
+FROM centos:7
 
 WORKDIR /data/
 
@@ -6,10 +6,9 @@ RUN mkdir -p /data/greentea
 ADD . /data/greentea/
 
 # install packages
-RUN dnf install git findutils -y \
-    && curl https://beaker-project.org/yum/beaker-client-Fedora.repo -o /etc/yum.repos.d/beaker-client-Fedora.repo \
-    && cat greentea/requirement/rpms-*.txt | xargs dnf install -y \
-    && dnf clean all \
+RUN curl https://beaker-project.org/yum/beaker-client-CentOS.repo -o /etc/yum.repos.d/beaker-client-CentOS.repo \
+    && cat greentea/requirement/rpms-*.txt | xargs yum install -y \
+    && yum clean all \
     && chmod 755 /data/ -R
 
 # create enviroment
@@ -23,7 +22,6 @@ RUN echo "root:GreenTea!" | chpasswd
 
 USER greentea
 ENV HOME /data/greentea
-ENV DJANGO_SETTINGS_MODULE tttt.settings.production
 
 RUN virtualenv $HOME/env \
     && cd $HOME \
@@ -32,6 +30,7 @@ RUN virtualenv $HOME/env \
 
 # create default values for running service
 RUN sh $HOME/bin/init-secretkey.sh > $HOME/tttt/settings/production.py
+ENV DJANGO_SETTINGS_MODULE tttt.settings.production
 
 RUN mkdir -p $HOME/tttt/static \
     && . $HOME/env/bin/activate \

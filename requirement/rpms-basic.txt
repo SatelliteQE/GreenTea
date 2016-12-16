@@ -10,4 +10,5 @@ beaker-common
 beaker-client
 gcc
 /usr/lib/rpm/redhat/redhat-hardened-cc1
+openssl-devel
 libffi-devel
