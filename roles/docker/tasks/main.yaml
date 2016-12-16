@@ -1,0 +1,25 @@
+---
+- name: Install Docker on {{ansible_distribution}} {{ansible_distribution_version}}
+  shell: |
+    dnf install -y docker libselinux-python nmap
+  when: ansible_distribution == "Fedora"
+  tags:
+    - prepare
+
+- name: Install Docker on {{ansible_os_family}} {{ansible_distribution_version}}
+  shell: |
+    yum install -y docker libselinux-python nmap
+  when: ansible_os_family == "RedHat"
+  tags:
+    - prepare
+
+- name: Configure and start Docker on system
+  shell: |
+    vg=$( vgdisplay | grep 'VG Name' | head -n 1 | sed 's/^\s\+VG Name\s\+\(.*\)$/\1/' )
+    echo VG='$vg' >> /etc/sysconfig/docker-storage-setup
+    echo AUTO_EXTEND_POOL='true' >> /etc/sysconfig/docker-storage-setup
+    docker-storage-setup
+    systemctl restart docker
+  tags:
+    - prepare
+
