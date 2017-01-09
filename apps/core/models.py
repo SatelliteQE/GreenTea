@@ -793,6 +793,14 @@ class DistroTemplate(models.Model):
         return super(model, self).save(*args, **kwargs)
 
 
+class Repository(models.Model):
+    name = models.CharField(max_length=255, blank=True)
+    url = models.URLField(unique=True)
+
+    def __unicode__(self):
+        return "%s" % self.name
+
+
 class RecipeTemplate(models.Model, ObjParams):
     NONE, RECIPE_MEMBERS, STANDALONE = 0, 1, 2
     ROLE_ENUM = (
@@ -826,6 +834,7 @@ class RecipeTemplate(models.Model, ObjParams):
     schedule = models.CharField(
         _("Schedule period"), max_length=255, blank=True,
         help_text="For example: s390x: 0,2,4; x86_64: 1,3,5,6")
+    external_repos=models.ManyToManyField(Repository)
 
     def __unicode__(self):
         name = self.name
@@ -851,6 +860,9 @@ class RecipeTemplate(models.Model, ObjParams):
     def get_extra_packages(self):
         default_packages = list(settings.BEAKER_DEFAULT_PACKAGES)
         return self.packages.split() + default_packages
+
+    def get_extra_repos(self):
+        return self.external_repos.all()
 
     def get_tasks(self):
         return self.tasks.filter(test__is_enable=True).select_related(

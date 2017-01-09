@@ -14,6 +14,11 @@
       {% for guest in r.cache_guests %}
         <guestrecipe guestargs="--kvm --ram={{ guest.memory|default:'1024'}} --file-size={{ guest.disk|default:'8' }}" guestname="guest" kernel_options="{{ guest.kernel_options }}" kernel_options_post="{{ guest.kernel_options_post }}" ks_meta="{{ guest.ks_meta }}" role="{{ guest.get_role|default:"STANDALONE" }}" whiteboard="{{ guest.name }}">
         <autopick random="false"/>
+        <repos>
+          {% for repo in r.get_extra_repos %}
+          <repo name="{{repo.name}}" url="{{repo.url}}"/>
+          {% endfor %}
+        </repos>
         <watchdog panic="None"/>
         <packages>
           <package name="@Base"/>
@@ -49,6 +54,11 @@
       {% comment %} ### Render xml for physical host ###  {% endcomment %}
       <autopick random="false"/>
       <watchdog panic="None"/>
+      <repos>
+        {% for repo in r.get_extra_repos %}
+        <repo name="{{repo.name}}" url="{{repo.url}}"/>
+        {% endfor %}
+      </repos>
       <packages>
         {% for package in r.get_extra_packages %}
         <package name="{{ package }}"/>

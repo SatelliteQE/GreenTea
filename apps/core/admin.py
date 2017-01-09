@@ -11,7 +11,7 @@ from django.core.urlresolvers import reverse
 
 from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Event,
                     FileLog, Git, GroupOwner, GroupTaskTemplate, GroupTemplate,
-                    GroupTestTemplate, Job, JobTemplate, PhaseLabel,
+                    GroupTestTemplate, Job, JobTemplate, PhaseLabel, Repository,
                     PhaseResult, Recipe, RecipeTemplate, System, Task,
                     TaskRoleEnum, TaskTemplate, Test, TestHistory)
 
@@ -252,7 +252,7 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (('get_jobtemplate_link', 'jobtemplate'), 'name', ('distro', 'arch',), 'hvm', ('is_virtualguest', 'virtualhost'),
-                       'role', 'memory', 'disk', 'hostname', 'packages', 'params',)
+                       'role', 'memory', 'disk', 'hostname', 'packages', 'external_repos', 'params',)
         }),
         ('Schdule plan', {
             'fields': ('schedule',),
@@ -297,6 +297,7 @@ admin.site.register(System)
 admin.site.register(Arch)
 admin.site.register(Event, EventAdmin)
 admin.site.register(Distro)
+admin.site.register(Repository)
 admin.site.register(Git, GitAdmin)
 admin.site.register(Author, AuthorAdmin)
 admin.site.register(TestHistory, TestHistoryAdmin)
