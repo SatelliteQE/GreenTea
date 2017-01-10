@@ -834,7 +834,7 @@ class RecipeTemplate(models.Model, ObjParams):
     schedule = models.CharField(
         _("Schedule period"), max_length=255, blank=True,
         help_text="For example: s390x: 0,2,4; x86_64: 1,3,5,6")
-    external_repos=models.ManyToManyField(Repository)
+    external_repos=models.ManyToManyField(Repository, blank=True)
 
     def __unicode__(self):
         name = self.name
