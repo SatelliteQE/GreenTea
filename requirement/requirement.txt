@@ -12,7 +12,6 @@ elasticsearch<3
 uwsgi
 pytz
 lxml
-fabric
 feedparser
 docutils
 croniter
