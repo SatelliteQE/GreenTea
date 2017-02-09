@@ -32,7 +32,7 @@ RUN virtualenv $HOME/env \
 RUN sh $HOME/bin/init-secretkey.sh > $HOME/tttt/settings/production.py
 ENV DJANGO_SETTINGS_MODULE tttt.settings.production
 
-RUN mkdir -p $HOME/tttt/static \
+RUN mkdir -p $HOME/tttt/static $HOME/storage \
     && . $HOME/env/bin/activate \
     && python $HOME/manage.py migrate --noinput \
     && python $HOME/manage.py collectstatic -c --noinput
@@ -45,8 +45,6 @@ RUN . $HOME/env/bin/activate && \
 # install cron and enable cron
 # it doesn't use for docker, only for real system
 # RUN yum install crontabs -y && mv $HOME/tttt/conf/cron/greentea.cron /etc/cron.d/
-
-ADD ./bin/docker-run.sh $HOME/bin/docker-run.sh
 
 EXPOSE 8000
 

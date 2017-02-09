@@ -40,6 +40,9 @@ htmlcov/
 nosetests.xml
 coverage.xml
 
+# Vim
+# *.swp
+
 # Translations
 *.mo
 *.pot
