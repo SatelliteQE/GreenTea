@@ -5,7 +5,6 @@
 schedule_t=30 # 30s.
 check_t=600 # 10min.
 
-
 # For asynchronous operation Green Tea needs to run cron
 # */1 * * * * 	greentea 	python /data/Greantea/manage.py pickup --traceback
 function schedule {
