@@ -47,7 +47,7 @@
         - update
         - deploy
 
-    ## Grean tea instance ###
+    ## Grean tea instance ##
     - name: "Upgrade pip packages"
       shell: |
         source env/bin/activate

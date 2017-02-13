@@ -30,6 +30,7 @@ RUN virtualenv $HOME/env \
 
 # create default values for running service
 RUN sh $HOME/bin/init-secretkey.sh > $HOME/tttt/settings/production.py
+RUN echo "ALLOWED_HOSTS=['*']" >> $HOME/tttt/settings/production.py
 ENV DJANGO_SETTINGS_MODULE tttt.settings.production
 
 RUN mkdir -p $HOME/tttt/static $HOME/storage \

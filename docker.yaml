@@ -1,0 +1,91 @@
+---
+- hosts: all
+  remote_user: root
+  ###gather_facts: no
+  vars:
+    homedir: "/var/www/greentea"
+    django_settings: "tttt.settings.production"
+    elasticsearch: "elasticsearch.docker"
+    greentea_host: "greentea.docker"
+    db_host: "postgresql.docker"
+    db_pass: "default_pass"
+    db_version: 9.5
+  environment:
+    DJANGO_SETTINGS_MODULE: "{{ django_settings }}"
+  tasks:
+    - name: "Test Docker service"
+      command: "service docker status"
+
+#    - name: "Enable Http"
+#      shell: "firewall-cmd --add-service=http && firewall-cmd --add-service=http --permanent"
+
+    - name: "Create storages for docker"
+      shell: |
+        mkdir -p {{ homedir }}/{{ item }}
+        chcon -Rt svirt_sandbox_file_t {{ homedir }}/{{ item }}
+        restorecon -rv  {{ homedir }}/{{ item }}
+      with_items:
+            - media
+            - static
+            - storage
+            - pgsql/data
+            - elasticsearch/data/
+
+    - name: "Update docker images"
+      command: docker pull {{ item }}
+      with_items:
+        - pajinek/greentea
+        - elasticsearch:2
+        - postgres:{{ db_version }}
+      tags:
+        - install
+        - update
+
+    ## Elasticseach instance ###
+    # only one instance of elastic search can be created
+    - name: "Destroy running version of elasticsearch"
+      shell: |
+       ! docker ps -a | grep {{elasticsearch}} || (
+        docker stop "{{elasticsearch}}" &&
+        docker rm "{{elasticsearch}}" )
+      tags:
+        - install
+      register: out
+    - debug: var=out.stdout_lines
+
+    - name: "Create new Elasticsearch in Docker"
+      shell: |
+        docker pull elasticsearch:2
+        docker run -d -p 9200:9200 -p 9300:9300 -v "{{ homedir }}/elasticsearch/data/":"/usr/share/elasticsearch/data/" --name "{{elasticsearch}}" -h "{{elasticsearch}}" elasticsearch:2
+      tags:
+        - install
+        - elasticserach
+
+    ## Postgresql 9.5 ###
+    - name: "Create Postgresql in Docker"
+      shell: |
+        docker ps | grep "{{ db_host }}" ||
+        docker run -d --name "{{ db_host }}" -h "{{ db_host }}" -p 5432:5432 \
+            -e POSTGRES_PASSWORD="{{ db_pass }}" \
+            -v {{ homedir }}/pgsql/data:/var/lib/pgsql/data \
+            postgres:{{ db_version }}
+      tags:
+        - install
+        - update
+
+    ## GreenTea instance ###
+    - name: Run Greentea in Docker
+      shell: |
+        docker run -d --name {{ greentea_host }} -h {{ greentea_host }} \
+            --link {{ db_host }}:{{ db_host }} -p 80:8000 \
+             -e POSTGRES_PASSWORD={{ db_pass }} \
+             -v /data/Greantea/tttt/media/:{{homedir}}/media:Z \
+             -v /data/Greantea/tttt/static/:{{homedir}}/static:Z \
+             -v /data/Greentea/tttt/storage/:{{homedir}}/storage:Z \
+                pajinek/greentea
+      tags:
+        - install
+        - update
+
+...
+
