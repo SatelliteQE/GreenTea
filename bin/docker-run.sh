@@ -69,8 +69,8 @@ echo "BEAKER_PASS=\"$BEAKER_PASS\"" >> $HOME/tttt/settings/production.py
 
 python $HOME/manage.py migrate --noinput
 
-manage('from django.contrib.sites.models import Site; site = Site.objects.create(domain="localhost", name="localhost"); site.save()')
-manage('from django.contrib.auth.models import User; User.objects.create_superuser("admin", "admin@example.com", "pass")')
+manage 'from django.contrib.sites.models import Site; site = Site.objects.create(domain="localhost", name="localhost"); site.save()'
+manage 'from django.contrib.auth.models import User; User.objects.create_superuser("admin", "admin@example.com", "pass")'
 
 python $HOME/manage.py collectstatic -c --noinput
 
