@@ -61,3 +61,11 @@ For managing of project is possible to use Ansible. Script contains tags deploy,
 ```
 ansible-playbook -i config/hosts.ini deploy.yaml --tags "deploy" -v
 ```
+
+## Ansible with Docker
+
+Easer way is deploy project by docker by following script:
+
+```
+ansible-playbook -i config/hosts.ini docker.yaml
+```
