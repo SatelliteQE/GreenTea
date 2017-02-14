@@ -3,6 +3,11 @@
   remote_user: root
   ###gather_facts: no
   vars:
+    # set information about your beaker instance
+    beaker_server: "localhost"
+    beaker_user: ""
+    beaker_pass: ""
+    # following options it isn't needed change
     homedir: "/var/www/greentea"
     django_settings: "tttt.settings.production"
     elasticsearch: "elasticsearch.docker"
@@ -67,11 +72,23 @@
         docker ps | grep "{{ db_host }}" ||
         docker run -d --name "{{ db_host }}" -h "{{ db_host }}" -p 5432:5432 \
             -e POSTGRES_PASSWORD="{{ db_pass }}" \
-            -v {{ homedir }}/pgsql/data:/var/lib/pgsql/data \
+            -e POSTGRES_SERVER="{{ db_host }}" \
+            -v {{ homedir }}/pgsql/data:/var/lib/postgresql/data \
             postgres:{{ db_version }}
       tags:
         - install
         - update
+
+    # only one instance of greentea can be created
+    - name: "Destroy running version of elasticsearch"
+      shell: |
+       ! docker ps -a | grep {{elasticsearch}} || (
+        docker stop "{{greentea_host}}" &&
+        docker rm "{{greentea_host}}" )
+      tags:
+        - install
+      register: out
+    - debug: var=out.stdout_lines
 
     ## GreenTea instance ###
     - name: Run Greentea in Docker
@@ -79,9 +96,12 @@
         docker run -d --name {{ greentea_host }} -h {{ greentea_host }} \
             --link {{ db_host }}:{{ db_host }} -p 80:8000 \
              -e POSTGRES_PASSWORD={{ db_pass }} \
-             -v /data/Greantea/tttt/media/:{{homedir}}/media:Z \
-             -v /data/Greantea/tttt/static/:{{homedir}}/static:Z \
-             -v /data/Greentea/tttt/storage/:{{homedir}}/storage:Z \
+             -e BEAKER_SERVER={{ beaker_server}} \
+             -e BEAKER_USER={{ beaker_user}} \
+             -e BEAKER_PASS={{ beaker_pass}} \
+             -v /data/greentea/tttt/media/:{{homedir}}/media:Z \
+             -v /data/greantea/tttt/static/:{{homedir}}/static:Z \
+             -v /data/greentea/tttt/storage/:{{homedir}}/storage:Z \
                 pajinek/greentea
       tags:
         - install
