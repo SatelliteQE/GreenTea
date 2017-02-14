@@ -3,7 +3,7 @@ FROM centos:7
 WORKDIR /data/
 
 RUN mkdir -p /data/greentea
-ADD . /data/greentea/
+ADD requirement /data/greentea/requirement
 
 RUN echo "root:GreenTea!" | chpasswd
 
@@ -12,6 +12,8 @@ RUN curl https://beaker-project.org/yum/beaker-client-CentOS.repo -o /etc/yum.re
     && cat greentea/requirement/rpms-*.txt | xargs yum install -y \
     && yum clean all \
     && chmod 755 /data/ -R
+
+ADD . /data/greentea/
 
 # create enviroment
 RUN useradd -ms /bin/bash greentea \

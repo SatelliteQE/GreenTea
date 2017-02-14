@@ -27,7 +27,7 @@ function check {
 }
 
 function manage() {
-    echo '$1' | python $HOME/manage.py shell
+    echo "$1" | python $HOME/manage.py shell
 }
 
 HOME=/data/greentea
@@ -35,7 +35,7 @@ source $HOME/env/bin/activate && cd $HOME
 
 # Set postgresql
 
-if ! [ -z $POSTGRES_SERVER]; then
+if ! [ -z $POSTGRES_SERVER ]; then
     pip install -r $HOME/requirement/requirement-postgresql.txt
 
     # create postgres db and user for greentea

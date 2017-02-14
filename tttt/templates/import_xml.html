@@ -15,7 +15,7 @@
 
 {% if job %}
 <div class="alert alert-info">
-	<p><b>Job Template:</b><a href="{% url 'admin:core_jobtemplate_change' job.id %}" >{{ job.whiteboard }}</a></p>
+	<p><b>Job Template:</b> <a href="{% url 'admin:core_jobtemplate_change' job.id %}" >{{ job.whiteboard }}</a></p>
 </div>
 <div class="alert alert-info">
 	<b>Recipe templates:</b>

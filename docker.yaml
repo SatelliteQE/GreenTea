@@ -71,8 +71,7 @@
       shell: |
         docker ps | grep "{{ db_host }}" ||
         docker run -d --name "{{ db_host }}" -h "{{ db_host }}" -p 5432:5432 \
-            -e POSTGRES_PASSWORD="{{ db_pass }}" \
-            -e POSTGRES_SERVER="{{ db_host }}" \
+            -e POSTGRES_PASSWORD={{ db_pass }} \
             -v {{ homedir }}/pgsql/data:/var/lib/postgresql/data \
             postgres:{{ db_version }}
       tags:
@@ -96,6 +95,7 @@
         docker run -d --name {{ greentea_host }} -h {{ greentea_host }} \
             --link {{ db_host }}:{{ db_host }} -p 80:8000 \
              -e POSTGRES_PASSWORD={{ db_pass }} \
+             -e POSTGRES_SERVER={{ db_host }} \
              -e BEAKER_SERVER={{ beaker_server}} \
              -e BEAKER_USER={{ beaker_user}} \
              -e BEAKER_PASS={{ beaker_pass}} \
