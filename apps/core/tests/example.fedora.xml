@@ -1,4 +1,4 @@
-<job group="" retention_tag="scratch">
+<job group="greentea" retention_tag="scratch">
   <whiteboard>
     Fedora 22
   </whiteboard>
@@ -6,9 +6,8 @@
     <recipe kernel_options="" kernel_options_post="" ks_meta="" role="RECIPE_MEMBERS" whiteboard="Client">
       <autopick random="false"/>
       <watchdog panic="None"/>
-      <packages/>
-      <ks_appends/>
       <repos/>
+      <packages/>
       <distroRequires>
         <and>
           <distro_family op="=" value="Fedora22"/>
