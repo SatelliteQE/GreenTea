@@ -6,8 +6,8 @@ env:
 install:
   - pip install -r requirement/requirement.txt
 before_script:
-  - find ./ -name "*.sh" | xargs -l1 bash -n
-  - find ./ -name "*.py" | xargs python -m py_compile
+  - git ls-files | grep .sh$ | xargs -l1 bash -n
+  - git ls-files | grep .py$ | xargs python -m py_compile
   - sh bin/init-secretkey.sh >> tttt/settings/basic.py
   - django-admin.py --version
   - python manage.py migrate --noinput
