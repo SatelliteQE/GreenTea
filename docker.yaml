@@ -46,17 +46,22 @@
         - install
         - update
 
+    - name: "List of existed versions of elasticsearch"
+      shell: docker ps -aq -f "name={{elasticsearch}}" | wc -l
+      register: eslist
+
+    - debug: var=eslist.stdout_lines
+
     ## Elasticseach instance ###
     # only one instance of elastic search can be created
-    - name: "Destroy running version of elasticsearch"
+    - name: "Stop running version of elasticsearch"
       shell: |
-        COUNT=$( docker ps -aq -f "name={{elasticsearch}}" | wc -l )
-        [ $COUNT -gt 0 ] && docker stop "{{elasticsearch}}" &&
-            docker rename "{{elasticsearch}}" "{{elasticsearch}}.$COUNT"
+            docker stop "{{elasticsearch}}"
+            docker rename "{{elasticsearch}}" "{{elasticsearch}}.{{eslist.stdout}}"
+      when: eslist|int > 0
       tags:
         - install
       register: out
-    - debug: var=out.stdout_lines
 
     - name: "Create new Elasticsearch in Docker"
       shell: |
@@ -80,7 +85,7 @@
     # only one instance of greentea can be created
     - name: "Destroy running version of elasticsearch"
       shell: |
-        COUNT=$( docker ps -aq -f "name={{greentea_host}}" | wc -l )
+        COUNT=$( docker ps -aq -f "name={{greentea_host}}" | wc -l );
         [ $COUNT -gt 0 ] && docker stop "{{greentea_host}}" &&
             docker rename "{{greentea_host}}" "{{greentea_host}}.$COUNT"
       tags:
