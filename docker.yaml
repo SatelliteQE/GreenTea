@@ -50,9 +50,9 @@
     # only one instance of elastic search can be created
     - name: "Destroy running version of elasticsearch"
       shell: |
-       ! docker ps -a | grep {{elasticsearch}} || (
-        docker stop "{{elasticsearch}}" &&
-        docker rm "{{elasticsearch}}" )
+        COUNT=$( docker ps -aq -f "name={{elasticsearch}}" | wc -l )
+        [ $COUNT -gt 0 ] && docker stop "{{elasticsearch}}" &&
+            docker rename "{{elasticsearch}}" "{{elasticsearch}}.$COUNT"
       tags:
         - install
       register: out
@@ -60,7 +60,6 @@
 
     - name: "Create new Elasticsearch in Docker"
       shell: |
-        docker pull elasticsearch:2
         docker run -d -p 9200:9200 -p 9300:9300 -v "{{ homedir }}/elasticsearch/data/":"/usr/share/elasticsearch/data/" --name "{{elasticsearch}}" -h "{{elasticsearch}}" elasticsearch:2
       tags:
         - install
@@ -81,9 +80,9 @@
     # only one instance of greentea can be created
     - name: "Destroy running version of elasticsearch"
       shell: |
-       ! docker ps -a | grep {{elasticsearch}} || (
-        docker stop "{{greentea_host}}" &&
-        docker rm "{{greentea_host}}" )
+        COUNT=$( docker ps -aq -f "name={{greentea_host}}" | wc -l )
+        [ $COUNT -gt 0 ] && docker stop "{{greentea_host}}" &&
+            docker rename "{{greentea_host}}" "{{greentea_host}}.$COUNT"
       tags:
         - install
       register: out

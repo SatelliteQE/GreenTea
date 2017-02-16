@@ -13,10 +13,11 @@
   tasks:
     ## Elasticseach instance ###
     # only one instance of elastic search can be created
-    - name: "Destroy running version of elasticsearch"
+    - name: "Stop and backup old version of elasticsearch"
       shell: |
-        docker stop "{{elasticsearch}}"
-        docker rm "{{elasticsearch}}"
+        COUNT=$( docker ps -aq -f "name={{elasticsearch}}" | wc -l )
+        [ $COUNT -gt 0 ] && docker stop "{{elasticsearch}}" &&
+            docker rename "{{elasticsearch}}" "{{elasticsearch}}.$COUNT"
       tags:
         - renew
         - renew-elasticserach
