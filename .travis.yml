@@ -10,6 +10,7 @@ before_script:
   - git ls-files | grep .py$ | xargs python -m py_compile
   - sh bin/init-secretkey.sh >> tttt/settings/basic.py
   - django-admin.py --version
+  - python manage.py collectstatic --noinput
   - python manage.py migrate --noinput
 script:
   - python manage.py test apps.core.tests.SimpleTest
