@@ -38,8 +38,6 @@
         git fetch
         git reset --hard HEAD
         git pull
-        source env/bin/activate
-        python manage.py collectstatic --noinput
       become: yes
       become_user: "{{ greentea_user }}"
       args:
@@ -61,6 +59,17 @@
         chdir: "{{ homedir }}"
       tags:
         - upgrade
+
+    - name: "Update collect static files"
+      shell: |
+        source env/bin/activate &&
+        python manage.py collectstatic --noinput
+      become: yes
+      become_user: greentea
+      args:
+        chdir: "{{ homedir }}"
+      tags:
+        - deploy
 
     - name: "Stop uwsgi instance of Django"
       shell:

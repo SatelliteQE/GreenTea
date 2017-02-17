@@ -21,16 +21,11 @@
     - name: "Test Docker service"
       command: "service docker status"
 
-#    - name: "Enable Http"
-#      shell: "firewall-cmd --add-service=http && firewall-cmd --add-service=http --permanent"
-
     - name: "Create storages for docker"
       shell: |
         mkdir -p {{ homedir }}/{{ item }}
         chcon -Rt svirt_sandbox_file_t {{ homedir }}/{{ item }}
-        restorecon -rv  {{ homedir }}/{{ item }}
       with_items:
-            - media
             - static
             - storage
             - pgsql/data
@@ -49,6 +44,9 @@
     - name: "List of existed versions of elasticsearch"
       shell: docker ps -aq -f "name={{elasticsearch}}" | wc -l
       register: eslist
+      tags:
+        - install
+        - update
 
     - debug: var=eslist.stdout_lines
 
@@ -58,14 +56,13 @@
       shell: |
             docker stop "{{elasticsearch}}"
             docker rename "{{elasticsearch}}" "{{elasticsearch}}.{{eslist.stdout}}"
-      when: eslist|int > 0
+      when: eslist.stdout|int > 0
       tags:
         - install
-      register: out
 
     - name: "Create new Elasticsearch in Docker"
       shell: |
-        docker run -d -p 9200:9200 -p 9300:9300 -v "{{ homedir }}/elasticsearch/data/":"/usr/share/elasticsearch/data/" --name "{{elasticsearch}}" -h "{{elasticsearch}}" elasticsearch:2
+        docker run -d -p 9200:9200 -p 9300:9300 -v "{{ homedir }}/elasticsearch/data/":"/usr/share/elasticsearch/data/:Z" --name "{{elasticsearch}}" -h "{{elasticsearch}}" elasticsearch:2
       tags:
         - install
         - elasticserach
@@ -73,29 +70,36 @@
     ## Postgresql 9.5 ###
     - name: "Create Postgresql in Docker"
       shell: |
+        docker start "{{ db_host }}" || true
         docker ps | grep "{{ db_host }}" ||
         docker run -d --name "{{ db_host }}" -h "{{ db_host }}" -p 5432:5432 \
             -e POSTGRES_PASSWORD={{ db_pass }} \
-            -v {{ homedir }}/pgsql/data:/var/lib/postgresql/data \
+            -v /var/lib/postgresql/data:/var/lib/postgresql/data:Z \
             postgres:{{ db_version }}
       tags:
         - install
         - update
 
+    - name: "List of existed versions of Greentea"
+      shell: docker ps -aq -f "name={{greentea_host}}" | wc -l
+      register: gtlist
+      tags:
+        - only-greentea
+
     # only one instance of greentea can be created
-    - name: "Destroy running version of elasticsearch"
+    - name: "Switch to newer image of Greentea"
       shell: |
-        COUNT=$( docker ps -aq -f "name={{greentea_host}}" | wc -l );
-        [ $COUNT -gt 0 ] && docker stop "{{greentea_host}}" &&
-            docker rename "{{greentea_host}}" "{{greentea_host}}.$COUNT"
+        docker stop "{{greentea_host}}" || true
+        docker rename "{{greentea_host}}" "{{greentea_host}}.{{gtlist.stdout}}" || true
       tags:
         - install
-      register: out
-    - debug: var=out.stdout_lines
+        - only-greentea
+      when: gtlist.stdout|int > 0
 
     ## GreenTea instance ###
-    - name: Run Greentea in Docker
+    - name: "Run Greentea in Docker"
       shell: |
+        chown 1000:1000 -R {{homedir}}
         docker run -d --name {{ greentea_host }} -h {{ greentea_host }} \
             --link {{ db_host }}:{{ db_host }} -p 80:8000 \
              -e POSTGRES_PASSWORD={{ db_pass }} \
@@ -103,13 +107,13 @@
              -e BEAKER_SERVER={{ beaker_server}} \
              -e BEAKER_USER={{ beaker_user}} \
              -e BEAKER_PASS={{ beaker_pass}} \
-             -v /data/greentea/tttt/media/:{{homedir}}/media:Z \
-             -v /data/greantea/tttt/static/:{{homedir}}/static:Z \
-             -v /data/greentea/tttt/storage/:{{homedir}}/storage:Z \
+             -v {{homedir}}/static:/data/greentea/tttt/static:Z \
+             -v {{homedir}}/storage:/data/greentea/storage:Z \
                 pajinek/greentea
       tags:
         - install
         - update
+        - only-greentea
 
 ...
 
