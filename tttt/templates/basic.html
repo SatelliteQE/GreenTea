@@ -9,19 +9,19 @@
     <link rel="stylesheet" href="/static/lib/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="/static/lib/bootstrap/dist/css/bootstrap-theme.min.css">
     <link rel="stylesheet" href="/static/lib/octicons/octicons.css">
-    <link rel="stylesheet" href="{%  staticfile "/static/css/basic.css" %}">
+    <link rel="stylesheet" href="/static/css/basic.css">
     <script src="/static/js/jquery-1.10.1.min.js"></script>
     <script src="/static/js/jquery.cookie.js"></script>
     <script src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
     <script src="/static/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     <link rel="shortcut icon" href="/static/images/shortcut.ico">
-    <script src="{%  staticfile "/static/js/functions.js" %}"></script>
+    <script src="/static/js/functions.js"></script>
     <script language="javascript">
     {% for key, value in conf.items %}
       var {{ key }}="{{ value }}";
     {% endfor %}
     </script>
-    <script src="{%  staticfile "/static/js/tttt.js" %}"></script>
+    <script src="/static/js/tttt.js"></script>
     {% block header %}{% endblock %}
   </head>
   <body>
