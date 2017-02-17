@@ -31,6 +31,7 @@ function manage() {
 }
 
 HOME=/data/greentea
+chown greentea:greentea -R $HOME
 source $HOME/env/bin/activate && cd $HOME
 
 # Set postgresql

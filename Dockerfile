@@ -1,15 +1,14 @@
 FROM centos:7
 
-WORKDIR /data/
-
 RUN mkdir -p /data/greentea
+WORKDIR /data/greentea
 ADD requirement /data/greentea/requirement
 
 RUN echo "root:GreenTea!" | chpasswd
 
 # install packages
 RUN curl https://beaker-project.org/yum/beaker-client-CentOS.repo -o /etc/yum.repos.d/beaker-client-CentOS.repo \
-    && cat greentea/requirement/rpms-*.txt | xargs yum install -y \
+    && cat requirement/rpms-*.txt | xargs yum install -y \
     && yum clean all \
     && chmod 755 /data/ -R
 
@@ -17,7 +16,7 @@ ADD . /data/greentea/
 
 # create enviroment
 RUN useradd -ms /bin/bash greentea \
-    && chown greentea:greentea -R greentea
+    && chown greentea:greentea -R /data/greentea
 
 USER greentea
 ENV HOME /data/greentea
@@ -38,5 +37,6 @@ RUN sh $HOME/bin/init-secretkey.sh > $HOME/tttt/settings/production.py \
 # RUN yum install crontabs -y && mv $HOME/tttt/conf/cron/greentea.cron /etc/cron.d/
 
 EXPOSE 8000
+VOLUME /data/greentea/tttt/static
 
 CMD sh $HOME/bin/docker-run.sh
