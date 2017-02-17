@@ -1284,7 +1284,7 @@ class Task(models.Model):
             print url, ":", e.getcode()
             return None
 
-        path_dir = "%sjournals/" % (settings.MEDIA_ROOT)
+        path_dir = "%sjournals/" % (settings.STORAGE_ROOT)
         path_file = "%s/%s-journal.xml" % (path_dir, self.uid)
         if not os.path.exists(path_dir):
             os.makedirs(path_dir)

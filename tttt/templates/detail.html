@@ -28,7 +28,7 @@
 	<td class="{% if not recipe.is_result_pass %} field-job{% endif %} status-{{ recipe.get_result }}" >
 		{{ recipe.resultrate|floatformat:"1" }}
 		{% if recipe.is_running %}
-		<img src="/media/images/done.png" alt="R" titles="Machine still running" />
+		<img src="/static/images/done.png" alt="R" titles="Machine still running" />
 		{% endif %}
 	</td>
 </tr>

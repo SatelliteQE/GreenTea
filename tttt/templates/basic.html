@@ -5,23 +5,23 @@
     <title>Green Tea {% block title %}{% endblock %}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/media/css/smoothness/jquery-ui-1.10.3.custom.css">
-    <link rel="stylesheet" href="/media/lib/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/media/lib/bootstrap/dist/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="/media/lib/octicons/octicons.css">
-    <link rel="stylesheet" href="{%  staticfile "/media/css/basic.css" %}">
-    <script src="/media/js/jquery-1.10.1.min.js"></script>
-    <script src="/media/js/jquery.cookie.js"></script>
-    <script src="/media/js/jquery-ui-1.10.3.custom.min.js"></script>
-    <script src="/media/lib/bootstrap/dist/js/bootstrap.min.js"></script>
-    <link rel="shortcut icon" href="/media/images/shortcut.ico">
-    <script src="{%  staticfile "/media/js/functions.js" %}"></script>
+    <link rel="stylesheet" href="/static/css/smoothness/jquery-ui-1.10.3.custom.css">
+    <link rel="stylesheet" href="/static/lib/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/lib/bootstrap/dist/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/static/lib/octicons/octicons.css">
+    <link rel="stylesheet" href="{%  staticfile "/static/css/basic.css" %}">
+    <script src="/static/js/jquery-1.10.1.min.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script src="/static/js/jquery-ui-1.10.3.custom.min.js"></script>
+    <script src="/static/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link rel="shortcut icon" href="/static/images/shortcut.ico">
+    <script src="{%  staticfile "/static/js/functions.js" %}"></script>
     <script language="javascript">
     {% for key, value in conf.items %}
       var {{ key }}="{{ value }}";
     {% endfor %}
     </script>
-    <script src="{%  staticfile "/media/js/tttt.js" %}"></script>
+    <script src="{%  staticfile "/static/js/tttt.js" %}"></script>
     {% block header %}{% endblock %}
   </head>
   <body>
