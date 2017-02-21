@@ -1,4 +1,4 @@
-<job group="greentea" retention_tag="scratch">
+<job retention_tag="scratch">
   <whiteboard>
     Fedora 22
   </whiteboard>
