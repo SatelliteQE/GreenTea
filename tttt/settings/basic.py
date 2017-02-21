@@ -186,6 +186,7 @@ try:
 except ImportError:
     pass
 
+
 ENABLE_PLUGINS = (
     #       "irc",
     "backuplogs",
@@ -277,29 +278,13 @@ KRB5_SERVICE = 'krbtgt@AS.EXAMPLE.COM'
 # redirect url after login
 LOGIN_REDIRECT_URL = '/'
 
-if int(os.environ.get("DDD", 0)) > 0:
-    # LOGGING['loggers']['commands']['handlers'] = ['console', ]
-    # LOGGING['loggers']['commands']['propagate'] = False
-    # LOGGING['root']['handlers'].append('console')
-
-    # Enabling django-debug-toolbar..."
-    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
-
-    DEBUG_TOOLBAR_CONFIG = {
-        'INTERCEPT_REDIRECTS': False,
-    }
-    INSTALLED_APPS += ('debug_toolbar',)
-
-
 # beaker settings
 BEAKER_SERVER = "https://beaker.example.com"
 
 # Set BEAKER_OWNER and BEAKER_PASS or you can use kerberos auth
 BEAKER_OWNER = None
 BEAKER_PASS = None
-BEAKER_JOB_GROUP = "greentea"
-
-MAX_LOGS_IN_ONE_CHECK = 1000
+BEAKER_JOB_GROUP = ""  # the group must to exist in Beaker
 
 BEAKER_DEFAULT_PACKAGES = (
     "vim", "gcc", "make", "nfs-utils", "wget", "libxml2-python",
@@ -308,10 +293,8 @@ BEAKER_DEFAULT_PACKAGES = (
 # How long should <reservesys> block the machine
 BEAKER_RESERVESYS = 86400
 
-BKR_SYSTEM_PASS = None
-BKR_SYSTEM_USER = None
-
 LOGFILE_LIFETIME = 30
+MAX_LOGS_IN_ONE_CHECK = 1000
 
 RESERVE_TEST = "/distribution/reservesys"
 
@@ -355,9 +338,24 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'PAGE_SIZE': 100
 }
+
 ELASTICSEARCH = ()
 ELASTICSEARCH_MAX_SIZE = 10**6  # 10MB
 
 # Time period for which average run time of tests should be computed, in hours
 LONGEST_RUNNING_PERIOD = 168
 LONGEST_RUNNING_COLUMN_LENGTH = 15
+
+### DEBUGING ###
+if int(os.environ.get("DDD", 0)) > 0:
+    # LOGGING['loggers']['commands']['handlers'] = ['console', ]
+    # LOGGING['loggers']['commands']['propagate'] = False
+    # LOGGING['root']['handlers'].append('console')
+
+    # Enabling django-debug-toolbar..."
+    MIDDLEWARE_CLASSES += ('debug_toolbar.middleware.DebugToolbarMiddleware',)
+
+    DEBUG_TOOLBAR_CONFIG = {
+        'INTERCEPT_REDIRECTS': False,
+    }
+    INSTALLED_APPS += ('debug_toolbar',)
