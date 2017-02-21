@@ -4,7 +4,7 @@ from django.contrib import admin
 
 from apps.report.models import Score
 from models import Task, TaskPeriod, TaskPeriodSchedule
-
+from forms import TaskPeriodForm
 logger = logging.getLogger("main")
 
 
@@ -14,6 +14,7 @@ class TaskAdmin(admin.ModelAdmin):
 
 class TaskPeriodAdmin(admin.ModelAdmin):
     list_display = ("title", "common", "cron", "get_previous_run", "is_enable")
+    form = TaskPeriodForm
 
     def recount(modeladmin, request, queryset):
         for it in queryset:

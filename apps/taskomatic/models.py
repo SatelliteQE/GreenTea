@@ -70,8 +70,10 @@ class TaskPeriodSchedule(models.Model):
 
 class TaskPeriod(models.Model):
     title = models.CharField(max_length=64)
-    label = models.SlugField(max_length=64, unique=True)
-    common = models.CharField(max_length=128)
+    label = models.SlugField(max_length=64, unique=True,
+                             help_text="Label must be same for command 'schedule --schedule-label [label]'")
+    common = models.CharField(_("Command"), max_length=128,
+                              help_text="All allowed <a href=\"https://github.com/SatelliteQE/GreenTea/wiki/Commands\">commands</a>. Example: \'beaker schedule --schedule-label daily\'")
     date_last = models.DateTimeField(
         _('Date of last run'),
         null=True,
