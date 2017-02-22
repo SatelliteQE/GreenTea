@@ -11,7 +11,7 @@ ROOT_PATH = os.path.abspath("%s/%s/" %
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 
 ADMINS = (
     # ('Example', 'admin@example.com'),
