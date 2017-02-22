@@ -8,6 +8,7 @@
     django_settings: "tttt.settings.production"
     elasticsearch: "elasticsearch.docker"
     elasticsearch_data_storage: "/usr/share/elasticsearch/data/"
+    backup_dir: "/var/backup/greentea/"
   environment:
     DJANGO_SETTINGS_MODULE: "{{ django_settings }}"
   tasks:
@@ -22,6 +23,7 @@
         - renew
         - renew-elasticserach
       register: out
+
     - debug: var=out.stdout_lines
 
     - name: "Create new Elasticsearch in Docker"
@@ -32,6 +34,42 @@
         - renew
         - renew-elasticserach
         - elasticserach
+
+    - name: "create storage for backup database"
+      file: path={{ backup_dir }} state=directory recurse=yes group={{ greentea_user }} owner={{ greentea_user }}
+      tags:
+        - backup_db
+
+    - name: "Backup database"
+      shell: |
+        source env/bin/activate
+        TIMESTEMP=$(date +"%Y-%m-%d.%H%M")
+        DB_NAME=$( python -c "from {{ django_settings }} import DATABASES; print DATABASES['default']['NAME']" )
+        DB_HOST=$( python -c "from {{ django_settings }} import DATABASES; print DATABASES['default']['HOST']" )
+        DB_USER=$( python -c "from {{ django_settings }} import DATABASES; print DATABASES['default']['USER']" )
+        pg_dump "$DB_NAME" -U "$DB_USER" -h "$DB_HOST" | gzip > {{ backup_dir }}/tttt-$TIMESTEMP.db.gz
+        echo tttt-$TIMESTEMP.db.gz > {{ backup_dir }}/latest
+      become: yes
+      become_user: "{{ greentea_user }}"
+      args:
+        chdir: "{{ homedir }}"
+      tags:
+        - backup_db
+
+    - name: "Load latest backup"
+      command: cat {{ backup_dir }}/latest
+      register: db_backup_name
+      tags:
+        - backup_db
+
+    - debug: var=db_backup_name.stdout
+      tags:
+        - backup_db
+
+    - name: "Fetch backup database"
+      fetch: src={{backup_dir}}/{{db_backup_name.stdout}} dest=tttt.db.gz flat=yes
+      tags:
+        - backup_db
 
     - name: "Update project from Github"
       shell: |
@@ -80,23 +118,6 @@
         - restart
         - stop
 
-    - name: "Backup database"
-      shell: |
-        DB_NAME=$( python -c "from {{ django_settings }} import DATABASES; print DATABASES['default']['NAME']" )
-        DB_HOST=$( python -c "from {{ django_settings }} import DATABASES; print DATABASES['default']['HOST']" )
-        DB_USER=$( python -c "from {{ django_settings }} import DATABASES; print DATABASES['default']['USER']" )
-        pg_dump "$DB_NAME" -U "$DB_USER" -h "$DB_HOST" | gzip > tttt.db.gz
-      become: yes
-      become_user: "{{ greentea_user }}"
-      args:
-        chdir: "{{ homedir }}"
-      tags:
-        - backup_db
-
-    - name: "Fetch backup database"
-      fetch: src=tttt.db.gz dest=tttt.db.gz flat=yes
-      tags:
-        - backup_db
 
     - name: "Migrate database schema"
       shell: |
