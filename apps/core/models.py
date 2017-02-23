@@ -776,9 +776,6 @@ class DistroTemplate(models.Model):
     distroname = models.CharField(max_length=255, blank=True, null=True,
                                   help_text="If field is empty, then it will use latest compose.")
 
-    def tpljobs_counter(self):
-        return RecipeTemplate.objects.filter(distro=self).count()
-
     def __unicode__(self):
         return self.name
 
@@ -791,6 +788,14 @@ class DistroTemplate(models.Model):
             self.name = "%s %s %s" % (
                 self.family, self.variant, self.distroname)
         return super(model, self).save(*args, **kwargs)
+
+    def tpljobs_counter(self):
+        return RecipeTemplate.objects.filter(distro=self).count()
+
+    def get_op(self):
+        if not self.distroname.find("%") < 0:
+            return "like"
+        return "="
 
 
 class Repository(models.Model):
@@ -834,7 +839,7 @@ class RecipeTemplate(models.Model, ObjParams):
     schedule = models.CharField(
         _("Schedule period"), max_length=255, blank=True,
         help_text="For example: s390x: 0,2,4; x86_64: 1,3,5,6")
-    external_repos=models.ManyToManyField(Repository, blank=True)
+    external_repos = models.ManyToManyField(Repository, blank=True)
 
     def __unicode__(self):
         name = self.name
