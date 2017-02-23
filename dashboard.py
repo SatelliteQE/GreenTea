@@ -39,6 +39,7 @@ class CustomIndexDashboard(Dashboard):
                         'apps.core.models.RecipeTemplate',
                         'apps.core.models.TaskTemplate',
                         'apps.core.models.TaskRoleEnum',
+                        'taggit.models.Tag',
                     ),
                 ),
                 modules.AppList(

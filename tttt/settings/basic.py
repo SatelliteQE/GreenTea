@@ -310,7 +310,7 @@ PAGINATOR_OBJECTS_ONHOMEPAGE = 10
 CHECK_COMMMITS_PREVIOUS_DAYS = 7
 
 GRAPPELLI_ADMIN_TITLE = "<a href='/' >Green Tea</a>"
-GRAPPELLI_INDEX_DASHBOARD = 'dashboard_redhat.CustomIndexDashboard'
+GRAPPELLI_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
 
 # how many periods is shown
 RANGE_PREVIOUS_RUNS = 9
@@ -319,11 +319,9 @@ PREVIOUS_DAYS = 9  # warning: deprecated
 
 MAX_TASKOMATIC_HISTORY = 300
 
-GRAPPELLI_ADMIN_TITLE = "<a href='/' >Green Tea</a>"
+TAGGIT_CASE_INSENSITIVE = True
 
-GRAPPELLI_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
-
-TEMPLATE_FOOTER = "Created by Satellite QA Team in 2013-2015"
+TEMPLATE_FOOTER = "Created by Satellite QA Team in 2013-2017"
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
