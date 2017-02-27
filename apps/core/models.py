@@ -805,6 +805,10 @@ class Repository(models.Model):
     def __unicode__(self):
         return "%s" % self.name
 
+    class Meta:
+        verbose_name = _("repository")
+        verbose_name_plural = _("repositories")
+
 
 class RecipeTemplate(models.Model, ObjParams):
     NONE, RECIPE_MEMBERS, STANDALONE = 0, 1, 2
@@ -1358,6 +1362,10 @@ class CheckProgress(models.Model):
     dateend = models.DateTimeField(null=True, blank=True)
     totalsum = models.IntegerField()
     actual = models.IntegerField(default=0)
+
+    class Meta:
+        verbose_name = _("Check progress")
+        verbose_name_plural = _("Check progress")
 
     def __unicode__(self):
         return "%s" % self.datestart
