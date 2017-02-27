@@ -11,7 +11,7 @@ ROOT_PATH = os.path.abspath("%s/%s/" %
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 
 ADMINS = (
     # ('Example', 'admin@example.com'),
@@ -268,61 +268,6 @@ LOGGING = {
     },
 }
 
-KRB5_TEST_USER = "username"
-KRB5_TEST_PASSWORD = "password"
-
-# kerberos realm and service
-KRB5_REALM = 'EXAMPLE.COM'
-KRB5_SERVICE = 'krbtgt@AS.EXAMPLE.COM'
-
-# redirect url after login
-LOGIN_REDIRECT_URL = '/'
-
-# beaker settings
-BEAKER_SERVER = "https://beaker.example.com"
-
-# Set BEAKER_OWNER and BEAKER_PASS or you can use kerberos auth
-BEAKER_OWNER = None
-BEAKER_PASS = None
-BEAKER_JOB_GROUP = ""  # the group must to exist in Beaker
-
-BEAKER_DEFAULT_PACKAGES = (
-    "vim", "gcc", "make", "nfs-utils", "wget", "libxml2-python",
-)
-
-# How long should <reservesys> block the machine
-BEAKER_RESERVESYS = 86400
-
-LOGFILE_LIFETIME = 30
-MAX_LOGS_IN_ONE_CHECK = 1000
-
-RESERVE_TEST = "/distribution/reservesys"
-
-# If you want to change directory with repositories,
-# don't forget changed it in /var/www/gitweb/gitweb_config.perl
-REPOSITORIES_GIT = {
-    "%s/git" % STORAGE_ROOT:
-        ("/tests",),
-}
-
-PAGINATOR_OBJECTS_ONPAGE = 20
-PAGINATOR_OBJECTS_ONHOMEPAGE = 10
-CHECK_COMMMITS_PREVIOUS_DAYS = 7
-
-GRAPPELLI_ADMIN_TITLE = "<a href='/' >Green Tea</a>"
-GRAPPELLI_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
-
-# how many periods is shown
-RANGE_PREVIOUS_RUNS = 9
-# how many previsou days use for frontend
-PREVIOUS_DAYS = 9  # warning: deprecated
-
-MAX_TASKOMATIC_HISTORY = 300
-
-TAGGIT_CASE_INSENSITIVE = True
-
-TEMPLATE_FOOTER = "Created by Satellite QA Team in 2013-2017"
-
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
@@ -337,12 +282,70 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100
 }
 
+
+### Kerberos ###
+# kerberos realm and service
+KRB5_REALM = 'EXAMPLE.COM'
+KRB5_SERVICE = 'krbtgt@AS.EXAMPLE.COM'
+
+
+### Web UI ###
+# redirect url after login
+LOGIN_REDIRECT_URL = '/'
+
+PAGINATOR_OBJECTS_ONPAGE = 20
+PAGINATOR_OBJECTS_ONHOMEPAGE = 10
+CHECK_COMMMITS_PREVIOUS_DAYS = 7
+
+GRAPPELLI_ADMIN_TITLE = "<a href='/' >Green Tea</a>"
+GRAPPELLI_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
+
+# How many periods are shown on web ui
+RANGE_PREVIOUS_RUNS = 9
+
+# How many picked tasks are stored
+MAX_TASKOMATIC_HISTORY = 300
+
+TAGGIT_CASE_INSENSITIVE = True
+
+TEMPLATE_FOOTER = "Created by Satellite QA Team in 2013-2017"
+
+
+### BEAKER ###
+BEAKER_SERVER = "https://beaker.example.com"
+
+# Set BEAKER_OWNER and BEAKER_PASS or you can use kerberos auth
+BEAKER_OWNER = None
+BEAKER_PASS = None
+BEAKER_JOB_GROUP = ""  # the group must to exist in Beaker
+
+BEAKER_DEFAULT_PACKAGES = (
+    # "vim", "gcc", "make"
+)
+
+# How long should <reservesys> block the machine
+BEAKER_RESERVESYS = 86400
+MAX_LOGS_IN_ONE_CHECK = 1000
+RESERVE_TEST = "/distribution/reservesys"
+
+
+### Elasticserach ###
 ELASTICSEARCH = ()
 ELASTICSEARCH_MAX_SIZE = 10**6  # 10MB
+LOGFILE_LIFETIME = 30
+
+### Repositories ###
+# If you want to change directory with repositories,
+# don't forget changed it in /var/www/gitweb/gitweb_config.perl
+REPOSITORIES_GIT = {
+    "%s/git" % STORAGE_ROOT:
+        ("/tests",),
+}
 
 # Time period for which average run time of tests should be computed, in hours
 LONGEST_RUNNING_PERIOD = 168
 LONGEST_RUNNING_COLUMN_LENGTH = 15
+
 
 ### DEBUGING ###
 if int(os.environ.get("DDD", 0)) > 0:
