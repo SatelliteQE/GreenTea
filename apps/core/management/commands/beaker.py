@@ -119,6 +119,7 @@ class BeakerCommand():
         b = Beaker()
         for it in FileLog.objects.filter(status_code=0)\
                          .order_by("-created")[0:settings.MAX_LOGS_IN_ONE_CHECK]:
+
             it.status_code, logpath = b.downloadLog(it.url)
             if not logpath:
                 # if file is not download then skip and not save object

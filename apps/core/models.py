@@ -1277,33 +1277,6 @@ class Task(models.Model):
     def logfiles(self):
         return list(FileLog.objects.filter(task=self).values("path"))
 
-    def get_url_journal(self):  # , job=None, recipe=None):
-        # if recipe == None: recipe = self.recipe
-        # if job == None: job = recipe.job
-        url = None
-        return url % (self.uid[0:5], self.uid)
-
-    def load_journal(self):
-
-        url = self.get_url_journal()
-        try:
-            response = urllib2.urlopen(url)
-            html = response.read()
-        except urllib2.HTTPError as e:
-            print url, ":", e.getcode()
-            return None
-
-        path_dir = "%sjournals/" % (settings.STORAGE_ROOT)
-        path_file = "%s/%s-journal.xml" % (path_dir, self.uid)
-        if not os.path.exists(path_dir):
-            os.makedirs(path_dir)
-        f = open(path_file, "w")
-        f.write(html)
-        f.close()
-
-        if os.path.exists(path_file):
-            return path_file
-
     def set_result(self, value):
         try:
             self.result = [it[0]
@@ -1423,7 +1396,7 @@ class FileLog(models.Model):
     task = models.ForeignKey(Task, blank=True, null=True,
                              related_name="logfiles")
     url = models.CharField(max_length=256, unique=True)
-    path = models.CharField(max_length=256, null=True, blank=False)
+    path = models.CharField(max_length=256, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     index_id = models.CharField(max_length=126, blank=True, null=True)
     is_downloaded = models.BooleanField(_("File is downlaod"), default=False)
@@ -1448,7 +1421,7 @@ class FileLog(models.Model):
                 self.logger.warning("This file is not download %s" % self.id)
                 return
             path_dir = os.path.dirname(path)
-            if path_dir == path:
+            if path_dir in ("/", path):
                 return
             absolute_path = os.path.join(
                 settings.STORAGE_ROOT, "./%s" % path_dir)
@@ -1471,11 +1444,10 @@ class FileLog(models.Model):
 
     def save(self, *args, **kwargs):
         # get taskid from path
-        # /beaker-logs/2016/03/12590/1259016/2554157/38992903/TESTOUT.log
-        # /beaker-logs/2016/03/12590/1259016/2554157/install.log
+        # /recipes/3545476/tasks/51898719/logs/journal.xml
         if not self.task:
             logparse = urlparse(self.url)
-            res = re.match(r'.*/%s/([0-9]+)/[^/]+$' %
+            res = re.match(r'.*/%s/tasks/([0-9]+)/logs/[^/]+$' %
                            self.recipe.uid, logparse.path)
             try:
                 if res:
