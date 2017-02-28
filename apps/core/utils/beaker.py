@@ -214,15 +214,18 @@ class Beaker:
             #    cfg_date = datetime.strptime(labeldates[0],"%Y-%m-%d")
         else:
             label = data["method"]
-        jt, status = JobTemplate.objects.get_or_create(whiteboard=label)
-        if status:
-            jt.save()
 
-        defaults = {"template": jt}
-        if date_created:
-            defaults["date"] = date_created
-        job, status = Job.objects.get_or_create(uid=jobid, defaults=defaults)
-        job.template = jt
+        try:
+            job = Job.objects.get(uid=jobid)
+        except Job.DoesNotExist:
+            jt = JobTemplate(whiteboard=label)
+            jt.save()
+            defaults={"template": jt}
+            if date_created:
+                defaults["date"] = date_created
+            job, status = Job.objects.get_or_create(uid=jobid, defaults=defaults)
+            job.template = jt
+
         job.is_running = not data["is_finished"]
 
         if ((running and job.is_running) or not job.is_finished):
