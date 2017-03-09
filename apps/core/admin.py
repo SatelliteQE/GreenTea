@@ -157,7 +157,7 @@ class CheckProgressAdmin(admin.ModelAdmin):
 
 
 class GitAdmin(admin.ModelAdmin):
-    list_display = ("name", "url", "localurl", "get_count")
+    list_display = ("name", "url", "localurl", "path", "get_count")
 
 
 class JobTemplateAdmin(admin.ModelAdmin):

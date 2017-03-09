@@ -31,6 +31,7 @@ from taggit.managers import TaggableManager
 from apps.core.signals import recipe_changed, recipe_finished
 from apps.core.utils.date_helpers import currentDate, toUTC
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
+from validators import validator_dir_exists
 
 logger = logging.getLogger("main")
 
@@ -146,6 +147,7 @@ class Git(models.Model):
     name = models.CharField(max_length=64, blank=True, null=True)
     localurl = models.CharField(max_length=255)
     url = models.CharField(max_length=255, unique=True)
+    path = models.CharField(max_length=255, blank=True, null=True, help_text="Only local directory file:///mnt/git/..", validators=[validator_dir_exists])
     path_absolute = None
     cmd = None
     log = None

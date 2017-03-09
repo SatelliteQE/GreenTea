@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 # Author: Pavel Studeni <pstudeni@redhat.com>
 
 # How often run script for pickup tasks in seconds

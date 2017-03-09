@@ -3,9 +3,7 @@
 
 import difflib
 import logging
-
 from django import forms
-
 import apps.core.views
 from models import GroupTemplate, GroupTestTemplate, JobTemplate, Test
 
