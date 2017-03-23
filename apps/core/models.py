@@ -694,7 +694,7 @@ class JobTemplate(models.Model):
     schedule = models.ForeignKey(TaskPeriod, null=True, blank=True)
     position = models.SmallIntegerField(default=0)
     grouprecipes = models.CharField(
-        max_length=255, null=False, blank=True,
+        max_length=255, null=False, blank=True, default="{{ whiteboard }}",
         help_text="example: {{arch}} {{whiteboard|nostartsdate}}")
     tags = TaggableManager(blank=True)
     group = settings.BEAKER_JOB_GROUP

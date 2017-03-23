@@ -15,6 +15,8 @@ class TaskPeriodForm(forms.ModelForm):
 
     def clean_common(self):
         params = shlex.split(self.cleaned_data["common"])
+        if "label" not in  self.cleaned_data:
+            return " ".join(params)
         label = self.cleaned_data["label"]
         for key, it in enumerate(params):
             if it == "--schedule-label":
