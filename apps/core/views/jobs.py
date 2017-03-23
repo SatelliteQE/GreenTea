@@ -190,8 +190,7 @@ class JobsListView(TemplateView):
         # include only jobs with given name
         search_query = ""
         if self.filters.get('search'):
-            search_query = """AND lower("core_jobtemplate"."whiteboard") LIKE lower('%%{}%%')""".format(
-                self.filters.get('search'))
+            search_query = """AND lower("core_jobtemplate"."whiteboard") LIKE lower(%s)"""
 
         query = """SELECT date("core_job"."date") as job_date, "core_task"."result" as task_ressult, count("core_task"."result") from core_task
            LEFT JOIN "core_recipe" ON ("core_task"."recipe_id" = "core_recipe"."id")
@@ -202,8 +201,10 @@ class JobsListView(TemplateView):
            GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """ % (tag_query, search_query)
 
         cursor = connection.cursor()
-        cursor.execute(query, [
-            (datetime.now().date() - timedelta(days=14)).isoformat()])
+        query_data = [(datetime.now().date() - timedelta(days=settings.CHART_MAX_DAYS)).isoformat(),]
+        if self.filters.get('search'):
+            query_data.append("%%%s%%" % self.filters.get('search'))
+        cursor.execute(query, query_data)
 
         data = cursor.fetchall()
         label = OrderedDict()

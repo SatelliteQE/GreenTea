@@ -303,6 +303,8 @@ GRAPPELLI_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
 # How many periods are shown on web ui
 RANGE_PREVIOUS_RUNS = 9
 
+CHART_MAX_DAYS = 30
+
 # How many picked tasks are stored
 MAX_TASKOMATIC_HISTORY = 300
 
