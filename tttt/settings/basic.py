@@ -334,14 +334,6 @@ ELASTICSEARCH = ()
 ELASTICSEARCH_MAX_SIZE = 10**6  # 10MB
 LOGFILE_LIFETIME = 30
 
-### Repositories ###
-# If you want to change directory with repositories,
-# don't forget changed it in /var/www/gitweb/gitweb_config.perl
-REPOSITORIES_GIT = {
-    "%s/git" % STORAGE_ROOT:
-        ("/tests",),
-}
-
 # Time period for which average run time of tests should be computed, in hours
 LONGEST_RUNNING_PERIOD = 168
 LONGEST_RUNNING_COLUMN_LENGTH = 15
