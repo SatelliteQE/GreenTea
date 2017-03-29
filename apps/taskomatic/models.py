@@ -165,6 +165,7 @@ class Task(models.Model):
     def run(self, errorHandler=None):
         t1 = timezone.now()
         self.status = self.STATUS_ENUM_INPROGRESS  # set status "in progress"
+        self.date_run = t1
         self.save()
         params = [it.strip() for it in self.common_params.split()]
 
@@ -206,7 +207,6 @@ class Task(models.Model):
         t0 = timezone.now()
         t2 = t0 - t1
         self.time_long = t2.seconds + t2.microseconds / 1000000.0
-        self.date_run = t0
         self.save()
 
 
