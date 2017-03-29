@@ -835,6 +835,7 @@ class RecipeTemplate(models.Model, ObjParams):
         help_text="Set to '= system42.beaker.example.com' if you want your recipe to run on exactly this system")
     hvm = models.BooleanField(_("Support virtualizaion"), default=False)
     params = models.TextField(_("Extra XML parameter"), blank=True)
+    # generator = models.TextField(_("Recipe generator"), blank=True, help_text="rules for generating recipes")
     packages = models.CharField(
         _("Extra packages"), max_length=256, blank=True,
         help_text="Separate by white space. For example: vim xen")
@@ -846,6 +847,7 @@ class RecipeTemplate(models.Model, ObjParams):
         _("Schedule period"), max_length=255, blank=True,
         help_text="For example: s390x: 0,2,4; x86_64: 1,3,5,6")
     external_repos = models.ManyToManyField(Repository, blank=True)
+
 
     def __unicode__(self):
         name = self.name
@@ -1118,7 +1120,7 @@ class Recipe(models.Model):
     uid = models.CharField("Recipe ID", max_length=12, unique=True)
     whiteboard = models.CharField(
         "Whiteboard",
-        max_length=64,
+        max_length=256,
         blank=True,
         null=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=UNKNOW)
