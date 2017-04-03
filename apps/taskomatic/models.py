@@ -158,7 +158,7 @@ class Task(models.Model):
     def get_params(self):
         data = {}
         for it in self.common_params.split():
-            key, value = it.strip().split("=")
+            key, value = it.strip().split("=", 1)
             data[key] = value
         return data
 
