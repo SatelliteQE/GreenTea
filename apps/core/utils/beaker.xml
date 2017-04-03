@@ -29,7 +29,6 @@
             {% if guest.distro.family %}<distro_family op="=" value="{{ guest.distro.family|default:"" }}"/>{% endif %}
             {% if guest.distro.variant %}<distro_variant op="=" value="{{ guest.distro.variant }}"/>{% endif %}
             <distro_name op="=" value="{{ guest.distro.distroname }}"/>
-            <distro_method op="=" value="nfs"/>
             <distro_arch op="=" value="{{ arch.name }}"/>
           </and>
         </distroRequires>
@@ -75,7 +74,6 @@
           {% if r.distro.family %}<distro_family op="=" value="{{ r.distro.family|default:"" }}"/>{% endif %}
           {% if r.distro.variant %}<distro_variant op="=" value="{{ r.distro.variant }}"/>{% endif %}
           <distro_name op="{{ r.distro.get_op }}" value="{{ r.distro.distroname }}"/>
-          <distro_method op="=" value="nfs"/>
           <distro_arch op="=" value="{{ arch.name }}"/>
         </and>
         {% if r.hvm %}<distro_virt op="=" value=""/>{% endif %}
