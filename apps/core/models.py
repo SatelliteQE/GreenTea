@@ -129,7 +129,7 @@ class ObjParams(object):
             if not it:
                 continue
             try:
-                n, v = it.strip().split("=")
+                n, v = it.strip().split("=", 1)
                 params.update({n: v})
             except ValueError:
                 logger.warning("valid params: %s" % self.params.split("\n"))
