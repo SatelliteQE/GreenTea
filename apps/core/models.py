@@ -808,6 +808,7 @@ class Repository(models.Model):
         return "%s" % self.name
 
     class Meta:
+        ordering = ('name', 'url')
         verbose_name = _("repository")
         verbose_name_plural = _("repositories")
 
