@@ -72,9 +72,13 @@ class TaskInLine(admin.TabularInline):
 class FileInLine(admin.TabularInline):
     model = FileLog
     extra = 0
-    fields = ("recipe", "task", "path", "created",
+    fields = ("get_link", "recipe", "task", "path", "created",
                     "is_downloaded", "is_indexed", "status_code")
     readonly_fields = fields
+    def get_link(self, obj):
+        url = reverse('admin:core_filelog_change', args=(obj.pk,))
+        return '<a href="%s">%s</a>' % (url, obj.id)
+    get_link.allow_tags = True
 
 
 class DistroTemplateAdmin(reversion.VersionAdmin):
@@ -290,7 +294,7 @@ class FileLogAdmin(admin.ModelAdmin):
     list_display = ("recipe", "task", "path", "created",
                     "is_downloaded", "is_indexed", "status_code")
     raw_id_fields = ("recipe", "task")
-    search_fields = ["task", "recipe"]
+    search_fields = ["task__uid", "recipe__uid"]
 
 
 class EventAdmin(admin.ModelAdmin):
