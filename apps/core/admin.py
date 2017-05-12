@@ -69,6 +69,14 @@ class TaskInLine(admin.TabularInline):
     readonly_fields = fields
 
 
+class FileInLine(admin.TabularInline):
+    model = FileLog
+    extra = 0
+    fields = ("recipe", "task", "path", "created",
+                    "is_downloaded", "is_indexed", "status_code")
+    readonly_fields = fields
+
+
 class DistroTemplateAdmin(reversion.VersionAdmin):
     list_display = ("name", "distroname",
                     "variant", "family", "tpljobs_counter")
@@ -105,8 +113,9 @@ class RecipeAdmin(admin.ModelAdmin):
 class TaskAdmin(admin.ModelAdmin):
     list_display = ("uid", "recipe", "test", "status",
                     "duration", "datestart", "result")
-    search_fields = ["uid"]
+    search_fields = ["uid",]
     raw_id_fields = ("recipe", "test")
+    inlines = [FileInLine]
 
 
 class TaskTemplateInLine(admin.TabularInline):
@@ -281,6 +290,7 @@ class FileLogAdmin(admin.ModelAdmin):
     list_display = ("recipe", "task", "path", "created",
                     "is_downloaded", "is_indexed", "status_code")
     raw_id_fields = ("recipe", "task")
+    search_fields = ["task", "recipe"]
 
 
 class EventAdmin(admin.ModelAdmin):
