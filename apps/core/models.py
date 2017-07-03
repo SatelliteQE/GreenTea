@@ -46,6 +46,7 @@ CANCEL = 7
 SCHEDULED = 8
 PANIC = 9
 FAILINSTALL = 10
+SKIP = 11
 RESULT_CHOICES = (
     (UNKNOW, "unknow"),
     (ABOART, "aborted"),
@@ -59,6 +60,7 @@ RESULT_CHOICES = (
     (PASS, "pass"),
     (PANIC, "panic"),
     (FAILINSTALL, "failinstall"),
+    (PANIC, "skip"),
 )
 
 NONE = 0
