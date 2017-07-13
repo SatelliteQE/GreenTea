@@ -60,7 +60,7 @@ RESULT_CHOICES = (
     (PASS, "pass"),
     (PANIC, "panic"),
     (FAILINSTALL, "failinstall"),
-    (PANIC, "skip"),
+    (SKIP, "skip"),
 )
 
 NONE = 0
@@ -100,13 +100,26 @@ class EnumResult:
     SCHEDULED = 8
     PANIC = 9
     FAILINSTALL = 10
+    SKIP = 11
 
     def __init__(self):
         self.enums = dict(RESULT_CHOICES)
 
-    def get(self, value):
+    def _get(self, value):
         if isinstance(value, int):
             return self.enums.get(value)
+        elif isinstance(value, str):
+            return [it[0] for it in self.enums.items() if it[1] == value.lower()][0]
+
+    @staticmethod
+    def choices():
+        er = EnumResult()
+        return er.enums.items()
+
+    @staticmethod
+    def get(value):
+        er = EnumResult()
+        return er._get(value)
 
 
 class Arch(models.Model):
@@ -1127,7 +1140,7 @@ class Recipe(models.Model):
         blank=True,
         null=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=UNKNOW)
-    result = models.SmallIntegerField(choices=RESULT_CHOICES, default=UNKNOW)
+    result = models.SmallIntegerField(choices=EnumResult.choices(), default=UNKNOW)
     resultrate = models.FloatField(default=-1.)
     system = models.ForeignKey(System,)
     arch = models.ForeignKey(Arch,)
@@ -1148,7 +1161,7 @@ class Recipe(models.Model):
                 [it[0] for it in RESULT_CHOICES if it[1] == value.lower()][0]
         except IndexError:
             logger.error("IndexError: result %s %s %s" %
-                         (value, self.result, RESULT_CHOICES))
+                         (value, self.result, EnumResult.choices()))
 
     def get_result(self):
         if self.statusbyuser == WAIVED:
@@ -1191,19 +1204,19 @@ class Recipe(models.Model):
         failed_test = []
         i = 0
         for it in Task.objects.filter(recipe=self).order_by("uid"):
-            if i == 0 and it.result in [FAIL, WARN, ABOART]:
+            if i == 0 and it.result in [EnumResult.FAIL, EnumResult.WARN, EnumResult.ABOART]:
                 self.result = FAILINSTALL
                 # self.save()
             i += 1
 
-            if it.result == PASS or it.statusbyuser == WAIVED:
+            if it.result in [EnumResult.PASS, EnumResult.SKIP] or it.statusbyuser == WAIVED:
                 total_ok += 1
             total += 1
 
             if it.statusbyuser == WAIVED:
                 waived = True
 
-            if it.result in [WARN, FAIL] and it.statusbyuser != WAIVED:
+            if it.result in [EnumResult.WARN, EnumResult.FAIL] and it.statusbyuser != WAIVED:
                 failed_test.append(it)
 
             if it.result == NEW and not running:
@@ -1213,7 +1226,7 @@ class Recipe(models.Model):
             if failed_test:
                 self.result = failed_test[0].result
             else:
-                self.result = PASS
+                self.result = EnumResult.PASS
             if running and running.test.name == settings.RESERVE_TEST \
                and total_ok + 1 == total:
                 self.set_waived()
@@ -1251,14 +1264,8 @@ class Recipe(models.Model):
         # self.recount_result()
         return (self.status in (self.RUNNING, self.RESERVED))
 
-    def get_info(self):
-        # TODO: ???? Toto je asi blbost ????
-        tests = Test.objects.filter(
-            task__recipe=self, task__statusbyuser=NONE, task__result__in=[NEW, WARN, FAIL]).order_by("task__uid")[:1]
-        return tests
-
     def is_result_pass(self):
-        return (PASS == self.result)
+        return (EnumResult.PASS == self.result)
 
     def reschedule(self):
         # TODO

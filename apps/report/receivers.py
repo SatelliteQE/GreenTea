@@ -45,7 +45,7 @@ def recount_test_score(sender, **kwargs):
                 score.score -= 2 * it["count"]
             elif EnumResult.WARN == it["result"]:
                 score.score -= 1 * it["count"]
-            elif EnumResult.PASS == it["result"]:
+            elif it["result"] in [EnumResult.PASS, EnumResult.SKIP]:
                 score.score += 0 * it["count"]
 
         score.rate = (score.score / float(score.count))

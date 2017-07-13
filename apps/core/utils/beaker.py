@@ -25,7 +25,7 @@ from django.conf import settings
 from django.template import Context, Template
 from django.template.defaultfilters import slugify
 
-from apps.core.models import (PASS, RETURNWHENGREEN, Arch, Author, Distro, Job,
+from apps.core.models import (EnumResult, RETURNWHENGREEN, Arch, Author, Distro, Job,
                               JobTemplate, Recipe, RecipeTemplate, System,
                               Task, TaskTemplate, Test)
 
@@ -162,7 +162,7 @@ class Beaker:
             logger.warning("No module named bkr.client")
 
     def systemRelease(self, recipe):
-        # set wathdog to 0 and system will be releasen in following seconds
+        # set watchdog to 0 and system will be releasen in following seconds
         if not isinstance(recipe, Recipe):
             msg = "This type is not supported: %s %s" % (recipe, type(recipe))
             raise TypeError(msg)
@@ -445,7 +445,7 @@ def parse_recipe(recipexml, job, guestrecipe=None):
     logger.debug("%s status:  %s result %s" %
                  (recipe.uid, recipe.status, recipe.result))
     if reserve or recipe.status == Recipe.RESERVED:
-        if recipe.result == PASS and job.template.event_finish == RETURNWHENGREEN:
+        if recipe.result in [EnumResult.PASS, EnumResult.SKIP] and job.template.event_finish == RETURNWHENGREEN:
             bk = Beaker()
             bk.return2beaker(recipe)
             bk.systemRelease(recipe)
