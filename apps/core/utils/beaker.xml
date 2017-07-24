@@ -28,7 +28,7 @@
           <and>
             {% if guest.distro.family %}<distro_family op="=" value="{{ guest.distro.family|default:"" }}"/>{% endif %}
             {% if guest.distro.variant %}<distro_variant op="=" value="{{ guest.distro.variant }}"/>{% endif %}
-            <distro_name op="=" value="{{ guest.distro.distroname }}"/>
+            <distro_name op="{{ guest.distro.get_op }}" value="{{ guest.distro.distroname }}"/>
             <distro_arch op="=" value="{{ arch.name }}"/>
           </and>
         </distroRequires>
