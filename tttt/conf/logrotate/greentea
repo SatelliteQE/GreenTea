@@ -1,0 +1,12 @@
+# source /etc/logrotate.d/greentea
+/data/greentea/log/error.log
+/data/greentea/log/info.log
+/data/greentea/log/indexing.log
+/data/greentea/log/uwsgi.log {
+        daily
+        missingok
+        copytruncate
+        dateext
+        rotate 10
+        maxage 30
+}
