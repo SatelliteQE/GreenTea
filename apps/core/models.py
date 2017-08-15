@@ -158,6 +158,29 @@ class ObjParams(object):
             raise ValidationError("Non-valid notation, please use a=b")
 
 
+class AppTag(models.Model):
+    title = models.CharField(max_length=256)
+    package = models.CharField(max_length=256, blank=True, null=True)
+
+    def __unicode__(self):
+        return "%s" % self.title
+
+
+class Bug(models.Model):
+    uid = models.IntegerField()
+    title = models.CharField(max_length=256)
+    status = models.CharField(max_length=16)
+
+    def __unicode__(self):
+        return "bz%d %s" % (self.uid, self.title)
+
+    def updateFromBugzilla(self):
+        pass
+
+    class Meta:
+        ordering = ("uid",)
+
+
 class Git(models.Model):
     name = models.CharField(max_length=64, blank=True, null=True)
     localurl = models.CharField(max_length=255)
@@ -299,6 +322,15 @@ class Git(models.Model):
             test.save()
             if 'RunFor' in info:
                 self.__updateGroups(test, info.get('RunFor'))
+            if 'RunApp' in info:
+                for it in info.get('RunApp').split():
+                    app, status = AppTag.objects.get_or_create(title=it)
+                    test.apps.add(app)
+            if 'Bug' in info:
+                for it in info.get('Bug').split():
+                    bug, status = Bug.objects.get_or_create(uid=it)
+                    test.bugs.add(bug)
+
             self.__updateDependences(test, info.get('RhtsRequires'))
             test.save()
         # deactivate deleted tests
@@ -620,6 +652,8 @@ class Test(models.Model):
         max_length=256, blank=True, null=True, db_index=True)
     is_enable = models.BooleanField("enable", default=True, db_index=True)
     groups = models.ManyToManyField(GroupOwner, blank=True)
+    bugs = models.ManyToManyField(Bug, blank=True)
+    apps = models.ManyToManyField(AppTag, blank=True)
 
     class Meta:
         ordering = ["-is_enable", "name"]

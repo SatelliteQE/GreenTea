@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Event,
                     FileLog, Git, GroupOwner, GroupTaskTemplate, GroupTemplate,
                     GroupTestTemplate, Job, JobTemplate, PhaseLabel, Repository,
-                    PhaseResult, Recipe, RecipeTemplate, System, Task,
+                    PhaseResult, Recipe, RecipeTemplate, System, Task, Bug, AppTag,
                     TaskRoleEnum, TaskTemplate, Test, TestHistory)
 
 
@@ -146,6 +146,13 @@ class TestAdmin(admin.ModelAdmin):
     list_display = ("name", "owner", "is_enable")
     search_fields = ["name", "owner__email"]
     filter_horizontal = ["dependencies", "groups"]
+    # fieldsets = [
+    #    ("", { "fields": ["name", "owner", "get_bugs"],
+    #    })
+    #]
+
+    def __init__(self, *argv, **kvargs):
+        super(self.__class__, self).__init__(*argv, **kvargs)
 
     def ownerName(self, obj):
         return obj.owner.name
