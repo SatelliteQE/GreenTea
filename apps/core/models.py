@@ -323,11 +323,11 @@ class Git(models.Model):
             if 'RunFor' in info:
                 self.__updateGroups(test, info.get('RunFor'))
             if 'RunApp' in info:
-                for it in info.get('RunApp').split():
+                for it in info.get('RunApp'):
                     app, status = AppTag.objects.get_or_create(title=it)
                     test.apps.add(app)
             if 'Bug' in info:
-                for it in info.get('Bug').split():
+                for it in info.get('Bug'):
                     bug, status = Bug.objects.get_or_create(uid=it)
                     test.bugs.add(bug)
 
