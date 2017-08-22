@@ -38,7 +38,7 @@
     </table>
   </div>
   <div class="col-md-6">
-<table class="table table-striped">
+    <table class="table table-striped">
         <tr>
             <th>Test</th><th>Run</th><th>Not Run</th><th>All</th>
         </tr>
@@ -54,6 +54,18 @@
     </table>
   </div>
 </div>
+
+{% if nonrun %}
+<h1>Non Runing Test</h1>
+<div class="row">
+{% for it in nonrun %}
+<div class="col-md-6">
+      {{ it }}
+</div>
+{% endfor %}
+</div>
+{% endif %}
+
 <h1>Longest running tests</h1>
 <div class="row">
   <div class="col-md-6">
@@ -84,17 +96,6 @@
         {% endfor %}
     </table>
   </div>
-</div>
-{% endif %}
-
-{% if nonrun %}
-<h1>Non Runing Test</h1>
-<div class="row">
-{% for it in nonrun %}
-<div class="col-md-6">
-      {{ it }}
-</div>
-{% endfor %}
 </div>
 {% endif %}
 
