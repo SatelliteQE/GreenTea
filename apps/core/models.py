@@ -262,6 +262,15 @@ class Git(models.Model):
         """
           Update informations about tests from Makefiles.
         """
+        def row2list(items):
+            data = []
+            if type(items) is not list:
+                items = [items, ]
+            for item in items:
+                for it in item.split():
+                    data.append(it)
+            return set(data)
+
         old_tests = self.__load_test_cache()
         number_of_tests = len(old_tests)
         git = self.__getGitCmd()
@@ -323,11 +332,11 @@ class Git(models.Model):
             if 'RunFor' in info:
                 self.__updateGroups(test, info.get('RunFor'))
             if 'RunApp' in info:
-                for it in info.get('RunApp'):
+                for it in row2list(info.get('RunApp')):
                     app, status = AppTag.objects.get_or_create(title=it)
                     test.apps.add(app)
             if 'Bug' in info:
-                for it in info.get('Bug'):
+                for it in row2list(info.get('Bug')):
                     bug, status = Bug.objects.get_or_create(uid=it)
                     test.bugs.add(bug)
 
