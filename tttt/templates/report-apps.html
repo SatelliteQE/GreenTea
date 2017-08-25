@@ -23,11 +23,13 @@
     {% endfor %}
     </div>
 
+{% if app %}
 <h1>{{ app }}</h1>
 <p>Tests that are using this command:</p>
 <ul>
     {% for it in tests %}
-    <li><a href="{{ it.get_absolute_url }}">{{ it }}</a> ({{it.groups.all|join:", "}})</li>
+    <li><a href="{{ it.get_absolute_url }}">{{ it }}</a> {% if it.groups.all %}({{it.groups.all|join:", "}}){% endif%}</li>
     {% endfor %}
-    </ul>
+</ul>
+{% endif %}
 {% endblock %}
