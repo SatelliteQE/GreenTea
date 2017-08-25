@@ -8,6 +8,7 @@
 
 <ul class="nav nav-tabs">
   <li role="presentation" {% if not page %}class="active"{% endif %} ><a href="{% url "reports" %}">All</a></li>
+  <li role="presentation" ><a href="{% url "reports-apps" %}">Apps</a></li>
   {% for it in external_links %}
   <li role="presentation" {% if page.id == it.id %} class="active" {% endif %} ><a href="{{ it.get_absolute_url }}" >{{ it }}</a></li>
   {% endfor %}

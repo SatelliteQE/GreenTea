@@ -1,0 +1,33 @@
+{% extends "basic.html" %}
+{% load gitweb %}
+{% load listutil %}
+
+{% block title %}- Reports{% endblock %}
+
+{% block content %}
+
+<ul class="nav nav-tabs">
+  <li role="presentation" ><a href="{% url "reports" %}">All</a></li>
+  <li role="presentation" class="active"><a href="{% url "reports-apps" %}" class="active" >Apps</a></li>
+  {% for it in external_links %}
+  <li role="presentation" {% if page.id == it.id %} class="active" {% endif %} ><a href="{{ it.get_absolute_url }}" >{{ it }}</a></li>
+  {% endfor %}
+</ul>
+
+<h1>Application coverage</h1>
+
+
+    <div class="row">
+    {% for it in  apps %}
+    <div class="col-md-3"><a href="{{ it.get_absolute_url }}">{{ it }}</a> ({{ it.count }})</div>
+    {% endfor %}
+    </div>
+
+<h1>{{ app }}</h1>
+<p>Tests that are using this command:</p>
+<ul>
+    {% for it in tests %}
+    <li><a href="{{ it.get_absolute_url }}">{{ it }}</a> ({{it.groups.all|join:", "}})</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

@@ -10,7 +10,7 @@ from django.db.models import Count, Avg
 from django.views.generic import DetailView, TemplateView
 from django.conf import settings
 
-from apps.core.models import GroupTestTemplate, Task, Test
+from apps.core.models import GroupTestTemplate, Task, Test, AppTag
 from apps.report.models import ExternalPage, ReportList
 from apps.taskomatic.models import TaskPeriodList
 
@@ -98,6 +98,25 @@ class ReportListView(TemplateView):
         report.stat_recipes()
         context["reports"] = report
 
+        context["external_links"] = ExternalPage.objects.filter(
+            is_enabled=True)
+        return context
+
+
+class ReportAppListView(TemplateView):
+    template_name = 'report-apps.html'
+
+    def get(self, request, *args, **kwargs):
+        self.app = request.GET.get("app")
+        return super(self.__class__, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super(self.__class__, self).get_context_data(**kwargs)
+        if self.app:
+            app = AppTag.objects.get(title=self.app)
+            context["tests"] = app.tests.all()
+            context["app"] = app
+        context["apps"] = AppTag.objects.all().order_by("title")
         context["external_links"] = ExternalPage.objects.filter(
             is_enabled=True)
         return context

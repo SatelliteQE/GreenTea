@@ -165,6 +165,12 @@ class AppTag(models.Model):
     def __unicode__(self):
         return "%s" % self.title
 
+    def get_absolute_url(self):
+        return "?app=%s" % self.title
+
+    def count(self):
+        return self.tests.all().count()
+
 
 class Bug(models.Model):
     uid = models.IntegerField()
@@ -332,13 +338,20 @@ class Git(models.Model):
             if 'RunFor' in info:
                 self.__updateGroups(test, info.get('RunFor'))
             if 'RunApp' in info:
-                for it in row2list(info.get('RunApp')):
-                    app, status = AppTag.objects.get_or_create(title=it)
-                    test.apps.add(app)
+                apps=row2list(info.get('RunApp'))
+                print apps, set([it.title for it in test.apps.all()])
+                if apps != set([it.title for it in test.apps.all()]):
+                    test.apps.clear()
+                    for it in apps:
+                        app, status = AppTag.objects.get_or_create(title=it)
+                        test.apps.add(app)
             if 'Bug' in info:
-                for it in row2list(info.get('Bug')):
-                    bug, status = Bug.objects.get_or_create(uid=it)
-                    test.bugs.add(bug)
+                bugs = row2list(info.get('Bug'))
+                if bugs != set(["%s" % it.uid for it in test.bugs.all()]):
+                    test.bugs.clear()
+                    for it in bugs:
+                        bug, status = Bug.objects.get_or_create(uid=it)
+                        test.bugs.add(bug)
 
             self.__updateDependences(test, info.get('RhtsRequires'))
             test.save()
@@ -662,7 +675,7 @@ class Test(models.Model):
     is_enable = models.BooleanField("enable", default=True, db_index=True)
     groups = models.ManyToManyField(GroupOwner, blank=True)
     bugs = models.ManyToManyField(Bug, blank=True)
-    apps = models.ManyToManyField(AppTag, blank=True)
+    apps = models.ManyToManyField(AppTag, blank=True, related_name="tests")
 
     class Meta:
         ordering = ["-is_enable", "name"]
