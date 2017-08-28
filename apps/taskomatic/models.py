@@ -25,8 +25,6 @@ from django.utils.translation import ugettext_lazy as _
 
 from apps.core.utils.date_helpers import toLocalZone
 
-# from single_process import single_process
-
 
 logger = logging.getLogger(__name__)
 
@@ -252,7 +250,6 @@ class Taskomatic:
             .filter(status=Task.STATUS_ENUM_DONE)
             .order_by("-date_run")[settings.MAX_TASKOMATIC_HISTORY:]]
 
-    # @single_process
     def run(self):
         self.checkTaskPeriods()
         self.checkTasks()

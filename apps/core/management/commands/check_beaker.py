@@ -11,7 +11,7 @@ from optparse import make_option
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from single_process import single_process
+# from single_process import single_process
 
 from apps.core.models import CheckProgress, Job
 from apps.core.utils.beaker import Beaker
@@ -57,7 +57,7 @@ class Command(BaseCommand):
         init(*args, **kwargs)
 
 
-@single_process
+#@single_process
 def init(*args, **kwargs):
     progress = CheckProgress()
     bkr = Beaker()
