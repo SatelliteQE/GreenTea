@@ -2,7 +2,7 @@
 # Date: 24.9.2013
 
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.core.paginator import Paginator
@@ -12,7 +12,7 @@ from elasticsearch import Elasticsearch
 
 from apps.core.forms import HomepageForm
 from apps.core.models import (CheckProgress, EnumResult, FileLog, Task,
-                              TestHistory)
+                              TestHistory, Recipe)
 from apps.report.models import Score
 from apps.taskomatic.models import TaskPeriodList, TaskPeriodSchedule
 from apps.waiver.models import Comment
@@ -119,6 +119,31 @@ class HomePageView(TemplateView):
                     data[hostname][schedule] = {}
         return {"labels": labels, "data": data}
 
+    def call_broken_systems(self):
+        self.brokensystems = {}
+        brokensystems = {}
+
+        tasks = Task.objects.filter(recipe__job__date__gt=datetime.now() - timedelta(days=settings.BROKEN_SYSTEM_DAYS)) \
+            .values("result", "recipe__system__hostname") \
+            .annotate(results=Count("result"),
+                      hosts=Count("recipe__system__hostname")) \
+            .order_by("recipe__system__hostname",)
+
+        for it in tasks:
+            brokensystems.setdefault(it["recipe__system__hostname"], {}) \
+                .setdefault(EnumResult.get(it["result"]), it["results"])
+        for key, it in brokensystems.items():
+            if not key:
+                continue  # system wasn't assigned
+            count = 0
+            for k, res in it.items():
+                if k == "pass":
+                    continue
+                count += res
+            if not it.get("pass") or count / float(it.get("pass") + count) > 0.9:  # 90% tasks failed
+                self.brokensystems[key] = (
+                    count, it.get("pass"), brokensystems[key])
+
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
 
@@ -187,4 +212,7 @@ class HomePageView(TemplateView):
             "indexed": FileLog.objects.filter(is_indexed=False, is_downloaded=True).count(),
             "downloaded": FileLog.objects.filter(status_code=0).count()
         }
+
+        self.call_broken_systems()
+        context["brokensystems"] = self.brokensystems
         return context

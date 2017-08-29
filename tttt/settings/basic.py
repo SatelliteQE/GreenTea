@@ -11,7 +11,7 @@ ROOT_PATH = os.path.abspath("%s/%s/" %
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
-VERSION = "1.0.9"
+VERSION = "1.0.10"
 
 ADMINS = (
     # ('Example', 'admin@example.com'),
@@ -329,7 +329,7 @@ BEAKER_DEFAULT_PACKAGES = (
 BEAKER_RESERVESYS = 86400
 MAX_LOGS_IN_ONE_CHECK = 1000
 RESERVE_TEST = "/distribution/reservesys"
-
+BROKEN_SYSTEM_DAYS = 7
 
 ### Elasticserach ###
 ELASTICSEARCH = ()

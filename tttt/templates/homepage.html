@@ -151,7 +151,7 @@ tatal: {{ search.hits.total }}
   {% if waiver.has_next %}<li><a href="?cpage={{ waiver.next_page_number }}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>{%endif%}
 </ul>
 
- <h1>History</h1>
+ <h1 id="history">History</h1>
 <table class="table table-striped">
     <tr>
         <th>Author</th><th>Test</th><th>Date</th><th>Commit</th>
@@ -173,4 +173,24 @@ tatal: {{ search.hits.total }}
   {% endfor %}
   {% if history.has_next %}<li><a href="?hpage={{ history.next_page_number }}">&raquo;</a></li>{% else %}<li class="disabled" ><span>&raquo;</span></li>{%endif%}
 </ul>
+
+
+{% if brokensystems %}
+<h1 id="brokensystems">Broken Systems <span style="color:red">(90% non-pass tasks)</span></h1>
+<table class="table table-striped">
+    <tr>
+        <th>Hostname</th>
+        <th>Result</th>
+        <th></th>
+    </tr>
+    {% for key, it in brokensystems.items %}
+    <tr>
+        <td><a href="https://beaker.engineering.redhat.com/view/{{ key }}#tasks">{{ key }}</a></td>
+        <td>{{ it.0 }} tasks failed {% if it.1 %}({{it.1}} pass) {% else %}(all){%endif%}</td>
+        <td>{{ it.2}}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+
 {% endblock %}
