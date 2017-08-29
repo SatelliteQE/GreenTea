@@ -47,7 +47,6 @@ class Parser:
         for item in xmlrecipe.childNodes:
             if item.nodeName == "guestrecipe":
                 self.recipe(item, is_guestrecipe=rt)
-
             if item.nodeName == "#text":
                 continue
             elif item.nodeName == "task":
@@ -58,10 +57,15 @@ class Parser:
                     parameters.append((name, value))
                 tests.append(
                     [item.getAttribute("name"), parameters, item.getAttribute("role")])
+
             elif item.nodeName == "hostRequires":
                 for key in item.childNodes:
                     if key.nodeName == "#text":
                         continue
+                    elif key.nodeName == "labcontroller":
+                        op = key.getAttribute("op")
+                        value = key.getAttribute("value").lower()
+                        rt.labcontroller = "%s %s" % (op, value)
                     elif key.nodeName == "and":
                         for keyvalue in key.childNodes:
                             if keyvalue.nodeName == "#text":

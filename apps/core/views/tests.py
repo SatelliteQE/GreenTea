@@ -224,7 +224,8 @@ class TestsListView(TemplateView):
             'git__id', 'git__localurl',
             'groups__name',
         ]
-        tests = Test.objects.filter(**testFilter).select_related(*relations).only(*fields).order_by("id")
+        tests = Test.objects.filter(
+            **testFilter).select_related(*relations).only(*fields).order_by("id")
         logger.debug("TestsListView.__get_tests returns: %s" % tests)
         return tests
 
@@ -243,7 +244,8 @@ class TestsListView(TemplateView):
         # Load and reorder data about tests
         data = self.prepare_matrix(
             tests=tests, periodschedules=periodschedules)
-        urlstring = ["%s=%s" % (key, it) for key, it in self.filters.items() if it]
+        urlstring = ["%s=%s" % (key, it)
+                     for key, it in self.filters.items() if it]
         # Return page
         context.update({
             'data': data,

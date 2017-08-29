@@ -73,8 +73,9 @@ class FileInLine(admin.TabularInline):
     model = FileLog
     extra = 0
     fields = ("get_link", "recipe", "task", "path", "created",
-                    "is_downloaded", "is_indexed", "status_code")
+              "is_downloaded", "is_indexed", "status_code")
     readonly_fields = fields
+
     def get_link(self, obj):
         url = reverse('admin:core_filelog_change', args=(obj.pk,))
         return '<a href="%s">%s</a>' % (url, obj.id)
@@ -117,7 +118,7 @@ class RecipeAdmin(admin.ModelAdmin):
 class TaskAdmin(admin.ModelAdmin):
     list_display = ("uid", "recipe", "test", "status",
                     "duration", "datestart", "result")
-    search_fields = ["uid",]
+    search_fields = ["uid", ]
     raw_id_fields = ("recipe", "test")
     inlines = [FileInLine]
 
@@ -272,7 +273,7 @@ class RecipeTemplateAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': (('get_jobtemplate_link', 'jobtemplate'), 'name', ('distro', 'arch',), 'hvm', ('is_virtualguest', 'virtualhost'),
-                       'role', 'memory', 'disk', 'hostname', 'packages', 'external_repos', 'params',)
+                       'role', ('memory', 'disk',), ('hostname', 'labcontroller',), 'packages', 'external_repos', 'params',)
         }),
         ('Schdule plan', {
             'fields': ('schedule',),

@@ -121,6 +121,10 @@ class EnumResult:
         er = EnumResult()
         return er._get(value)
 
+    @staticmethod
+    def broken_list():
+        return [EnumResult.FAIL, EnumResult.FAILINSTALL, EnumResult.ABOART, EnumResult.PANIC, EnumResult.WARN]
+
 
 class Arch(models.Model):
     name = models.CharField(max_length=32, unique=True)
@@ -191,7 +195,8 @@ class Git(models.Model):
     name = models.CharField(max_length=64, blank=True, null=True)
     localurl = models.CharField(max_length=255)
     url = models.CharField(max_length=255, unique=True)
-    path = models.CharField(max_length=255, blank=True, null=True, help_text="Only local directory file:///mnt/git/..", validators=[validator_dir_exists])
+    path = models.CharField(max_length=255, blank=True, null=True,
+                            help_text="Only local directory file:///mnt/git/..", validators=[validator_dir_exists])
     path_absolute = None
     cmd = None
     log = None
@@ -338,7 +343,7 @@ class Git(models.Model):
             if 'RunFor' in info:
                 self.__updateGroups(test, info.get('RunFor'))
             if 'RunApp' in info:
-                apps=row2list(info.get('RunApp'))
+                apps = row2list(info.get('RunApp'))
                 print apps, set([it.title for it in test.apps.all()])
                 if apps != set([it.title for it in test.apps.all()]):
                     test.apps.clear()
@@ -905,6 +910,8 @@ class RecipeTemplate(models.Model, ObjParams):
     hostname = models.CharField(
         max_length=255, blank=True,
         help_text="Set to '= system42.beaker.example.com' if you want your recipe to run on exactly this system")
+    labcontroller = models.CharField(
+        max_length=255, blank=True, help_text="= hostname.lab.example.com")
     hvm = models.BooleanField(_("Support virtualizaion"), default=False)
     params = models.TextField(_("Extra XML parameter"), blank=True)
     # generator = models.TextField(_("Recipe generator"), blank=True, help_text="rules for generating recipes")
@@ -919,7 +926,6 @@ class RecipeTemplate(models.Model, ObjParams):
         _("Schedule period"), max_length=255, blank=True,
         help_text="For example: s390x: 0,2,4; x86_64: 1,3,5,6")
     external_repos = models.ManyToManyField(Repository, blank=True)
-
 
     def __unicode__(self):
         name = self.name
@@ -1196,7 +1202,8 @@ class Recipe(models.Model):
         blank=True,
         null=True)
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=UNKNOW)
-    result = models.SmallIntegerField(choices=EnumResult.choices(), default=UNKNOW)
+    result = models.SmallIntegerField(
+        choices=EnumResult.choices(), default=UNKNOW)
     resultrate = models.FloatField(default=-1.)
     system = models.ForeignKey(System,)
     arch = models.ForeignKey(Arch,)

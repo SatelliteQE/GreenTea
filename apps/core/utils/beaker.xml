@@ -79,6 +79,7 @@
         {% if r.hvm %}<distro_virt op="=" value=""/>{% endif %}
       </distroRequires>
       <hostRequires>
+        {% if r.labcontroller %}<labcontroller op="{{r.labcontroller.split.0}}" value="{{r.labcontroller.split.1}}"/>{% endif %}
         <and>
           {% if r.hvm %}<key_value key="HVM" op="=" value="1"/>{% endif %}
           {% if r.hvm %}<cpu>

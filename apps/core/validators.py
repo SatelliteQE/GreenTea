@@ -2,6 +2,7 @@ import os
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
+
 def validator_dir_exists(value):
     if value.startswith("file://"):
         value = value[7:]

@@ -201,14 +201,16 @@ class JobsListView(TemplateView):
            GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """ % (tag_query, search_query)
 
         cursor = connection.cursor()
-        query_data = [(datetime.now().date() - timedelta(days=settings.CHART_MAX_DAYS)).isoformat(),]
+        query_data = [(datetime.now().date() -
+                       timedelta(days=settings.CHART_MAX_DAYS)).isoformat(), ]
         if self.filters.get('search'):
             query_data.append("%%%s%%" % self.filters.get('search'))
         cursor.execute(query, query_data)
 
         data = cursor.fetchall()
         label = OrderedDict()
-        T = lambda x: dict(RESULT_CHOICES)[x]
+
+        def T(x): return dict(RESULT_CHOICES)[x]
         for it in data:
             if not it[0] in label.keys():
                 label.update({it[0]: 0})
