@@ -123,7 +123,7 @@ class HomePageView(TemplateView):
         self.brokensystems = {}
         brokensystems = {}
 
-        tasks = Task.objects.filter(recipe__job__date__gt=datetime.now() - timedelta(days=settings.BROKEN_SYSTEM_DAYS)) \
+        tasks = Task.objects.filter(recipe__job__date__gt=datetime.now() - timedelta(days=settings.BROKEN_SYSTEM_DAYS+10)) \
             .values("result", "recipe__system__hostname") \
             .annotate(results=Count("result"),
                       hosts=Count("recipe__system__hostname")) \
@@ -137,10 +137,19 @@ class HomePageView(TemplateView):
                 continue  # system wasn't assigned
             count = 0
             for k, res in it.items():
-                if k == "pass":
+                if k not in ('fail', 'warning'):
                     continue
                 count += res
-            if not it.get("pass") or count / float(it.get("pass") + count) > 0.9:  # 90% tasks failed
+            positive = 0
+            if it.get("pass"):
+                positive += it.get("pass")
+            if it.get("new"):
+                positive += it.get("new")
+
+            # 90 % tasks fail/warning in more than 30 tasks
+            MIN_TASK = 30
+            FAIL_LIMIT = 0.9
+            if count > MIN_TASK and (positive == 0 or count / float(positive + count) > FAIL_LIMIT):  # 90% tasks failed
                 self.brokensystems[key] = (
                     count, it.get("pass"), brokensystems[key])
 
