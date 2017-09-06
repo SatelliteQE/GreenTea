@@ -123,7 +123,7 @@ class HomePageView(TemplateView):
         self.brokensystems = {}
         brokensystems = {}
 
-        tasks = Task.objects.filter(recipe__job__date__gt=datetime.now() - timedelta(days=settings.BROKEN_SYSTEM_DAYS+10)) \
+        tasks = Task.objects.filter(recipe__job__date__gt=datetime.now() - timedelta(days=settings.BROKEN_SYSTEM_DAYS)) \
             .values("result", "recipe__system__hostname") \
             .annotate(results=Count("result"),
                       hosts=Count("recipe__system__hostname")) \
