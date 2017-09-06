@@ -3,6 +3,7 @@
 
 import logging
 from datetime import datetime, timedelta
+from collections import OrderedDict
 
 from django.conf import settings
 from django.core.paginator import Paginator
@@ -152,6 +153,8 @@ class HomePageView(TemplateView):
             if count > MIN_TASK and (positive == 0 or count / float(positive + count) > FAIL_LIMIT):  # 90% tasks failed
                 self.brokensystems[key] = (
                     count, it.get("pass"), brokensystems[key])
+
+            self.brokensystems = OrderedDict(sorted(self.brokensystems.items()))
 
     def get_context_data(self, **kwargs):
         context = super(self.__class__, self).get_context_data(**kwargs)
