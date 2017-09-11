@@ -11,15 +11,12 @@ from optparse import make_option
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from single_process import single_process
 
 from apps.core.models import CheckProgress, Job
 from apps.core.utils.beaker import Beaker
 from apps.core.utils.date_helpers import currentDate
 
 logger = logging.getLogger("backend")
-
-single_process()
 
 class Command(BaseCommand):
     help = ("Load data from beaker and save to db")
@@ -59,6 +56,10 @@ class Command(BaseCommand):
 
 
 def init(*args, **kwargs):
+    if CheckProgress.IsRunning():
+        logger.warning("Process check beaker's jobs is still running... ")
+        return
+    CheckProgress.Clean()
     progress = CheckProgress()
     bkr = Beaker()
 

@@ -9,7 +9,7 @@ import json
 import logging
 import os
 import re
-import urllib2
+from django.utils import timezone
 from datetime import datetime, timedelta
 from urlparse import urlparse
 from xml.dom.minidom import parseString
@@ -1408,6 +1408,7 @@ class SkippedPhase(models.Model):
 
 
 class CheckProgress(models.Model):
+    ARCHIVE_LAST_CHECKS=1000
     datestart = models.DateTimeField(default=timezone.now)
     dateend = models.DateTimeField(null=True, blank=True)
     totalsum = models.IntegerField()
@@ -1436,6 +1437,22 @@ class CheckProgress(models.Model):
     def get_duration(self):
         if self.dateend:
             return (self.dateend - self.datestart)
+
+    @staticmethod
+    def Clean():
+        for it in CheckProgress.objects.order_by("-id")[CheckProgress.ARCHIVE_LAST_CHECKS:]:
+            it.delete()
+
+    @staticmethod
+    def IsRunning():
+        for it in CheckProgress.objects.filter(dateend=None).order_by("-datestart"):
+            duration = (timezone.now() - it.datestart)
+            if duration.days * 24 + duration.seconds/(60.*60) > 1:
+                it.dateend = timezone.now()
+                it.save()
+            else:
+                return True
+        return False
 
 
 class Event(models.Model):
