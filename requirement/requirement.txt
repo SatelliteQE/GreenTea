@@ -17,6 +17,5 @@ docutils
 croniter
 texttable
 BeautifulSoup4
-single_process
 markdown
 djangorestframework<3.5
