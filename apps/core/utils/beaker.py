@@ -338,6 +338,8 @@ class JobGen:
                 params2 = taskT.get_params()
                 params2.update(params)
                 taskT.parent_params = params2
+                if taskG.role is not None and taskT.role is None:
+                    taskT.role = taskG.role
                 cache_tasks.append(self.__generateTask(taskT))
 
         # other tasks show after groups
