@@ -1,7 +1,8 @@
 FROM centos:7
 
-RUN mkdir -p /data/greentea
+RUN mkdir -p /data/greentea /var/log/greentea
 WORKDIR /data/greentea
+ENV HOME /data/greentea
 ADD requirement /data/greentea/requirement
 
 RUN echo "root:GreenTea!" | chpasswd
@@ -14,29 +15,32 @@ RUN curl https://beaker-project.org/yum/beaker-client-CentOS.repo -o /etc/yum.re
 
 ADD . /data/greentea/
 
+# update CA certs
+RUN cp $HOME/tttt/conf/*.crt /etc/pki/ca-trust/source/anchors/ \
+    && update-ca-trust extract
+
 # create enviroment
 RUN useradd -ms /bin/bash greentea \
-    && chown greentea:greentea -R /data/greentea
+    && chown greentea:greentea -R /data/greentea /var/log/greentea
 
 USER greentea
-ENV HOME /data/greentea
 ENV DJANGO_SETTINGS_MODULE tttt.settings.production
 
 RUN virtualenv $HOME/env \
     && cd $HOME \
     && . env/bin/activate \
-    && pip install -r $HOME/requirement/requirement.txt
-
-# create default values for running service
-RUN sh $HOME/bin/init-secretkey.sh > $HOME/tttt/settings/production.py \
-    && echo "ALLOWED_HOSTS=['*']" >> $HOME/tttt/settings/production.py \
-    && mkdir -p $HOME/tttt/static $HOME/storage
+    && pip install -r $HOME/requirement/requirement.txt \
+    && pip install -r $HOME/requirement/requirement-postgresql.txt
 
 # install cron and enable cron
-# it doesn't use for docker, only for real system
+# it doesn't use for docker, only for physical system
 # RUN yum install crontabs -y && mv $HOME/tttt/conf/cron/greentea.cron /etc/cron.d/
 
-EXPOSE 8000
-VOLUME /data/greentea/tttt/static
+COPY bin/docker-entrypoint.sh /usr/local/bin/
 
-CMD sh $HOME/bin/docker-run.sh
+EXPOSE 8000
+VOLUME ["/data/greentea/tttt/static", "/data/greentea/tttt/storage"]
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
+CMD ["greentea"]
