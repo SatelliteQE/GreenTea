@@ -50,7 +50,7 @@ def strToSec(string):
         delta = timedelta(days=days, hours=t.hour, minutes=t.minute,
                           seconds=t.second)
     except ValueError:
-        logger.error("ValueError %s" % data)
+        logger.error("ValueError: Problem convert %s to time" % data)
         return 0
     if sys.version_info < (2, 7):
         return total_sec(delta)
@@ -391,7 +391,9 @@ def parse_task(taskxml, recipe):
     task.set_status(status_str)
 
     if task.is_completed():
-        task.duration = float(strToSec(taskxml.getAttribute("duration")))
+        duration = taskxml.getAttribute("duration")
+        if duration:
+            task.duration = float(strToSec(duration))
     task.save()
 
 
