@@ -16,8 +16,8 @@ RUN curl https://beaker-project.org/yum/beaker-client-CentOS.repo -o /etc/yum.re
 ADD . /data/greentea/
 
 # update CA certs
-RUN cp $HOME/tttt/conf/*.crt /etc/pki/ca-trust/source/anchors/ \
-    && update-ca-trust extract
+RUN ! [ -f $HOME/tttt/conf/*.crt ] || ( cp $HOME/tttt/conf/*.crt /etc/pki/ca-trust/source/anchors/ \
+    && update-ca-trust extract )
 
 # create enviroment
 RUN useradd -ms /bin/bash greentea \
