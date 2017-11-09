@@ -1,0 +1,69 @@
+
+# compile docker image on localhost
+- name: Compile {{project_name}} image
+  command: docker build -t {{project_name}} .
+  delegate_to: localhost
+
+- name: Export image to file
+  command: docker save -o {{image}} {{project_name}}
+  delegate_to: localhost
+
+- name: Copy image {{image}} to server
+  copy: src={{image}} dest=/tmp/{{image}}
+
+- name: Delete build image
+  file: path={{image}} state=absent
+  delegate_to: localhost
+
+- name: Info about running docker instance
+  shell: docker inspect {{project_name}}:latest
+  register: result
+  ignore_errors: yes
+
+- debug:
+      var: result
+
+- name: Rename old image by tag
+  shell: docker tag $( docker images {{project_name}}:latest -q )  {{project_name}}:$(date +"%x-%H.%M")
+  when: result.rc == 0
+
+- name: Load {{project_name}} image
+  command: docker load -i /tmp/{{image}}
+
+- name: Remove old instance {{project_name}}
+  shell: docker rm {{project_name}}.backup || true
+  when: result.rc == 0
+
+- name: Stop old instance {{project_name}}
+  shell: docker stop {{project_name}}.prod || true
+
+- name: Backup old instance
+  shell: docker rename {{project_name}}.prod {{project_name}}.backup || true
+
+- name: Create public storage for static files and public content
+  file:
+      path: "{{item}}"
+      state: directory
+  with_items:
+      - "{{public}}/storage"
+      - "{{public}}/static"
+
+- name: Run new instance of {{project_name}}
+  command: docker run -d -p 127.0.0.1:{{port}}:8000 \
+           --link {{db}}:postgresql --link {{elasticsearch}}:elasticsearch \
+           --security-opt label:disable \
+           -v {{public}}/static:{{docker_home}}/tttt/static:Z \
+           -v {{public}}/storage:{{docker_home}}/tttt/storage:Z \
+           -v {{private}}/git:{{docker_home}}/git/:Z \
+           --name {{project_name}}.prod {{project_name}}
+
+- name: Show log instance of {{project_name}}
+  command: docker logs {{project_name}}.prod
+  register: result
+  tags:
+      - log
+
+- debug:
+     var: result.stderr_lines
+  tags:
+      - log

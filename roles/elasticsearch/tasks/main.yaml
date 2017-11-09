@@ -1,0 +1,11 @@
+---
+- name: Pull elasticsearch version 2.4
+  command: docker pull elasticsearch:2.4
+  tags:
+    - elasticsearch
+
+- name: Start instance of elasticsearch
+  command: docker run -d -p 9200:9200 -p 9300:9300 -v "{{ elasticsearch_data }}":/usr/share/elasticsearch/data/ \
+      --name "{{ elasticsearch }}" elasticsearch:2.4
+  tags:
+    - elasticsearch
