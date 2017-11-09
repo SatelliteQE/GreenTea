@@ -6,7 +6,9 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 from django.views.generic import TemplateView
+from django.conf import settings
 
+logger = logging.getLogger("main")
 
 class LoginView(TemplateView):
     template_name = 'login.html'
@@ -14,13 +16,13 @@ class LoginView(TemplateView):
     def dispatch(self, *args, **kwargs):
         self.remote_user = self.request.META[
             "REMOTE_USER"] if "REMOTE_USER" in self.request.META else None
-
+        logger.info("Kerberos: %s" % self.remote_user)
         if not self.remote_user:
             return redirect(reverse("admin:index"))
 
         username, real = self.remote_user.split("@")
         email = self.remote_user.lower()
-        password = "nimda"  # TODO better default password
+        password = settings.DEFAULT_KERBEROS_PASSWORD
 
         if self.remote_user is not None:
             try:

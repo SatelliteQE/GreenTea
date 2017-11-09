@@ -287,7 +287,7 @@ REST_FRAMEWORK = {
 # kerberos realm and service
 KRB5_REALM = 'EXAMPLE.COM'
 KRB5_SERVICE = 'krbtgt@AS.EXAMPLE.COM'
-
+DEFAULT_KERBEROS_PASSWORD = "password"
 
 ### Web UI ###
 # redirect url after login
