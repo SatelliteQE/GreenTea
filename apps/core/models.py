@@ -193,7 +193,7 @@ class Bug(models.Model):
 
 class Git(models.Model):
     name = models.CharField(max_length=64, blank=True, null=True)
-    localurl = models.CharField(max_length=255)
+    localurl = models.CharField(_("Viewer"), max_length=255)
     url = models.CharField(max_length=255, unique=True)
     path = models.CharField(max_length=255, blank=True, null=True,
                             help_text="Only local directory file:///mnt/git/..", validators=[validator_dir_exists])
@@ -1437,6 +1437,12 @@ class CheckProgress(models.Model):
     def get_duration(self):
         if self.dateend:
             return (self.dateend - self.datestart)
+
+    @staticmethod
+    def Restore():
+        for it in CheckProgress.objects.filter(dateend=None):
+            it.dateend=timezone.now()
+            it.save()
 
     @staticmethod
     def Clean():

@@ -48,6 +48,11 @@ class Command(BaseCommand):
         make_option('--default-date',
                     dest='date',
                     help='Set default date when job was started'),
+        make_option('--force',
+                    action='store_true',
+                    dest='force',
+                    default=False,
+                    help='skip checking running instance' ),
     )
 
     def handle(self, *args, **kwargs):
@@ -56,9 +61,13 @@ class Command(BaseCommand):
 
 
 def init(*args, **kwargs):
-    if CheckProgress.IsRunning():
+    if not kwargs["force"] and CheckProgress.IsRunning():
         logger.warning("Process check beaker's jobs is still running... ")
         return
+    if kwargs["force"]:
+        logger.info("Finish running checks by --force")
+        CheckProgress.Restore()
+
     CheckProgress.Clean()
     progress = CheckProgress()
     bkr = Beaker()
