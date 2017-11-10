@@ -29,7 +29,6 @@ from elasticsearch import Elasticsearch
 from taggit.managers import TaggableManager
 
 from apps.core.signals import recipe_changed, recipe_finished
-from apps.core.utils.date_helpers import currentDate, toUTC
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 from validators import validator_dir_exists
 
@@ -1431,7 +1430,7 @@ class CheckProgress(models.Model):
         return int(self.actual * 100 / self.totalsum)
 
     def finished(self):
-        self.dateend = currentDate()
+        self.dateend = timezone.now()
         self.save()
 
     def get_duration(self):

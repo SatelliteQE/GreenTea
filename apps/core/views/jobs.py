@@ -334,6 +334,6 @@ class JobsListView(TemplateView):
         # get all tags
 
         context["events"] = Event.objects.filter(
-            is_enabled=True, datestart__lt=datetime.now,
-            dateend__gt=datetime.now)
+            is_enabled=True, datestart__lt=datetime.now(),
+            dateend__gt=datetime.now())
         return context
