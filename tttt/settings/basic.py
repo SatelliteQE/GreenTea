@@ -310,7 +310,7 @@ PAGINATOR_OBJECTS_ONPAGE = 20
 PAGINATOR_OBJECTS_ONHOMEPAGE = 10
 CHECK_COMMMITS_PREVIOUS_DAYS = 7
 
-GRAPPELLI_ADMIN_TITLE = "<a href='/' >Green Tea</a>"
+GRAPPELLI_ADMIN_TITLE = "Green Tea"
 GRAPPELLI_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
 
 # How many periods are shown on web ui
