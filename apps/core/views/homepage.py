@@ -2,12 +2,13 @@
 # Date: 24.9.2013
 
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from collections import OrderedDict
 
 from django.conf import settings
 from django.core.paginator import Paginator
 from django.db.models import Count
+from django.utils import timezone
 from django.views.generic import TemplateView
 from elasticsearch import Elasticsearch
 
@@ -124,7 +125,7 @@ class HomePageView(TemplateView):
         self.brokensystems = {}
         brokensystems = {}
 
-        tasks = Task.objects.filter(recipe__job__date__gt=datetime.now() - timedelta(days=settings.BROKEN_SYSTEM_DAYS)) \
+        tasks = Task.objects.filter(recipe__job__date__gt=timezone.now() - timedelta(days=settings.BROKEN_SYSTEM_DAYS)) \
             .values("result", "recipe__system__hostname") \
             .annotate(results=Count("result"),
                       hosts=Count("recipe__system__hostname")) \
@@ -178,7 +179,7 @@ class HomePageView(TemplateView):
 
         # Waiver
         comments = Comment.objects\
-            .filter(created_date__gt=datetime.today().date())\
+            .filter(created_date__gt=timezone.now().date())\
             .order_by("-created_date", "task", "recipe", "job")
         paginator = Paginator(comments, settings.PAGINATOR_OBJECTS_ONHOMEPAGE)
         context['waiver'] = paginator.page(

@@ -12,6 +12,7 @@ from django.db import connection
 from django.db.models import Count
 from django.http import HttpResponse, Http404
 from django.views.generic import TemplateView
+from django.utils import timezone
 from taggit.models import Tag
 
 from apps.core.forms import FilterForm
@@ -201,7 +202,7 @@ class JobsListView(TemplateView):
            GROUP BY date("core_job"."date"), "core_task"."result" ORDER BY job_date ASC, task_ressult """ % (tag_query, search_query)
 
         cursor = connection.cursor()
-        query_data = [(datetime.now().date() -
+        query_data = [(timezone.now().date() -
                        timedelta(days=settings.CHART_MAX_DAYS)).isoformat(), ]
         if self.filters.get('search'):
             query_data.append("%%%s%%" % self.filters.get('search'))
@@ -334,6 +335,6 @@ class JobsListView(TemplateView):
         # get all tags
 
         context["events"] = Event.objects.filter(
-            is_enabled=True, datestart__lt=datetime.now(),
-            dateend__gt=datetime.now())
+            is_enabled=True, datestart__lt=timezone.now(),
+            dateend__gt=timezone.now())
         return context

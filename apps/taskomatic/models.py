@@ -13,13 +13,13 @@ import sys
 import time
 import traceback
 from cStringIO import StringIO
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from croniter import croniter
 from django.conf import settings
 from django.core import management
 from django.db import models
-from django.db.models import Count, Max
+from django.db.models import Max
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -35,7 +35,7 @@ class TaskPeriodList:
     def last_runs(history=0):
         filters = {}
         if history > 0:
-            filters["date_create__lt"] = datetime.now() - timedelta(history)
+            filters["date_create__lt"] = timezone.now() - timedelta(history)
         data = TaskPeriodSchedule.objects.values("period_id")\
             .filter(**filters)\
             .annotate(max_id=Max("id")).order_by("period")

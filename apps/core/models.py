@@ -967,7 +967,7 @@ class RecipeTemplate(models.Model, ObjParams):
         """
 
         # Weekday as a decimal number [0(Sunday),6].
-        weekday = int(datetime.now().strftime("%w"))
+        weekday = int(timezone.now().strftime("%w"))
         # archs = [it.name for it in self.arch.all()]
         schedule = self.__parse_schedule_period(self.schedule)
 
@@ -1146,7 +1146,7 @@ class TaskTemplate(ObjParams, models.Model):
 class Job(models.Model):
     template = models.ForeignKey(JobTemplate)
     uid = models.CharField("Job ID", max_length=12, unique=True)
-    date = models.DateTimeField(default=timezone.now, db_index=True)
+    date = models.DateTimeField(auto_now_add = True, db_index=True)
     schedule = models.ForeignKey(TaskPeriodSchedule, null=True, blank=True)
     is_running = models.BooleanField(default=False)
     # this is for checking (no used for data from beaker)
@@ -1591,7 +1591,7 @@ class FileLog(models.Model):
 
     @staticmethod
     def clean_old(days=settings.LOGFILE_LIFETIME):
-        to_delete = datetime.now() - timedelta(days=days)
+        to_delete = timezone.now() - timedelta(days=days)
         logs = FileLog.objects.filter(
             created__lt=to_delete).order_by("created")
         logger.info("%d logs to prepare remove" % len(logs))
