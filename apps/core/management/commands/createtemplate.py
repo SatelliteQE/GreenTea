@@ -5,10 +5,7 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-from optparse import make_option
-
 from django.core.management.base import BaseCommand
-
 from apps.core.models import (DistroTemplate, Job, Recipe, RecipeTemplate,
                               Task, TaskTemplate)
 from apps.core.utils.beaker_import import Parser

@@ -12,9 +12,7 @@
 import logging
 import os
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
-
 from apps.core.models import Git
 from apps.core.validators import validator_dir_exists
 
