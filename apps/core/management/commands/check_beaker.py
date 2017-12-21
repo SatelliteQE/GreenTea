@@ -7,7 +7,6 @@
 
 import logging
 from datetime import datetime, timedelta
-from optparse import make_option
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -23,37 +22,37 @@ class Command(BaseCommand):
     requires_system_checks = True
     can_import_settings = True
 
-    option_list = BaseCommand.option_list + (
-        make_option('--running',
+    def add_arguments(self, parser):
+        parser.add_argument('--running',
                     action='store_true',
                     dest='running',
                     default=False,
-                    help='check only running script (only from db) '),
-        make_option('--init',
+                    help='check only running script (only from db) ')
+        parser.add_argument('--init',
                     action='store_true',
                     dest='init',
                     default=False,
-                    help='init data from beaker and save to db'),
-        make_option('--quiet',
+                    help='init data from beaker and save to db')
+        parser.add_argument('--quiet',
                     action='store_true',
                     dest='quiet',
                     default=False,
-                    help='quiet mode'),
-        make_option('--min-id',
+                    help='quiet mode')
+        parser.add_argument('--min-id',
                     dest='minid',
-                    help='minimum jobid in filter (optimize communication with beaker)'),
-        make_option('--jobs',
+                    help='minimum jobid in filter (optimize communication with beaker)')
+        parser.add_argument('--jobs',
                     dest='jobs',
-                    help='check concrete jobs, for example: J:12345 J:12346'),
-        make_option('--default-date',
+                    help='check concrete jobs, for example: J:12345 J:12346')
+        parser.add_argument('--default-date',
                     dest='date',
-                    help='Set default date when job was started'),
-        make_option('--force',
+                    help='Set default date when job was started')
+        parser.add_argument('--force',
                     action='store_true',
                     dest='force',
                     default=False,
-                    help='skip checking running instance' ),
-    )
+                    help='skip checking running instance' )
+
 
     def handle(self, *args, **kwargs):
         # print "args:", kwargs

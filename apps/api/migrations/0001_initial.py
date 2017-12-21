@@ -20,8 +20,7 @@ class Migration(migrations.Migration):
                 ('label', models.CharField(max_length=32, null=True, blank=True)),
                 ('name', models.CharField(max_length=64)),
                 ('description', models.TextField(blank=True)),
-                ('date_create', apps.core.utils.date_helpers.TZDateTimeField(
-                    default=apps.core.utils.date_helpers.currentDate)),
+                ('date_create', models.TimeField()),
                 ('duration', models.FloatField()),
                 ('exitcode', models.IntegerField()),
             ],

@@ -5,10 +5,7 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-from optparse import make_option
-
 from django.core.management.base import BaseCommand
-
 from apps.core.models import (DistroTemplate, Job, Recipe, RecipeTemplate,
                               Task, TaskTemplate)
 from apps.core.utils.beaker_import import Parser
@@ -19,17 +16,16 @@ class Command(BaseCommand):
     requires_system_checks = True
     can_import_settings = True
 
-    option_list = BaseCommand.option_list + (
-        make_option('--files',
+    def add_arguments(self, parser):
+        parser.add_argument('--files',
                     dest='files',
-                    help='Create template from xml'),
-        make_option('--jobs',
+                    help='Create template from xml')
+        parser.add_argument('--jobs',
                     dest='jobs',
-                    help='Create template from jobs'),
-        make_option('--position',
+                    help='Create template from jobs')
+        parser.add_argument('--position',
                     dest='position',
-                    help='Set position of this template'),
-    )
+                    help='Set position of this template')
 
     def handle(self, *args, **kwargs):
         init(*args, **kwargs)

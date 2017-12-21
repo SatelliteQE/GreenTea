@@ -5,9 +5,10 @@
 # Email: pstudeni@redhat.com
 # Date: 24.9.2013
 
-import reversion
+
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+from reversion.admin import VersionAdmin
 
 from models import (Arch, Author, CheckProgress, Distro, DistroTemplate, Event,
                     FileLog, Git, GroupOwner, GroupTaskTemplate, GroupTemplate,
@@ -82,7 +83,7 @@ class FileInLine(admin.TabularInline):
     get_link.allow_tags = True
 
 
-class DistroTemplateAdmin(reversion.VersionAdmin):
+class DistroTemplateAdmin(VersionAdmin):
     list_display = ("name", "distroname",
                     "variant", "family", "tpljobs_counter")
     ordering = ("name",)

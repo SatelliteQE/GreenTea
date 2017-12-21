@@ -2,7 +2,7 @@ language: python
 python:
   - "2.7"
 env:
-  - DJANGO=1.8
+  - DJANGO=1.10
 install:
   - pip install -r requirement/requirement.txt
 before_script:

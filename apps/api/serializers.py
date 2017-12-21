@@ -45,24 +45,29 @@ class ArchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Arch
+        fields = '__all__'
 
 
 class DistroSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Distro
+        fields = '__all__'
 
 
 class SystemSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = System
+        fields = '__all__'
 
 
 class JobSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
+        fields = '__all__'
+
     date = serializers.DateTimeField('%Y-%m-%d %X')
 
 
@@ -70,6 +75,8 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
+        fields = '__all__'
+
     created_date = serializers.DateTimeField('%Y-%m-%d %X')
 
 
@@ -77,12 +84,15 @@ class AuthorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Author
+        fields = '__all__'
 
 
 class TestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
+        fields = '__all__'
+
     repository_url = serializers.CharField(source='get_reposituory_url')
     detail_url = serializers.CharField(source='get_detail_url')
     external_links = serializers.CharField(source='get_external_links')
@@ -92,6 +102,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
+        fields = '__all__'
 
     class InnerTaskSerializer(serializers.ModelSerializer):
 
@@ -145,6 +156,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
+        fields = '__all__'
 
     class InnerTestSerializer(serializers.ModelSerializer):
 

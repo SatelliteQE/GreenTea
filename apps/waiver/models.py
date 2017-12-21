@@ -7,8 +7,7 @@
 from django.db import models
 
 from apps.core.models import Job, Recipe, Task, Test
-from apps.core.utils.date_helpers import currentDate
-
+from django.utils import timezone
 
 class Comment(models.Model):
     ENUM_ACTION_NONE = 0
@@ -41,7 +40,7 @@ class Comment(models.Model):
 
     def set_time(self, tdate=None):
         if not tdate:
-            tdate = currentDate()
+            tdate = timezone.now()
         self.created_date = tdate
         self.save()
 

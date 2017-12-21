@@ -5,6 +5,7 @@
 # Date: 3.2.2016
 
 from datetime import datetime, timedelta
+from django.utils import timezone
 
 from django.db.models import Count, Avg
 from django.views.generic import DetailView, TemplateView
@@ -62,7 +63,7 @@ class ReportListView(TemplateView):
         context["repotest"] = Test.objects.values("git__name").annotate(
             dcount=Count("git")).order_by("-dcount")
         context["testlengths"] = \
-            Task.objects.filter(recipe__job__schedule__date_create__gte=datetime.now() +
+            Task.objects.filter(recipe__job__schedule__date_create__gte=timezone.now() +
                                 timedelta(hours=-settings
                                 .LONGEST_RUNNING_PERIOD))\
             .values("test__name","test__id").annotate(avg_duration=Avg('duration'))\

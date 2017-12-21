@@ -107,42 +107,6 @@ class TZDatetime(datetime):
         return self.astimezone(tz)
 
 
-class TZDateTimeField(models.DateTimeField):
-
-    """A DateTimeField that treats naive datetimes as local time zone."""
-    __metaclass__ = models.SubfieldBase
-
-    def to_python(self, value):
-        """Returns a time zone-aware datetime object.
-
-        A naive datetime is assigned the time zone from settings.TIME_ZONE.
-        This should be the same as the database session time zone.
-        A wise datetime is left as-is. A string with a time zone offset is
-        assigned to UTC.
-        """
-        try:
-            value = super(TZDateTimeField, self).to_python(value)
-        except ValidationError:
-            match = TZ_OFFSET.search(value)
-            if match:
-                value, op, hours, minutes = match.groups()
-                value = super(TZDateTimeField, self).to_python(value)
-                value = value - \
-                    timedelta(hours=int(op + hours), minutes=int(op + minutes))
-                value = value.replace(tzinfo=pytz.utc)
-            else:
-                raise
-
-        if value is None:
-            return value
-
-        # Only force zone if the datetime has no tzinfo
-        if (value.tzinfo is None) or (value.tzinfo.utcoffset(value) is None):
-            value = force_tz(value, settings.TIME_ZONE)
-        return TZDatetime(value.year, value.month, value.day, value.hour,
-                          value.minute, value.second, value.microsecond, tzinfo=value.tzinfo)
-
-
 def force_tz(obj, tz):
     """Converts a datetime to the given timezone.
 

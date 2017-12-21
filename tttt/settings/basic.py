@@ -9,7 +9,6 @@ ROOT_PATH = os.path.abspath("%s/%s/" %
                             (os.path.dirname(os.path.realpath(__file__)), "../.."))
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
 
 VERSION = "1.0.12"
 
@@ -100,23 +99,22 @@ STATICFILES_FINDERS = (
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = ''
 
-# List of callables that know how to import templates from various sources.
-TEMPLATE_LOADERS = (
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    # 'django.template.loaders.eggs.Loader',
-)
-
 MIDDLEWARE_CLASSES = (
     'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     # 'django.middleware.cache.FetchFromCacheMiddleware',
     # Uncomment the next line for simple clickjacking protection:
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
+)
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'django.contrib.auth.backends.RemoteUserBackend',
 )
 
 # Cache only for production deployment
@@ -130,11 +128,32 @@ MIDDLEWARE_CLASSES = (
 #    }
 #}
 
-TEMPLATE_CONTEXT_PROCESSORS = global_settings.TEMPLATE_CONTEXT_PROCESSORS + (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.request",
-    "tttt.context_processors.basic",
-)
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            "%s/%s/" % (ROOT_PATH, 'tttt/templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                # Insert your TEMPLATE_CONTEXT_PROCESSORS here or use this
+                # list if you haven't customized them:
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.template.context_processors.request',
+                'django.contrib.messages.context_processors.messages',
+                'tttt.context_processors.basic',
+            ],
+            'debug': DEBUG,
+        },
+    },
+]
 
 TASKOMATIC_HOOKS = (
     'apps.core.management.commands',
@@ -145,12 +164,6 @@ ROOT_URLCONF = 'tttt.urls'
 # Python dotted path to the WSGI application used by Django's runserver.
 WSGI_APPLICATION = 'tttt.wsgi.application'
 
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    "%s/%s/" % (ROOT_PATH, 'tttt/templates'),
-)
 
 INSTALLED_APPS = (
     'django.contrib.auth',
@@ -175,7 +188,7 @@ INSTALLED_APPS = (
     'apps.api',
     'django_filters',
     'crispy_forms',
-    'plugins',
+#    'plugins',
 )
 
 try:
@@ -274,8 +287,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ],
-    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',
-                                'rest_framework.filters.OrderingFilter'),
+    #'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',
+    #                            'rest_framework.filters.OrderingFilter'),
     'DEFAULT_PAGINATION_CLASS':
         'rest_framework.pagination.LimitOffsetPagination',
     'DEFAULT_AUTHENTICATION_CLASSES': [],
@@ -297,7 +310,7 @@ PAGINATOR_OBJECTS_ONPAGE = 20
 PAGINATOR_OBJECTS_ONHOMEPAGE = 10
 CHECK_COMMMITS_PREVIOUS_DAYS = 7
 
-GRAPPELLI_ADMIN_TITLE = "<a href='/' >Green Tea</a>"
+GRAPPELLI_ADMIN_TITLE = "Green Tea"
 GRAPPELLI_INDEX_DASHBOARD = 'dashboard.CustomIndexDashboard'
 
 # How many periods are shown on web ui
