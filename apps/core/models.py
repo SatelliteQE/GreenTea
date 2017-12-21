@@ -32,6 +32,8 @@ from apps.core.signals import recipe_changed, recipe_finished
 from apps.taskomatic.models import TaskPeriod, TaskPeriodSchedule
 from validators import validator_dir_exists
 
+from apps.core.utils.date_helpers import toUTC
+
 logger = logging.getLogger("main")
 
 UNKNOW = 0
