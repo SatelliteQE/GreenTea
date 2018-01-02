@@ -15,7 +15,6 @@ from apps.core.models import GroupTestTemplate, Task, Test, AppTag
 from apps.report.models import ExternalPage, ReportList
 from apps.taskomatic.models import TaskPeriodList
 
-
 class ListId:
 
     @staticmethod

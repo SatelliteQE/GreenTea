@@ -6,13 +6,11 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.db.models import Count
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from taggit.models import Tag
 
 from apps.core.models import EnumResult, Task
 from models import Score
 
 logger = logging.getLogger("main")
-
 
 @receiver(post_save, sender=Task)
 def recount_test_score(sender, **kwargs):

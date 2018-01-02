@@ -7,13 +7,12 @@
 
 import logging
 import os
-import re
 from urlparse import urlparse
 
 from django.dispatch import receiver
 
-from apps.core.models import FileLog, Task
 from apps.core.signals import recipe_changed, recipe_finished
+from apps.core.models import FileLog
 from apps.core.utils.beaker import Beaker
 
 logger = logging.getLogger(__name__)

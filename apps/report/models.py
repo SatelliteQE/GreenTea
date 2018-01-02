@@ -10,8 +10,7 @@ from django.db import models
 from django.db.models import permalink
 from taggit.models import Tag
 
-from apps.core.models import (EnumResult, JobTemplate, RecipeTemplate, Task,
-                              Test)
+from apps.core.models import (EnumResult, JobTemplate, RecipeTemplate, Task,                           Test)
 from apps.taskomatic.models import TaskPeriodSchedule
 
 

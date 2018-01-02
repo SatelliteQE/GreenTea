@@ -1,1 +1,1 @@
-#from receivers import recount_test_score
+default_app_config = 'apps.report.config.ReportConfig'

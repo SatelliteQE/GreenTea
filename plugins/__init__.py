@@ -1,5 +1,4 @@
 import os
-import sys
 import logging
 from django.conf import settings
 

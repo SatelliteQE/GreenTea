@@ -180,15 +180,14 @@ INSTALLED_APPS = (
     'rest_framework',
     'taggit',
     'reversion',
+    'django_filters',
+    'crispy_forms',
     'apps.core',
     'apps.taskomatic',
     'apps.waiver',
-    'apps.report',
     'apps.kerberos',
     'apps.api',
-    'django_filters',
-    'crispy_forms',
-#    'plugins',
+    'apps.report',
 )
 
 try:
