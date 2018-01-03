@@ -173,7 +173,10 @@ class TaskSerializer(serializers.ModelSerializer):
 
         class Meta:
             model = Recipe
-            exclude = ('tasks', )
+            fields = "__all__"
+            fields = ("id", "job", "arch", "comments")
+            # from rest framework 3.3 is not possible set exclude = ('tasks', )
+            # exclude = ('tasks', )
 
     test = InnerTestSerializer()
     # result = ResultField()
