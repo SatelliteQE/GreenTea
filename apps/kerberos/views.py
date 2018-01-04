@@ -16,7 +16,7 @@ class LoginView(TemplateView):
 
     def dispatch(self, *args, **kwargs):
         self.remote_user = self.request.META[
-            "REMOTE_USER"] if "REMOTE_USER" in self.request.META else None
+            "HTTP_REMOTE_USER"] if "HTTP_REMOTE_USER" in self.request.META else None
         logger.info("Kerberos: %s" % self.remote_user)
         if not self.remote_user:
             return redirect(reverse("admin:index"))
