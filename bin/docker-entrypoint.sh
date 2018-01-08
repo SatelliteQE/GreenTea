@@ -82,5 +82,5 @@ schedule & # Schedule jobs
 check & # Check all running jobs
 
 # Run main web service
-uwsgi --http :8000 --thunder-lock --enable-threads --wsgi-file tttt/wsgi.py
+uwsgi --ini uwsgi.ini
 
