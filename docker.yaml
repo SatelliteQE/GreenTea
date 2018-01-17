@@ -101,7 +101,8 @@
       shell: |
         chown 1000:1000 -R {{homedir}}
         docker run -d --name {{ greentea_host }} -h {{ greentea_host }} \
-            --link {{ db_host }}:{{ db_host }} -p 80:8000 \
+             --link {{ db_host }}:{{ db_host }} -p 80:8000 \
+             --restart=always \
              -e POSTGRES_PASSWORD={{ db_pass }} \
              -e POSTGRES_SERVER={{ db_host }} \
              -e BEAKER_SERVER={{ beaker_server}} \

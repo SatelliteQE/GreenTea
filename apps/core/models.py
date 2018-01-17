@@ -345,7 +345,6 @@ class Git(models.Model):
                 self.__updateGroups(test, info.get('RunFor'))
             if 'RunApp' in info:
                 apps = row2list(info.get('RunApp'))
-                print apps, set([it.title for it in test.apps.all()])
                 if apps != set([it.title for it in test.apps.all()]):
                     test.apps.clear()
                     for it in apps:
