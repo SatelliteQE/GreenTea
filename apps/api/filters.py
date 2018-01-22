@@ -5,7 +5,7 @@
 # Email: mkorbel@redhat.com
 # Date: 4.4.2016
 
-from django_filters import Filter, FilterSet
+from django_filters import Filter, FilterSet, NumberFilter
 
 from apps.core.models import Task
 
@@ -21,9 +21,11 @@ class ListFilter(Filter):
 
 
 class TaskFilter(FilterSet):
-    results = ListFilter(name='result')
+    # FIXME skip filter by results
+    # results = ListFilter(name='result')
+    recipe = NumberFilter(name='recipe__id')
 
     class Meta:
         model = Task
-        fields = ['recipe', 'recipe__uid', 'test', 'result', 'results',
+        fields = ['recipe', 'recipe__uid', 'test', 'result',
                   'status', 'statusbyuser', 'uid']
