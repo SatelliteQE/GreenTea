@@ -8,6 +8,7 @@
 from django_filters import Filter, FilterSet, NumberFilter
 
 from apps.core.models import Task
+from django_filters.fields import Lookup
 
 
 class ListFilter(Filter):
@@ -15,14 +16,12 @@ class ListFilter(Filter):
     def filter(self, qs, value):
         if not value:
             return qs
-        self.lookup_type = 'in'
-        values = value.split(',')
-        return super(ListFilter, self).filter(qs, values)
+        value_list = [int(x) for x in value.split(',')]
+        return super(ListFilter, self).filter(qs, Lookup(value_list, 'in'))
 
 
 class TaskFilter(FilterSet):
-    # FIXME skip filter by results
-    # results = ListFilter(name='result')
+    results = ListFilter(name='result')
     recipe = NumberFilter(name='recipe__id')
 
     class Meta:

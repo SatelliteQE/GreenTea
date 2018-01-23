@@ -12,4 +12,5 @@ class PerformanceAdmin(admin.ModelAdmin):
         return obj.exitcode == 0
     is_valid.boolean = True
 
+
 admin.site.register(Performance, PerformanceAdmin)
