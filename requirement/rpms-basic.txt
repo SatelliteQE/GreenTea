@@ -1,15 +1,13 @@
 beaker-client
 beaker-common
-build-essential
+git
 gcc
-gitweb-caching
 highlight
 libffi-devel
-libpq-dev
 libxml2-devel
 libxslt-devel
 openssl-devel
-python-dev
+python-devel
 python-virtualenv
 source-highlight
 /usr/lib/rpm/redhat/redhat-hardened-cc1

@@ -1,14 +1,4 @@
-Django < 1.12
-django-grappelli < 2.11
-django-debug-toolbar
-django-taggit
-django-reversion
-django-widget-tweaks
-django-filter
-django-crispy-forms
-GitPython
 python-dateutil
-elasticsearch<3
 uwsgi
 pytz
 lxml
@@ -17,5 +7,16 @@ docutils
 croniter
 texttable
 BeautifulSoup4
+single_process
 markdown
+Django < 1.12
+django-grappelli < 2.11
+django-debug-toolbar
+django-taggit
+django-reversion
+django-widget-tweaks
+django-filter
+django-crispy-forms
 djangorestframework
+GitPython
+elasticsearch<3
