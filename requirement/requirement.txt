@@ -1,8 +1,8 @@
-Django < 1.11
-django-grappelli < 2.10
+Django < 1.12
+django-grappelli < 2.11
 django-debug-toolbar
 django-taggit
-django-reversion < 1.11
+django-reversion
 django-widget-tweaks
 django-filter
 django-crispy-forms
