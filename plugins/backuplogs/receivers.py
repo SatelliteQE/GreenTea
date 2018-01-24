@@ -30,8 +30,7 @@ def download_files_from_recipe(recipe):
     @return None
     """
     b = Beaker()
-    listurls = b.listLogs("R:%d" % int(recipe.uid))
-    for url in listurls:
+    for url in b.listLogs(recipe.uid):
         namefile = os.path.basename(urlparse(url).path)
         if namefile in backuplogs:
             logfile, created = FileLog.objects.get_or_create(

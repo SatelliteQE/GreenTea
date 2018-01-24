@@ -190,7 +190,7 @@ function render_tasklist(tasks) {
         message += '<tr>';
         message += '<td>'+result+'</td>';
         message += '<td>'+task.test.name+'&nbsp&nbsp'+
-                   '<a class="glyphicon glyphicon-link" href="tests.html?search='+encodeURI(task.test.name)+'#T:'+task.uid+'" title="Test detail"></a>&nbsp;&nbsp;'+
+                   '<a class="glyphicon glyphicon-link" href="'+task.test.get_absolute_url+'#T:'+task.uid+'" title="Test detail"></a>&nbsp;&nbsp;'+
                    '<a href="https://' + BEAKER_SERVER + '/recipes/'+task.recipe.uid+'#task'+task.uid+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>';
 		if (task.logfiles.length > 0) {
 			for (var ix in task.logfiles) {

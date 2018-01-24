@@ -166,7 +166,7 @@ class Beaker:
         if not isinstance(recipe, Recipe):
             msg = "This type is not supported: %s %s" % (recipe, type(recipe))
             raise TypeError(msg)
-        return self.execute("watchdog-extend", "R:%s --by 0" % recipe.uid)
+        return self.execute("watchdog-extend", "%s --by 0" % recipe.uid)
 
     def scheduleFromContent(self, xmlcontent):
         logger.error("Method is not implemented")
@@ -380,7 +380,7 @@ def parse_task(taskxml, recipe):
                 task_alias = param.getAttribute("value")
 
     task, status = Task.objects.get_or_create(
-        uid=uid,
+        uid="T:%s" % uid,
         defaults={
             "recipe": recipe,
             "test": test,
@@ -419,7 +419,7 @@ def parse_recipe(recipexml, job, guestrecipe=None):
     )
 
     recipe, status = Recipe.objects.get_or_create(
-        uid=uid,
+        uid="R:%s" % uid,
         defaults={
             "job": job,
             "system": system,

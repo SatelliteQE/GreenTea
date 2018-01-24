@@ -79,7 +79,7 @@ class WaiverForm(forms.ModelForm):
                 task = TaskomaticTask(title="WebUI: beaker return2beaker",
                                       common="beaker")
                 task.common_params = "return2beaker "\
-                    "--return2beaker-recipe=R:%(recipe)s "\
+                    "--return2beaker-recipe=%(recipe)s "\
                     "--return2beaker-message='%(content)s'" % \
                                      data
                 task.save()

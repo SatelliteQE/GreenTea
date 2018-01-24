@@ -34,10 +34,10 @@ class BeakerCommand():
             recipe = Recipe.objects.get(uid=uid[2:])
             res = self.beaker.return2beaker(recipe)
             if res:
-                logger.info("R:%s recipes was returned to beaker."
+                logger.info("%s recipes was returned to beaker."
                             % recipe.uid)
             else:
-                logger.info("Problem with returning to beaker (R:%s) with exit code %s."
+                logger.info("Problem with returning to beaker (%s) with exit code %s."
                             % (recipe.uid, res))
             self.beaker.systemRelease(recipe)
 

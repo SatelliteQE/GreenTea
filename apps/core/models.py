@@ -1339,7 +1339,8 @@ class Task(models.Model):
     uid = models.CharField("Task ID", max_length=12, unique=True)
     recipe = models.ForeignKey(Recipe, related_name="tasks")
     test = models.ForeignKey(Test)
-    result = models.SmallIntegerField(choices=RESULT_CHOICES, default=UNKNOW)
+    result = models.SmallIntegerField(choices=RESULT_CHOICES,
+        default=UNKNOW, db_index=True)
     status = models.SmallIntegerField(
         choices=Recipe.STATUS_CHOICES, default=UNKNOW)
     duration = models.FloatField(default=-1.)
