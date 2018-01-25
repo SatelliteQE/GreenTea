@@ -163,7 +163,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
         class Meta:
             model = Test
-            fields = ('id', 'owner', 'repository_url', 'detail_url',
+            fields = ('id', 'name', 'owner', 'repository_url', 'detail_url',
                       'external_links', "get_absolute_url")
 
         repository_url = serializers.CharField(source='get_reposituory_url')
