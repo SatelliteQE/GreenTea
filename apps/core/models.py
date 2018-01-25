@@ -1226,6 +1226,11 @@ class Recipe(models.Model):
             logger.error("IndexError: result %s %s %s" %
                          (value, self.result, EnumResult.choices()))
 
+    def get_uid(self):
+        if self.uid.startswith("R"):
+            return self.uid[2:]
+        return self.uid
+
     def get_result(self):
         if self.statusbyuser == WAIVED:
             return [it[1] for it in USERSTATUS_CHOICES if it[0] == WAIVED][0]

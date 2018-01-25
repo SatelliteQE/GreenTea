@@ -31,7 +31,7 @@ class BeakerCommand():
                 "return2beaker - parameter return2beaker_recipe cannot be empty")
 
         for uid in return2beaker_recipe:
-            recipe = Recipe.objects.get(uid=uid[2:])
+            recipe = Recipe.objects.get(uid=uid)
             res = self.beaker.return2beaker(recipe)
             if res:
                 logger.info("%s recipes was returned to beaker."
