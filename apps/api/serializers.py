@@ -174,7 +174,7 @@ class TaskSerializer(serializers.ModelSerializer):
         class Meta:
             model = Recipe
             # fields = "__all__"
-            fields = ("id", "job", "arch", "comments")
+            fields = ("id", "uid", "job", "arch", "comments")
             # from rest framework 3.3 is not possible set exclude = ('tasks', )
             # exclude = ('tasks', )
 
