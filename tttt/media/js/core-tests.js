@@ -75,9 +75,10 @@ function render_task_detail_tab(data) {
     var recipe_icon = getResultRecipeIcon(data.recipe);
     var task_icon = getTaskResultIcon(data)
 	var status_icon = getTaskStatusIcon(data)
-    message += '<h4>'+data.recipe.job_name+' '+recipeWhiteboard+' ('+data.recipe.job.date+')&nbsp;&nbsp;'+
-       '<a class="glyphicon glyphicon-link" href="/jobs.html#R:'+data.recipe.uid+'" title="Job detail"></a>&nbsp;&nbsp;'+
-       '<a href="https://' + BEAKER_SERVER + '/recipes/'+data.recipe.uid+'#'+data.uid+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>'+
+
+    message += '<h4>'+data.recipe.job.name+' '+recipeWhiteboard+' ('+data.recipe.job.date+')&nbsp;&nbsp;'+
+       '<a class="glyphicon glyphicon-link" href="/jobs.html#'+data.recipe.uid+'" title="Job detail"></a>&nbsp;&nbsp;'+
+       '<a href="https://' + BEAKER_SERVER + '/recipes/'+data.recipe.uid.replace("R:")+'#'+data.uid+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>'+
        '</h4>';
     message += '<table class="taskInfo">';
     message += '<tr><th>Test:</th><td><strong>'+data.test.name;

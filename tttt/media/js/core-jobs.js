@@ -282,7 +282,7 @@ function previewRecipe(id, synced) {
             if (data.job.is_running) {
 				icons.push({icon: 'star', title: "System is still runnig.", color: "gold"});
             }
-			var head = 'R:'+data.uid;
+			var head = 'R:'+data.uid.replace("R:");
 			for (var ix in icons) {
 				head += '&nbsp<span class="glyphicon glyphicon-'+icons[ix].icon+'" style="color:'+icons[ix].color+'" title="'+icons[ix].title+'"></span>'
 			}

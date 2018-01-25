@@ -69,6 +69,7 @@ class JobSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     date = serializers.DateTimeField('%Y-%m-%d %X')
+    name = serializers.CharField(source='template.whiteboard', read_only=True)
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -162,7 +163,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
         class Meta:
             model = Test
-            fields = ('id', 'name', 'owner', 'repository_url', 'detail_url',
+            fields = ('id', 'owner', 'repository_url', 'detail_url',
                       'external_links', "get_absolute_url")
 
         repository_url = serializers.CharField(source='get_reposituory_url')

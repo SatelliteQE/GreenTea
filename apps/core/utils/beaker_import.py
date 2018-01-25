@@ -141,7 +141,7 @@ class Parser:
         for xmljob in self.content_xml.childNodes:
             for it in xmljob.childNodes:
                 if it.nodeName == "whiteboard":
-                    whiteboard = it.firstChild.nodeValue.strip()
+                    whiteboard = it.firstChild.nodeValue.strip() if it.firstChild else "(empty)"
                     jt, status = JobTemplate.objects.get_or_create(
                         whiteboard=whiteboard)
                     self.job = jt
