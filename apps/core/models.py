@@ -1147,7 +1147,7 @@ class TaskTemplate(ObjParams, models.Model):
 class Job(models.Model):
     template = models.ForeignKey(JobTemplate)
     uid = models.CharField("Job ID", max_length=12, unique=True)
-    date = models.DateTimeField(auto_now_add = True, db_index=True)
+    date = models.DateTimeField(auto_now_add=True, db_index=True)
     schedule = models.ForeignKey(TaskPeriodSchedule, null=True, blank=True)
     is_running = models.BooleanField(default=False)
     # this is for checking (no used for data from beaker)
@@ -1345,7 +1345,7 @@ class Task(models.Model):
     recipe = models.ForeignKey(Recipe, related_name="tasks")
     test = models.ForeignKey(Test)
     result = models.SmallIntegerField(choices=RESULT_CHOICES,
-        default=UNKNOW, db_index=True)
+                                      default=UNKNOW, db_index=True)
     status = models.SmallIntegerField(
         choices=Recipe.STATUS_CHOICES, default=UNKNOW)
     duration = models.FloatField(default=-1.)
@@ -1414,7 +1414,7 @@ class SkippedPhase(models.Model):
 
 
 class CheckProgress(models.Model):
-    ARCHIVE_LAST_CHECKS=1000
+    ARCHIVE_LAST_CHECKS = 1000
     datestart = models.DateTimeField(default=timezone.now)
     dateend = models.DateTimeField(null=True, blank=True)
     totalsum = models.IntegerField()
@@ -1447,7 +1447,7 @@ class CheckProgress(models.Model):
     @staticmethod
     def Restore():
         for it in CheckProgress.objects.filter(dateend=None):
-            it.dateend=timezone.now()
+            it.dateend = timezone.now()
             it.save()
 
     @staticmethod
@@ -1459,7 +1459,7 @@ class CheckProgress(models.Model):
     def IsRunning():
         for it in CheckProgress.objects.filter(dateend=None).order_by("-datestart"):
             duration = (timezone.now() - it.datestart)
-            if duration.days * 24 + duration.seconds/(60.*60) > 1:
+            if duration.days * 24 + duration.seconds / (60. * 60) > 1:
                 it.dateend = timezone.now()
                 it.save()
             else:
@@ -1548,26 +1548,27 @@ class FileLog(models.Model):
             self.index_remove()
         super(FileLog, self).delete(*args, **kwargs)
 
-    def save(self, *args, **kwargs):
+    def set_task_uid(self):
         # get taskid from path
         # /recipes/3545476/tasks/51898719/logs/journal.xml
-        if not self.task:
-            logparse = urlparse(self.url)
-            res = re.match(r'.*/%s/tasks/([0-9]+)/logs/[^/]+$' %
-                           self.recipe.uid, logparse.path)
-            try:
+        logparse = urlparse(self.url)
+        res = re.match(r'.*/tasks/([0-9]+)/logs/[^/]+$', logparse.path)
+        try:
+            if res:
+                uid = res.group(1)
+                self.task = Task.objects.get(uid="T:%s" % uid)
+            else:
+                res = re.match(r'.*[+]/([0-9]+)/[^/]+$', logparse.path)
                 if res:
-                    task = res.group(1)
-                    self.task = Task.objects.get(uid="T:%s" % task)
-                else:
-                    res = re.match(r'.*[+]/([0-9]+)/[^/]+$', logparse.path)
-                    if res:
-                        task = res.group(1)
-                        self.task = Task.objects.get(uid="T:%s" % task)
-            except Task.DoesNotExist:
-                logger.warn("%s doesn't exists for %s" %
-                            (task, self.path))
+                    uid = res.group(1)
+                    self.task = Task.objects.get(uid="T:%s" % uid)
+        except Task.DoesNotExist:
+            logger.warn("%s doesn't exists for %s" %
+                        (uid, self.path))
 
+    def save(self, *args, **kwargs):
+        if not self.task:
+            self.set_task_uid()
         super(FileLog, self).save(*args, **kwargs)
 
     def parse_journal(self):
