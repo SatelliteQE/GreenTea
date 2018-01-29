@@ -1157,7 +1157,7 @@ class Job(models.Model):
         return self.uid
 
     def get_uid(self):
-        return self.uid[2:]
+        return self.uid.replace("J:","")
 
     def get_url_beaker(self):
         return "%s/%s/" % (settings.BEAKER_SERVER, self.uid)
@@ -1227,9 +1227,7 @@ class Recipe(models.Model):
                          (value, self.result, EnumResult.choices()))
 
     def get_uid(self):
-        if self.uid.startswith("R"):
-            return self.uid[2:]
-        return self.uid
+        return self.uid.replace("R:", "")
 
     def get_result(self):
         if self.statusbyuser == WAIVED:
@@ -1389,6 +1387,9 @@ class Task(models.Model):
         self.save()
         self.recipe.recount_result()
         self.recipe.save()
+
+    def get_uid(self):
+        return self.uid.replace("T:", "")
 
 
 class PhaseLabel(models.Model):
@@ -1637,7 +1638,7 @@ class FileLog(models.Model):
                                  "datestart": self.task.datestart if self.task else '',
                                  "duration": self.task.duration if self.task else '',
                                  "period": self.recipe.job.schedule.id if self.recipe.job.schedule else None,
-                                 "task": self.task.uid if self.task else '',
+                                 "task": self.task.uid if self.task and self.task.uid else '',
                                  "file_id": self.id,
                                  "path": self.path})
             if res["created"]:
