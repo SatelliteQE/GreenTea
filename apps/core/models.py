@@ -708,7 +708,7 @@ class Test(models.Model):
     def get_reposituory_url(self):
         if not self.git:
             return None
-        return "%s/tree/HEAD:/%s" % (self.git.localurl, self.folder)
+        return settings.GIT_TREE_PARRENT % (self.git.localurl, self.folder)
 
     def delete(self, *args, **kwargs):
         # not possible to remove test
