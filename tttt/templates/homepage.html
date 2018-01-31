@@ -14,7 +14,7 @@
     <span class="sr-only">{{ progress.percent }}% Complete</span>
   </div>
 </div>
-<p>In queue: {{files.indexed}} to indexing and {{files.downloaded}} to downloading. <span class="{% if elasticsearch  %}alert-success{% else %}alert-danger{% endif %}">&nbsp; Elasticsearch {{ elasticsearch.version.number }} &nbsp;</span></p>
+<p>In queue: {{files.indexed}} to index and {{files.downloaded}} to download. <span class="{% if elasticsearch  %}alert-success{% else %}alert-danger{% endif %}">&nbsp; Elasticsearch {{ elasticsearch.version.number }} &nbsp;</span></p>
 
 <form action="./" method="GET">
 <div class="row">
