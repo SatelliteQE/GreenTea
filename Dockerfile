@@ -3,15 +3,17 @@ FROM centos:7
 RUN mkdir -p /data/greentea /var/log/greentea
 WORKDIR /data/greentea
 ENV HOME /data/greentea
-ADD requirement /data/greentea/requirement
+ADD requirement/rpms-* /data/greentea/requirement/
 
 RUN echo "root:GreenTea!" | chpasswd
 
 # install packages
 RUN curl https://beaker-project.org/yum/beaker-client-CentOS.repo -o /etc/yum.repos.d/beaker-client-CentOS.repo \
     && cat requirement/rpms-*.txt | xargs yum install -y \
-    && virtualenv $HOME/env \
-    && . $HOME/env/bin/activate \
+    && virtualenv $HOME/env
+
+ADD requirement/* /data/greentea/requirement/
+RUN source $HOME/env/bin/activate \
     && pip install -r $HOME/requirement/requirement.txt \
     && pip install -r $HOME/requirement/requirement-postgresql.txt \
     && yum remove -y python-devel libpq-devel openssl-devel gcc \
@@ -23,7 +25,6 @@ ADD . /data/greentea/
 RUN ! [ -f tttt/conf/*.crt ] || \
     ( cp $HOME/tttt/conf/*.crt /etc/pki/ca-trust/source/anchors/ \
     && update-ca-trust extract )
-
 
 # create enviroment
 RUN useradd -ms /bin/bash greentea \
