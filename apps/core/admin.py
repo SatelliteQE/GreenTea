@@ -124,6 +124,18 @@ class TaskAdmin(admin.ModelAdmin):
     inlines = [FileInLine]
 
 
+class GroupTemplateInLine(admin.TabularInline):
+    model = GroupTestTemplate
+    extra = 0
+    fields = ("get_grouptemplate_link", "group",)
+    readonly_fields = fields
+    def get_grouptemplate_link(self, obj):
+        url = reverse('admin:core_grouptemplate_change',
+                      args=(obj.group.pk,))
+        return '<a href="%s">%s</a>' % (url, obj.group.id)
+    get_grouptemplate_link.allow_tags = True
+
+
 class TaskTemplateInLine(admin.TabularInline):
     model = TaskTemplate
     extra = 0
@@ -162,7 +174,7 @@ class TestAdmin(admin.ModelAdmin):
     def ownerEmail(self, obj):
         return obj.owner.email
 
-    inlines = [TaskTemplateInLine]
+    inlines = [GroupTemplateInLine, TaskTemplateInLine]
 
 
 class TestHistoryAdmin(admin.ModelAdmin):
