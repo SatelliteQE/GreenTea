@@ -246,8 +246,7 @@ class Taskomatic:
 
     def cleanOldTasks(self):
         # delete old tasks with status DONE, keep only last 300 tasks
-        [it.delete() for it in Task.objects
-            .filter(status=Task.STATUS_ENUM_DONE)
+        [it.delete() for it in Task.objects.all()
             .order_by("-date_run")[settings.MAX_TASKOMATIC_HISTORY:]]
 
     def run(self):
