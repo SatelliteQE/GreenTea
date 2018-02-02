@@ -10,6 +10,8 @@ logger = logging.getLogger("main")
 
 class TaskAdmin(admin.ModelAdmin):
     list_display = ('title', 'status', 'common', 'date_run', 'get_time_long')
+    search_fields = ("title", "common")
+    list_filter = ("status",)
 
 
 class TaskPeriodAdmin(admin.ModelAdmin):
