@@ -1,2 +1,2 @@
 -r requirement.txt
-psycopg2
+psycopg2-binary
