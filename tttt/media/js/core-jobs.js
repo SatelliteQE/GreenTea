@@ -192,7 +192,7 @@ function render_tasklist(tasks) {
         message += '<td>'+result+'</td>';
         message += '<td>'+task.test.name+'&nbsp&nbsp'+
                    '<a class="glyphicon glyphicon-link" href="'+task.test.get_absolute_url+'#'+task.uid+'" title="Test detail"></a>&nbsp;&nbsp;'+
-                   '<a href="https://' + BEAKER_SERVER + '/recipes/'+task.recipe.uid.replace("R:")+'#task'+task.uid.replace("T:")+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>';
+                   '<a href="https://' + BEAKER_SERVER + '/recipes/'+task.recipe.uid.replace("R:", "")+'#task'+task.uid.replace("T:", "")+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>';
 		if (task.logfiles.length > 0) {
 			for (var ix in task.logfiles) {
 				if (task.logfiles[ix].endsWith('TESTOUT.log')) {
@@ -282,7 +282,7 @@ function previewRecipe(id, synced) {
             if (data.job.is_running) {
 				icons.push({icon: 'star', title: "System is still runnig.", color: "gold"});
             }
-			var head = 'R:'+data.uid.replace("R:");
+			var head = 'R:'+data.uid.replace("R:", "");
 			for (var ix in icons) {
 				head += '&nbsp<span class="glyphicon glyphicon-'+icons[ix].icon+'" style="color:'+icons[ix].color+'" title="'+icons[ix].title+'"></span>'
 			}
@@ -306,7 +306,7 @@ function saveDetailTab(){
 		previewRecipe.apply(this)
 		return false;
 	}
-	if (tab != null && tab.data.id == "preview") {        
+	if (tab != null && tab.data.id == "preview") {
 		return false;
 	}
 	tab = detailPanel.getTab(0);

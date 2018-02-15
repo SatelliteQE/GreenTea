@@ -78,7 +78,7 @@ function render_task_detail_tab(data) {
 
     message += '<h4>'+data.recipe.job.name+' '+recipeWhiteboard+' ('+data.recipe.job.date+')&nbsp;&nbsp;'+
        '<a class="glyphicon glyphicon-link" href="/jobs.html#'+data.recipe.uid+'" title="Job detail"></a>&nbsp;&nbsp;'+
-       '<a href="https://' + BEAKER_SERVER + '/recipes/'+data.recipe.uid.replace("R:")+'#'+data.uid+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>'+
+       '<a href="https://' + BEAKER_SERVER + '/recipes/'+data.recipe.uid.replace("R:", "")+'#'+data.uid+'" class="glyphicon glyphicon-briefcase" title="Link to Beaker"></a>'+
        '</h4>';
     message += '<table class="taskInfo">';
     message += '<tr><th>Test:</th><td><strong>'+data.test.name;
