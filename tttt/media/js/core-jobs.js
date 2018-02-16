@@ -18,12 +18,13 @@ function initPage() {
 		var res = [];
 		var recipes = $('.recipe-list > div', detailPanel.elm);
         for (var ix=0, max=recipes.length; ix < max; ix++) {
+					console.log($(recipes[ix]))
           res[res.length] = $(recipes[ix]).text().trim();
 		};
 		$('input[name="uids"]', detailPanel.elm).val(res.join(' '));
 	});
 
-    events.addEvent('DELETE',function() {
+  events.addEvent('DELETE',function() {
 		this.data.box_el.removeClass('selected');
 		this.data.button_el.remove();
 		var ix = detailPanel.getIndexTab(this);
@@ -36,7 +37,7 @@ function initPage() {
 		if ($('.recipe-list div', detailPanel.elm).length == 0) {
 			$("button[data-action-field='action']", detailPanel.elm).attr('disabled',"");
 		}
-    });
+  });
 
 	events.addEvent('UPDATE', function() {
 			$('.filter-switch .btn', this.content_elm).click(function(){
@@ -60,7 +61,7 @@ function initPage() {
 		}
 	});
 
-    var uid = window.location.hash.substring(1);
+  var uid = window.location.hash.substring(1);
 	if (uid.match(/^R:[0-9]+/) != null) {
 		//previewRecipe(uid);
 		var sElm = $("td[id='"+uid+"']");
@@ -279,9 +280,9 @@ function previewRecipe(id, synced) {
 			//if (data.statusbyuser == 11 || data.statusbyuser == 'waived') tres=11;
             var icons = [];
 			icons[icons.length] = getResultRecipeIcon(data)
-            if (data.job.is_running) {
+      if (data.job.is_running) {
 				icons.push({icon: 'star', title: "System is still runnig.", color: "gold"});
-            }
+      }
 			var head = 'R:'+data.uid.replace("R:", "");
 			for (var ix in icons) {
 				head += '&nbsp<span class="glyphicon glyphicon-'+icons[ix].icon+'" style="color:'+icons[ix].color+'" title="'+icons[ix].title+'"></span>'

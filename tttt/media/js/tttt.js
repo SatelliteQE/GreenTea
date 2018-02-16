@@ -315,7 +315,7 @@ function actionSubmit() {
 		var link = $(this).data('clicked2');
 		if(link && link.is('[data-action-field]') && link.is('[data-action-value]')) {
 			var field = link.attr('data-action-field');
-			var value = link.attr('data-action-value');
+			var value = link.attr('data-action-value');      
 			if (field.indexOf('.') < 0 && field.indexOf('#') < 0) {
 				field = 'input[name="'+field+'"]';
 			}

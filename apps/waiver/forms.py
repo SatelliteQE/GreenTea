@@ -8,8 +8,8 @@ from apps.waiver.models import Comment
 
 
 class WaiverForm(forms.ModelForm):
-    uids = forms.fields.CharField(required=True)
-    action = forms.fields.CharField(required=True)
+    uids = forms.fields.CharField(required=True, widget=forms.HiddenInput())
+    action = forms.fields.CharField(required=True, widget=forms.HiddenInput())
 
     class Meta:
         model = Comment
@@ -17,11 +17,10 @@ class WaiverForm(forms.ModelForm):
 
     def clean_uids(self):
         uids = self.cleaned_data["uids"].split(" ")
-        # print uids
         uid_list = []
         for uid in uids:
             if uid.startswith("R:"):
-                uid_list.append(Recipe.objects.get(uid=uid[2:]))
+                uid_list.append(Recipe.objects.get(uid=uid))
             if uid.startswith("J:"):
                 uid_list.append(Job.objects.get(uid=uid))
             if uid.startswith("T:"):
