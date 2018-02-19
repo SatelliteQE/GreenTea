@@ -1,0 +1,42 @@
+<job retention_tag="scratch" group="satellite">
+  <whiteboard>Spacewalk nightly</whiteboard>
+  <recipeSet priority="Normal">
+    <recipe whiteboard="Spacewalk nightly on Fedora" role="None" ks_meta="" kernel_options="" kernel_options_post="">
+      <autopick random="false"/>
+      <watchdog panic="None"/>
+      <packages>
+        <package name="redhat-lsb"/>
+      </packages>
+      <ks_appends/>
+      <repos/>
+      <distroRequires>
+        <and>
+          <distro_name op="=" value="Fedora-27"/>
+          <distro_arch op="=" value="x86_64"/>
+        </and>
+      </distroRequires>
+      <hostRequires>
+        <and>
+          <system>
+            <and>
+              <arch op="=" value="x86_64"/>
+            </and>
+          </system>
+          <or/>
+        </and>
+        <system_type value="Machine"/>
+      </hostRequires>
+      <partitions/>
+      <task name="/CoreOS/RHN-Satellite/Compose/Sanity/import-key" role="STANDALONE">
+        <params>
+          <param name="AVC_ERROR" value="+no_avc_check"/>
+        </params>
+      </task>
+      <task name="/CoreOS/Spacewalk/Installer/Sanity/Whole-installation/SW-nightly-PostgreSQL" role="STANDALONE"/>
+      <task name="/CoreOS/Spacewalk/Installer/yum-update" role="STANDALONE"/>
+      <task name="/CoreOS/RHN-Tools/install-rhn-tools/Spacewalk" role="STANDALONE"/>
+      <task name="/CoreOS/Spacewalk/Compose/Sanity/rhn-satellite-status" role="STANDALONE"/>
+      <task name="/CoreOS/RHN-Satellite/Server/create-custom-channel" role="STANDALONE"/>
+    </recipe>
+  </recipeSet>
+</job>

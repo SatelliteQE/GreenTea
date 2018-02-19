@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# This is just a fake variant of /usr/bin/rhts-submit-log supposed not to
+# attempt to communicate with Beaker (submit log), but to simmply put the
+# log somewhere we can find it later
+
+# From these params this is normally called, IMO only this one matters:
+#
+#        if opt in ('-l', '--log'):
+#            logname = val
+#
+# Also we will use $JOBID and $TESTID env. variables set in our playbook to
+# create unique path to store the log.
+#
+# FIXME: What happens if test attempts to store log named in a same way twice?
+
+if [ -z "$JOBID" ] || [ -z "$TESTID" ]; then
+    echo "Either JOBID or TESTID is empty. Can not create uniq logs storage" >&2
+    exit 1
+fi
+
+params=$#
+n=0
+while [ "$1" != '-l' ] && [ "$1" != '--log' ] && [ "$n" -lt "$params" ]; do
+    shift
+    let n+=1
+done
+
+shift
+log=$1
+
+if [ -z "$log" ]; then
+    echo "Was unable to determine log you want to upload." >&2
+    exit 2
+fi
+
+dir="/mnt/testarea/LOGS/$( echo "$JOBID" | sed 's/[^0-9a-zA-Z]/_/g' )/$( echo "$TESTID" | sed 's/[^0-9a-zA-Z]/_/g' )/"
+
+mkdir -p "$dir"
+cp "$log" "$dir"

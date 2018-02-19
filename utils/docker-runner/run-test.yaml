@@ -1,0 +1,72 @@
+---
+ - name: "Test {{ test }}"
+   block:
+
+    - name: "Executing test {{ task }}"
+      debug:
+        msg: "Executing test {{ task }}"
+
+    - name: "Install"
+      yum:
+        name: "test({{ task }})"
+        state: latest
+
+    - name: "Prepare metadata"
+      command:
+        make testinfo.desc -C "/mnt/tests{{ task }}/"
+      # Warning: containers comes with +- latest packages but repo we are
+      # configuring have GA packages, so when installing pkgs now, there might
+      # be conflicts. What I did:
+      #     [root@localhost ~]# docker exec -i -t my_tester /bin/bash
+      #     [root@00ce433fd9b0 /]# yum distribution-synchronization
+    - name: "Gather requirements"
+      shell:
+        grep '^Requires:' "/mnt/tests{{ task }}/testinfo.desc" | cut -d ':' -f 2 | sed "s/\s\+/\n/g" | grep -v '^$' | sort -u
+      register: test_requirements
+    - name: "Install requirements"
+      yum:
+        name: "{{ item }}"
+      with_items: "{{ test_requirements.stdout_lines }}"
+
+    # Note that that regexp should not be needed at all as these should be
+    # just numbers, but just to be sure
+    # FIXME: If you are changing the regexp used, change it in
+    # fake-beaker-utils/rhts-submit-log as well. Would be nice to have it
+    # a variable and keep it in up2date in that file by templating
+    # FIXME: Same for that '/mnt/testarea/LOGS/' prefix
+    - name: "Determine logs directory"
+      set_fact:
+        test_logs_dir: "/mnt/testarea/LOGS/{{ job_id | regex_replace('[^0-9a-zA-Z]', '_') }}/{{ test_counter | regex_replace('[^0-9a-zA-Z]', '_') }}"
+    - name: "Create logs directory"
+      file:
+        path: "{{ test_logs_dir }}"
+        state: directory
+    # Now run the the test with some extra variables:
+    # - JOBID is set to fool BeakerLib and to allow for better reporting
+    # - TESTID is set only to fool BeakerLib to make it actually try to report results
+    # - TESTPATH is for us to identify the test
+    # - Rest of variables were specified in job XML file
+    - name: "Run"
+      shell:
+        "export JOBID={{ job_id }}; export TESTID={{ test_counter }}; export TESTPATH='{{ task }}'; {% if task_params[task] is defined %}{% for param in task_params[task] %}export {{ param.name }}='{{ param.value }}';{% endfor %}{% endif %} make run -C /mnt/tests{{ task }}/ &>{{ test_logs_dir }}/TESTOUT.log"
+      register: test_result
+      ignore_errors: true
+    # FIXME: That '/mnt/testarea/RESULTS' is also in
+    # fake-beaker-utils/rhts-report-result so we should have variable for it
+    # and manage it by templating
+    - name: "Save return code"
+      shell:
+        echo "$( date --utc --iso-8601=ns ),{{ job_id }},{{ test_counter }},{{ task }},TEST FINAL EXIT CODE,{{ test_result.rc }}" >>/mnt/testarea/RESULTS
+
+   rescue:
+
+    - name: "Someting failed"
+      debug:
+        msg: "Something failed with test {{ task }}"
+
+   always:
+
+    - name: "Increment tests counter"
+      set_fact:
+        test_counter: "{{ test_counter|int + 1 }}"
+...

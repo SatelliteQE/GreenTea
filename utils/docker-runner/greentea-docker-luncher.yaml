@@ -1,0 +1,134 @@
+---
+- hosts: docker-host
+  remote_user: root
+  gather_facts: no
+  vars:
+    # TODO: DNS IP here and in Dockerfile whould be a variable
+    # TODO: Start container based on data from beaker xml
+    # TODO: Add check that there is only one docker-host
+    test: /CoreOS/RHN-Satellite/Compose/Sanity/import-key
+    test_counter: 0
+  tasks:
+    - name: "Count recipe sets in the job"
+      xml:
+        path: "{{ job_xml_file }}"
+        xpath: /job/recipeSet
+        count: yes
+      register: rscount
+    - name: "Count recipes in the job"
+      xml:
+        path: "{{ job_xml_file }}"
+        xpath: /job/recipeSet[1]/recipe
+        count: yes
+      register: rcount
+    - name: "Assert there is only one recipe set with only one recipe in it"
+      assert:
+        that:
+          - "rscount.count == 1"
+          - "rcount.count == 1"
+
+    # This is too complicated. Anyway, aim is to have structures like this at the end:
+    #
+    #    task_names:
+    #      - "/CoreOS/RHN-Satellite/Compose/Sanity/import-key"
+    #      - "/CoreOS/RHN-Satellite/Other/Utils/remove-home-extend-root"
+    #    task_params:
+    #      - "/CoreOS/RHN-Satellite/Other/Utils/remove-home-extend-root":
+    #          "TEST": "something something"
+    #          "hello": "world"
+    #
+    # I.e. dict with key being test name and value being list of params for that test.
+    - name: "Load list of tasks"
+      xml:
+        path: "{{ job_xml_file }}"
+        xpath: /job/recipeSet/recipe/task
+        content: attribute
+      register: recipe
+    - name: "Create task_names dict"
+      set_fact:
+        task_names: "{{ task_names|default([]) + [item] }}"
+      with_items: "{{ recipe|json_query('matches[*].task.name') }}"
+    - debug:
+        var: task_names
+    - name: "Load params for individual tasks"
+      xml:
+        path: "{{ job_xml_file }}"
+        xpath: "/job/recipeSet/recipe/task[@name='{{ item }}']/params/param"
+        content: attribute
+      with_items: "{{ task_names }}"
+      ignore_errors: yes
+      register: params
+    - name: "Update tasks dict with params"
+      set_fact:
+        task_params: "{{ task_params|default({}) | combine({item.item: item|json_query('matches[*].param')}) }}"
+      when: "item.matches is defined"
+      with_items: "{{ params.results }}"
+      ignore_errors: yes
+    - debug:
+        var: task_params
+
+    - name: "Make sure we have docker-py"
+      yum:
+        name: python2-docker
+        state: present
+
+    - name: "Copy files needed to build image"
+      copy:
+        src: "{{ item }}"
+        dest: "/root/{{ item | basename }}"
+        force: yes
+      with_items:
+        - Dockerfile-test
+        - Dockerfile-test-Fedora.repo
+        - Dockerfile-test-harness.repo
+        - Dockerfile-test-tasks.repo
+        - fake-beaker-utils/rhts-report-result
+        - fake-beaker-utils/rhts-submit-log
+    - name: "Prepare image"
+      docker_image:
+        name: tester
+        build_path: /root/
+        dockerfile: Dockerfile-test
+        pull: yes
+        state: present
+    - name: "Start container"
+      docker_container:
+        name: my_tester
+        image: tester
+        dns_servers: 10.5.30.160
+        capabilities: SYS_PTRACE
+
+    - name: "Add container to inventory"
+      add_host:
+        name: my_tester
+        ansible_connection: docker
+        ###ansible_docker_extra_args: "--tlsverify --tlscacert=/path/to/ca.pem --tlscert=/path/to/client-cert.pem --tlskey=/path/to/client-key.pem -H=tcp://myserver.net:4243"
+        ###ansible_docker_extra_args: "-H=unix://var/run/docker.sock"
+        ansible_user: root
+      changed_when: false
+
+    - include_tasks: run-test.yaml
+      delegate_to: my_tester
+      with_items: "{{ task_names }}"
+      loop_control:
+        loop_var: task
+
+    - name: "Find list of test's logs to backup"
+      find:
+        paths: "/mnt/testarea"
+        recurse: yes
+        file_type: file
+      register: files_to_copy
+      delegate_to: my_tester
+    - name: "Backup test's logs"
+      fetch:
+        src: "{{ item.path }}"
+        dest: "testarea-logs/{{ job_id }}/"
+      with_items: "{{ files_to_copy.files }}"
+      delegate_to: my_tester
+
+    - name: "Remove container"
+      docker_container:
+        name: my_tester
+        state: absent
+...

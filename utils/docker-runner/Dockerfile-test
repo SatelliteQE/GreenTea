@@ -1,0 +1,11 @@
+FROM docker.io/fedora/fedora:latest
+MAINTAINER Jan Hutar <jhutar@redhat.com>
+COPY Dockerfile-test-Fedora.repo Dockerfile-test-harness.repo Dockerfile-test-tasks.repo /etc/yum.repos.d/
+RUN yum -y install rhts-test-env rhts-python beakerlib beakerlib-redhat && yum clean all
+RUN yum -y install initscripts && yum clean all
+COPY rhts-report-result rhts-submit-log /usr/bin/
+RUN chmod +x /usr/bin/rhts-report-result /usr/bin/rhts-submit-log
+RUN if [ -d /etc/rhsm-host ]; then mv /etc/rhsm-host{,.ORIG}; else true; fi; if [ -d /etc/pki/entitlement-host ]; then mv /etc/pki/entitlement-host{,.ORIG}; else true; fi
+ENV LANG en_US.utf8
+USER root
+CMD [ "/sbin/init" ]
