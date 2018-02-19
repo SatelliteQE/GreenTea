@@ -1,0 +1,5 @@
+[beaker-tasks]
+name=beaker-tasks
+baseurl=http://beaker.example.com/rpms/
+enabled=1
+gpgcheck=0

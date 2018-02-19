@@ -1,0 +1,5 @@
+[beaker-Server]
+name=beaker-Fedora
+baseurl=http://ftp.fi.muni.cz/pub/linux/fedora/linux/releases/$releasever/Server/x86_64/os/
+enabled=1
+gpgcheck=0

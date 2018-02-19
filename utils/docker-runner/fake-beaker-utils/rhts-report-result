@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# This is just a fake variant of /usr/bin/rhts-report-result supposed not to
+# attempt to communicate with Beaker (record result), but to simmply add
+# results to local file
+
+# This is called with these params:
+#
+# $1 ... phase
+# $2 ... result (warning, might have different forms - numerical, uppercase, lowercase, for mapping see /usr/bin/rhts-db-submit-result
+# $3 ... log, but it is useless as it gets overwitten because we have fake $TESTID
+#
+# and these are interesting env variable we are going to record as well:
+#
+# $JOBID ... our playbook was called with this in job_id param
+# $TESTID ... order of current test in the job
+# $TESTPATH ... name of the task which is running now
+
+echo "\"$( date --utc --iso-8601=ns )\",$( echo "$JOBID" | sed 's/,/_/g' ),$( echo "$TESTID" | sed 's/,/_/g' ),$( echo "$TESTPATH" | sed 's/,/_/g' ),$( echo "$1" | sed 's/,/_/g' ),$( echo "$2" | sed 's/,/_/g' ),$( echo "$3" | sed 's/,/_/g' )" >>/mnt/testarea/RESULTS
