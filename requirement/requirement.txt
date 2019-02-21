@@ -15,7 +15,7 @@ django-debug-toolbar
 django-taggit
 django-reversion
 django-widget-tweaks
-django-filter
+django-filter == 1.1.0
 django-crispy-forms
 djangorestframework
 GitPython
